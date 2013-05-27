@@ -1,0 +1,4 @@
+/ebin
+/deps
+.depsolver.plt
+erl_crash.dump
