@@ -25,7 +25,7 @@ Beyond the TL;DR for these tasks, the main things to be aware of are the setting
 
 ### PLT
 
-The Persistent Lookup Table (PLT) is basically a cached output of the analysis. This is important because you'd probably stab yourself in the eye with a fork if you had to wait for Dialyzer to complete this for all the standard library and OTP functions you are using everytime you ran it. Running the mix task dialyzer.plt builds a PLT in HOME/.dialyxir_core_<OTP Version>_<Elixir Version>.plt which includes a basic set of OTP applications, as well as all of the Elixir standard libraries. This may well meet your needs, but if you are using additional OTP applications in your project you'll want to add those as well. The apps included by default are ["erts","kernel", "stdlib", "crypto", "public_key"]. If you need additional ones, add the full list to a dialyxir: plt_apps: key in your mix.exs:
+The Persistent Lookup Table (PLT) is basically a cached output of the analysis. This is important because you'd probably stab yourself in the eye with a fork if you had to wait for Dialyzer to complete this for all the standard library and OTP functions you are using everytime you ran it. Running the mix task dialyzer.plt builds a PLT in HOME/.dialyxir_core_[OTP Version]_[Elixir Version].plt which includes a basic set of OTP applications, as well as all of the Elixir standard libraries. This may well meet your needs, but if you are using additional OTP applications in your project you'll want to add those as well. The apps included by default are ["erts","kernel", "stdlib", "crypto", "public_key"]. If you need additional ones, add the full list to a dialyxir: plt_apps: key in your mix.exs:
 
 
     def project do
