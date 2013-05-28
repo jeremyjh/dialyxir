@@ -1,5 +1,6 @@
 defmodule Mix.Tasks.Dialyzer.Plt do
   use Mix.Task
+  import System, only: [cmd: 1, user_home!: 0, version: 0]
 
   @shortdoc "Builds PLT with default erlang applications included."
 
@@ -9,6 +10,14 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   You can define a plt_apps in your Mix project config to override defaults
   
   
+  e.g.
+    def project do
+      [ app: :my_app,
+        version: "0.0.1",
+        deps: deps,
+        dialyzer: plt_apps: ["erts","kernel", "stdlib", "crypto", "public_key", "mnesia"]
+      ]
+    end
   Also includes all libraries included in the current Elixir.
   """
   def run(_) do
@@ -22,12 +31,11 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   end
 
   def core_apps do
-    (Mix.project[:plt_apps] 
-    || ["erts","kernel", "stdlib", "crypto", "public_key", "mnesia", "ssl", "ets", "sasl"])
+    (Mix.project[:dialyzer][:plt_apps] 
+    || ["erts","kernel", "stdlib", "crypto", "public_key"])
     |> Enum.join(" ")
   end
 
-  import System, only: [user_home!: 0, version: 0]
   def plt_file, do: "#{user_home!}/.dialyxir_core_#{:erlang.system_info(:otp_release)}_#{version}.plt"
 
   defp need_build? do
@@ -38,7 +46,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     IO.puts "Starting PLT Core Build ... this will take awhile"
     cmds = "dialyzer --output_plt #{plt_file} --build_plt --apps #{core_apps} -r #{ex_lib_path}"
     IO.puts cmds
-    IO.puts :os.cmd(binary_to_list(cmds))
+    IO.puts cmd(cmds)
   end
 
   defp need_add? do
@@ -52,7 +60,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     IO.puts "Adding Erlang/OTP Apps to existing PLT ... this will take a little time"
     cmds = "dialyzer --add_to_plt --plt #{plt_file} --apps #{apps}"
     IO.puts cmds
-    IO.puts :os.cmd(binary_to_list(cmds))
+    IO.puts cmd(cmds)
   end
 
   defp missing_apps do

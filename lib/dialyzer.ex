@@ -13,11 +13,11 @@ defmodule Mix.Tasks.Dialyzer do
   
   e.g.
     def project do
-      [ app: :mix_dialyze,
+      [ app: :my_app,
         version: "0.0.1",
         deps: deps,
-        dialyzer_flags: ["-Werror_handling", "-Wrace_conditions"],
-        dialyzer_paths: ["ebin", "deps/foo/ebin"]
+        dialyzer: [flags: ["-Werror_handling", "-Wrace_conditions"],
+                   paths: ["ebin", "deps/foo/ebin"]]
       ]
     end
   """
@@ -26,18 +26,18 @@ defmodule Mix.Tasks.Dialyzer do
     IO.puts "Starting Dialyzer"
     cmds = "dialyzer --quiet --no_check_plt --plt #{Plt.plt_file} #{dialyzer_flags} #{dialyzer_paths}"
     IO.puts cmds
-    IO.puts :os.cmd(binary_to_list(cmds))
+    IO.puts System.cmd(cmds)
   end
 
   import Enum, only: [join: 2]
 
   defp dialyzer_flags do
-    (Mix.project[:dialyzer_flags]
+    (Mix.project[:dialyzer][:flags]
       || ["-Wunmatched_returns","-Werror_handling","-Wrace_conditions","-Wunderspecs"])
       |> join(" ")
   end
 
-  defp dialyzer_paths, do: (Mix.project[:dialyzer_paths] || ["ebin"]) |> join(" ")
+  defp dialyzer_paths, do: (Mix.project[:dialyzer][:paths] || ["ebin"]) |> join(" ")
 
 end
 
