@@ -46,7 +46,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
      ".local.plt"
 
-  * `dialyzer: :plt_deps` - Bool - include the project's dependencies in the PLT. Defaults true.
+  * `dialyzer: :plt_add_deps` - Bool - include the project's dependencies in the PLT. Defaults false.
 
   """
   def run(_) do
@@ -64,30 +64,41 @@ defmodule Mix.Tasks.Dialyzer.Plt do
       || "#{user_home!}/.dialyxir_core_#{:erlang.system_info(:otp_release)}_#{version}.plt"
   end
 
-  defp include_apps do
-    ((plt_apps || (default_apps ++ plt_add_apps)) ++ deps_apps)
-      |> Enum.map(atom_to_binary(&1))
-      |> Enum.join(" ")
+  defp build_plt do
+    Mix.shell.info "Starting PLT Core Build ... this will take awhile"
+    cmds = "dialyzer --output_plt #{plt_file} --build_plt #{include_pa} --apps #{include_apps} -r #{ex_lib_path}"
+    Mix.shell.info cmds
+    Mix.shell.info cmd(cmds)
+  end
+
+  defp include_apps, do: Enum.map_join(cons_apps," ", to_binary_if_atom(&1))
+
+  defp to_binary_if_atom(b) when is_binary(b), do: b
+  defp to_binary_if_atom(a) when is_atom(a), do: atom_to_binary(a)
+
+  defp cons_apps, do: ((plt_apps || (default_apps ++ plt_add_apps)) ++ include_deps)
+
+  defp include_pa do
+    case Enum.filter(deps_apps || [], &1 in cons_apps) do
+      [] -> ""
+      apps ->
+        Enum.map_join(apps, fn(a) ->
+          " -pa deps/" <> atom_to_binary(a)
+          <> "/ebin" end)
+    end
   end
 
   defp plt_apps, do: Mix.project[:dialyzer][:plt_apps]
   defp plt_add_apps, do: Mix.project[:dialyzer][:plt_add_apps] || []
   defp default_apps, do: [:erts, :kernel, :stdlib, :crypto, :public_key]
 
+  defp include_deps, do: if Mix.project[:dialyzer][:plt_add_deps], do: deps_apps, else: []
   defp deps_apps do
-    if Mix.project[:dialyzer][:plt_deps] == false, do: [],
-    else: Mix.project[:deps] |> Enum.map(elem(&1,0))
+    Mix.project[:deps] |> Enum.map(elem(&1,0))
   end
 
   defp need_build? do
     not File.exists?(plt_file)
-  end
-
-  defp build_plt do
-    Mix.shell.info "Starting PLT Core Build ... this will take awhile"
-    cmds = "dialyzer --output_plt #{plt_file} --build_plt --apps #{include_apps} -r #{ex_lib_path}"
-    Mix.shell.info cmds
-    Mix.shell.info cmd(cmds)
   end
 
   defp need_add? do
