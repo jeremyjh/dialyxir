@@ -92,7 +92,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp plt_add_apps, do: Mix.project[:dialyzer][:plt_add_apps] || []
   defp default_apps, do: [:erts, :kernel, :stdlib, :crypto, :public_key]
 
-  defp include_deps, do: if Mix.project[:dialyzer][:plt_add_deps], do: deps_apps, else: []
+  defp include_deps, do: (if Mix.project[:dialyzer][:plt_add_deps], do: deps_apps, else: [])
   defp deps_apps do
     Mix.project[:deps] |> Enum.map(elem(&1,0))
   end
