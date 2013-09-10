@@ -125,8 +125,8 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   end
 
   defp core_plt_contains?(app, plt_file) do
-    app = binary_to_list(app)
-    plt_file = binary_to_list(plt_file)
+    app = to_char_list(app)
+    plt_file = to_char_list(plt_file)
     :dialyzer.plt_info(plt_file)
     |> elem(1) |> Keyword.get(:files)
     |> Enum.find(fn(s) ->
@@ -135,5 +135,5 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     |> is_list
   end
 
-  defp ex_lib_path, do: "#{list_to_binary(:code.lib_dir(:elixir))}/.."
+  defp ex_lib_path, do: "#{to_string(:code.lib_dir(:elixir))}/.."
 end
