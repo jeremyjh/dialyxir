@@ -71,7 +71,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     Mix.shell.info cmd(cmds)
   end
 
-  defp include_apps, do: Enum.map_join(cons_apps," ", to_binary_if_atom(&1))
+  defp include_apps, do: Enum.map_join(cons_apps," ", &to_binary_if_atom(&1))
 
   defp to_binary_if_atom(b) when is_binary(b), do: b
   defp to_binary_if_atom(a) when is_atom(a), do: atom_to_binary(a)
@@ -79,7 +79,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp cons_apps, do: ((plt_apps || (default_apps ++ plt_add_apps)) ++ include_deps)
 
   defp include_pa do
-    case Enum.filter(deps_apps || [], &1 in cons_apps) do
+    case Enum.filter(deps_apps || [], &(&1 in cons_apps)) do
       [] -> ""
       apps ->
         Enum.map_join(apps, fn(a) ->
@@ -94,7 +94,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp include_deps, do: (if Mix.project[:dialyzer][:plt_add_deps], do: deps_apps, else: [])
   defp deps_apps do
-    Mix.project[:deps] |> Enum.map(elem(&1,0))
+    Mix.project[:deps] |> Enum.map(&elem(&1,0))
   end
 
   defp need_build? do
