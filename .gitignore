@@ -1,4 +1,4 @@
-/ebin
+/_build
 /deps
 .depsolver.plt
 erl_crash.dump
