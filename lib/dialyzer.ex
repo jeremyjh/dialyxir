@@ -20,11 +20,18 @@ defmodule Mix.Tasks.Dialyzer do
                    paths: ["ebin", "deps/foo/ebin"]]
       ]
     end
+
+  Any arguments passed to this task are passed on to the dialyzer command.
+
+  e.g.
+    mix dialyzer --raw
+
   """
 
-  def run(_) do
+  def run(args) do
     IO.puts "Starting Dialyzer"
-    cmds = "dialyzer --quiet --no_check_plt --plt #{Plt.plt_file} #{dialyzer_flags} #{dialyzer_paths}"
+    argStr = Enum.join args, " "
+    cmds = "dialyzer #{argStr} --quiet --no_check_plt --plt #{Plt.plt_file} #{dialyzer_flags} #{dialyzer_paths}"
     IO.puts cmds
     IO.puts System.cmd(cmds)
   end

@@ -30,9 +30,9 @@ Beyond the TL;DR for these tasks, the main things to be aware of are the setting
 
 The Persistent Lookup Table (PLT) is basically a cached output of the analysis. This is important because you'd probably stab yourself in the eye with 
 a fork if you had to wait for Dialyzer to complete this for all the standard library and OTP functions you are using everytime you ran it. 
-Running the mix task dialyzer.plt builds a PLT in HOME/.dialyxir_core_[OTP Version]_[Elixir Version].plt which includes a basic set of OTP applications, 
+Running the mix task dialyzer.plt builds a PLT in `HOME/.dialyxir_core_[OTP Version]_[Elixir Version].plt` which includes a basic set of OTP applications, 
 as well as all of the Elixir standard libraries. This may well meet your needs, but if you are using additional OTP applications in your project you'll want to add those as well. 
-The apps included by default are [ :erts, :kernel, :stdlib, :crypto, :public_key]. If you need additional ones, add them to a dialyxir: plt_add_apps: key in your mix.exs:
+The apps included by default are `[ :erts, :kernel, :stdlib, :crypto, :public_key]`. If you need additional ones, add them to a `dialyxir: plt_add_apps: key` in your mix.exs:
 
 ```elixir
 def project do
@@ -44,11 +44,11 @@ def project do
 end
 ```
 
-If you don't want to include the default apps you can specify a :plt_apps key and list there only the apps you do want in the PLT. 
-There is also a :plt_add_deps option you can set true, and automatically all the apps and paths in your mix.exs deps list will be included in the PLT using the -pa flag. 
-If you don't want to include all your deps in the PLT, you can list individual deps applications in :plt_add_apps and those paths are added with the -pa flag so they will be included.
+If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you do want in the PLT. 
+There is also a `:plt_add_deps` option you can set true, and automatically all the apps and paths in your mix.exs deps list will be included in the PLT using the -pa flag. 
+If you don't want to include all your deps in the PLT, you can list individual deps applications in `:plt_add_apps` and those paths are added with the -pa flag so they will be included.
 
-Finally, if you don't want all your projects to share a PLT you can specify a :plt_file key with a string containing the filename you want e.g. plt_file: ".local.plt"
+Finally, if you don't want all your projects to share a PLT you can specify a :plt_file key with a string containing the filename you want e.g. `plt_file: ".local.plt"`
 
 You can re-run the dialyzer.plt task at any time. It will check all the libraries to see if they need to be updated in the PLT, and it will add any new apps you've added to your
 project config. It will only rebuild the PLT if you delete it or if you upgrade your Erlang or Elixir version.
@@ -73,7 +73,7 @@ end
 
 ### Paths
 
-By default only the ebin for the root of your project is included in paths to search for BEAM files to perform analysis on. You may well want to add your deps to the analysis, but I would recommend trying them one at a time. Also as the deps can significantly slow down your analysis you may want to add them them to your PLT.
+By default only the ebin in the `_build` directory for the current mix environment of your project is included in paths to search for BEAM files to perform analysis on. You may well want to add your deps to the analysis, but I would recommend trying them one at a time. Also as the deps can significantly slow down your analysis you may want to add them them to your PLT.
 
 ```elixir
 def project do
