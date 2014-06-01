@@ -60,7 +60,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   end
 
   def plt_file do
-    Mix.project[:dialyzer][:plt_file]
+    Mix.Project.config[:dialyzer][:plt_file]
       || "#{user_home!}/.dialyxir_core_#{:erlang.system_info(:otp_release)}_#{version}.plt"
   end
 
@@ -88,13 +88,13 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     end
   end
 
-  defp plt_apps, do: Mix.project[:dialyzer][:plt_apps]
-  defp plt_add_apps, do: Mix.project[:dialyzer][:plt_add_apps] || []
+  defp plt_apps, do: Mix.Project.config[:dialyzer][:plt_apps]
+  defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || []
   defp default_apps, do: [:erts, :kernel, :stdlib, :crypto, :public_key]
 
-  defp include_deps, do: (if Mix.project[:dialyzer][:plt_add_deps], do: deps_apps, else: [])
+  defp include_deps, do: (if Mix.Project.config[:dialyzer][:plt_add_deps], do: deps_apps, else: [])
   defp deps_apps do
-    Mix.project[:deps] |> Enum.map(&elem(&1,0))
+    Mix.Project.config[:deps] |> Enum.map(&elem(&1,0))
   end
 
   defp need_build? do
