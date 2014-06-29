@@ -74,7 +74,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp include_apps, do: Enum.map_join(cons_apps," ", &to_binary_if_atom(&1))
 
   defp to_binary_if_atom(b) when is_binary(b), do: b
-  defp to_binary_if_atom(a) when is_atom(a), do: atom_to_binary(a)
+  defp to_binary_if_atom(a) when is_atom(a), do: Atom.to_string(a)
 
   defp cons_apps, do: ((plt_apps || (default_apps ++ plt_add_apps)) ++ include_deps)
 
@@ -83,7 +83,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
       [] -> ""
       apps ->
         Enum.map_join(apps, fn(a) ->
-          " -pa deps/" <> atom_to_binary(a)
+          " -pa deps/" <> Atom.to_string(a)
           <> "/ebin" end)
     end
   end
