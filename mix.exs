@@ -3,7 +3,7 @@ defmodule Dialyxir.Mixfile do
 
   def project do
     [ app: :dialyxir,
-      version: "0.2.3",
+      version: "0.2.4",
       elixir: ">= 0.13.3",
       deps: deps
     ]
