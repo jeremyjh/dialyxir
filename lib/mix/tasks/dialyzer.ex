@@ -1,7 +1,4 @@
 defmodule Mix.Tasks.Dialyzer do
-  use Mix.Task
-  alias Mix.Tasks.Dialyzer.Plt, as: Plt
-
   @shortdoc "Runs dialyzer with default or project-defined flags."
 
   @moduledoc """
@@ -28,12 +25,16 @@ defmodule Mix.Tasks.Dialyzer do
 
   """
 
+  use Mix.Task
+  alias Mix.Tasks.Dialyzer.Plt, as: Plt
+  import Dialyxir.Helpers
+
   def run(args) do
-    IO.puts "Starting Dialyzer"
+    puts "Starting Dialyzer"
     argStr = Enum.join args, " "
     cmds = "dialyzer #{argStr} --quiet --no_check_plt --plt #{Plt.plt_file} #{dialyzer_flags} #{dialyzer_paths}"
-    IO.puts cmds
-    IO.puts System.cmd(cmds)
+    puts cmds
+    puts System.cmd(cmds)
   end
 
   import Enum, only: [join: 2]

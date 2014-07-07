@@ -1,7 +1,4 @@
 defmodule Mix.Tasks.Dialyzer.Plt do
-  use Mix.Task
-  import System, only: [cmd: 1, user_home!: 0, version: 0]
-
   @shortdoc "Builds PLT with default erlang applications included."
 
   @moduledoc """
@@ -49,13 +46,17 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   * `dialyzer: :plt_add_deps` - Bool - include the project's dependencies in the PLT. Defaults false.
 
   """
+
+  use Mix.Task
+  import System, only: [cmd: 1, user_home!: 0, version: 0]
+  import Dialyxir.Helpers
+
   def run(_) do
     if need_build? do
       build_plt
       if need_add?, do: add_plt
     else
-      if need_add?, do: add_plt,
-      else: Mix.shell.info "Nothing to do."
+      if need_add?, do: add_plt, else: puts "Nothing to do."
     end
   end
 
@@ -65,10 +66,10 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   end
 
   defp build_plt do
-    Mix.shell.info "Starting PLT Core Build ... this will take awhile"
+    puts "Starting PLT Core Build ... this will take awhile"
     cmds = "dialyzer --output_plt #{plt_file} --build_plt #{include_pa} --apps #{include_apps} -r #{ex_lib_path}"
-    Mix.shell.info cmds
-    Mix.shell.info cmd(cmds)
+    puts cmds
+    puts cmd(cmds)
   end
 
   defp include_apps, do: Enum.map_join(cons_apps," ", &to_binary_if_atom(&1))
@@ -107,12 +108,12 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp add_plt do
     apps = missing_apps
-    Mix.shell.info "Some apps are missing and will be added:"
-    Mix.shell.info Kernel.inspect(apps)
-    Mix.shell.info "Adding Erlang/OTP Apps to existing PLT ... this will take a little time"
+    puts "Some apps are missing and will be added:"
+    puts inspect(apps)
+    puts "Adding Erlang/OTP Apps to existing PLT ... this will take a little time"
     cmds = "dialyzer --add_to_plt --plt #{plt_file} --apps #{apps}"
-    Mix.shell.info cmds
-    Mix.shell.info cmd(cmds)
+    puts cmds
+    puts cmd(cmds)
   end
 
   defp missing_apps do
