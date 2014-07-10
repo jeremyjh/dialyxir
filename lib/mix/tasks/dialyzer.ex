@@ -30,6 +30,8 @@ defmodule Mix.Tasks.Dialyzer do
   import Dialyxir.Helpers
 
   def run(args) do
+    Mix.Task.run "compile", []
+    
     puts "Starting Dialyzer"
     argStr = Enum.join args, " "
     cmds = "dialyzer #{argStr} --quiet --no_check_plt --plt #{Plt.plt_file} #{dialyzer_flags} #{dialyzer_paths}"
