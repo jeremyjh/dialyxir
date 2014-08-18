@@ -48,7 +48,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   """
 
   use Mix.Task
-  import System, only: [cmd: 1, user_home!: 0, version: 0]
+  import System, only: [cmd: 3, user_home!: 0, version: 0]
   import Dialyxir.Helpers
 
   def run(_) do
@@ -67,12 +67,13 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp build_plt do
     puts "Starting PLT Core Build ... this will take awhile"
-    cmds = "dialyzer --output_plt #{plt_file} --build_plt #{include_pa} --apps #{include_apps} -r #{ex_lib_path}"
-    puts cmds
-    puts cmd(cmds)
+    args = List.flatten ["--output_plt", "#{plt_file}", "--build_plt", include_pa, "--apps", include_apps, "-r", ex_lib_path]
+    puts "dialyzer " <> Enum.join(args, " ")
+    {ret, _} = cmd("dialyzer", args, [])
+    puts ret
   end
 
-  defp include_apps, do: Enum.map_join(cons_apps," ", &to_binary_if_atom(&1))
+  defp include_apps, do: Enum.map(cons_apps, &to_binary_if_atom(&1))
 
   defp to_binary_if_atom(b) when is_binary(b), do: b
   defp to_binary_if_atom(a) when is_atom(a), do: Atom.to_string(a)
@@ -81,11 +82,10 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp include_pa do
     case Enum.filter(deps_apps || [], &(&1 in cons_apps)) do
-      [] -> ""
+      [] -> []
       apps ->
         Enum.map_join(apps, fn(a) ->
-          " -pa deps/" <> Atom.to_string(a)
-          <> "/ebin" end)
+          ["-pa", "deps/" <> Atom.to_string(a) <> "/ebin"] end)
     end
   end
 
@@ -109,16 +109,16 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp add_plt do
     apps = missing_apps
     puts "Some apps are missing and will be added:"
-    puts inspect(apps)
+    puts Enum.join(apps, " ")
     puts "Adding Erlang/OTP Apps to existing PLT ... this will take a little time"
-    cmds = "dialyzer --add_to_plt --plt #{plt_file} --apps #{apps}"
-    puts cmds
-    puts cmd(cmds)
+    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file}", "--apps", apps]
+    puts "dialyzer " <> Enum.join(args, " ")
+    {ret, _} = cmd("dialyzer", args, [])
+    puts ret
   end
 
   defp missing_apps do
     missing_apps = include_apps
-      |> String.split(" ")
       |> Enum.filter(fn(app) ->
           not core_plt_contains?(app,plt_file)
          end)
@@ -131,8 +131,8 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     :dialyzer.plt_info(plt_file)
     |> elem(1) |> Keyword.get(:files)
     |> Enum.find(fn(s) ->
-         :string.str(s, app) > 0
-       end)
+                   :string.str(s, app) > 0
+                 end)
     |> is_list
   end
 
@@ -140,6 +140,5 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     code_dir = Path.join(:code.lib_dir(:elixir), "..")
     ~w[eex elixir ex_unit iex mix]
     |> Enum.map(&Path.join([ code_dir, &1, "ebin" ]))
-    |> Enum.join(" ")
   end
 end
