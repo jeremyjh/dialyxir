@@ -31,20 +31,20 @@ defmodule Mix.Tasks.Dialyzer do
 
   def run(args) do
     puts "Starting Dialyzer"
-    argStr = Enum.join args, " "
-    cmds = "dialyzer #{argStr} --no_check_plt --plt #{Plt.plt_file} #{dialyzer_flags} #{dialyzer_paths}"
-    puts cmds
-    puts System.cmd(cmds)
+    args = List.flatten [args, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags, "#{dialyzer_paths}"]
+    puts "dialyzer " <> Enum.join(args, " ")
+    {ret, _} = System.cmd("dialyzer", args, [])
+    puts ret
   end
 
   import Enum, only: [join: 2]
 
   defp dialyzer_flags do
-    (Mix.Project.config[:dialyzer][:flags]
-      || ["-Wunmatched_returns","-Werror_handling","-Wrace_conditions","-Wunderspecs"])
-      |> join(" ")
+    Mix.Project.config[:dialyzer][:flags]
+    || ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]
   end
 
-  defp dialyzer_paths, do: (Mix.Project.config[:dialyzer][:paths] || [ Path.join(Mix.Project.app_path, "ebin") ]) |> join(" ")
-
+  defp dialyzer_paths do
+    Mix.Project.config[:dialyzer][:paths] || [ Path.join(Mix.Project.app_path, "ebin") ]
+  end
 end

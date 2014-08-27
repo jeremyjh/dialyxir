@@ -7,8 +7,8 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 Clone this repository. Then from the local repository:
 
 ```console
-mix archive
-mix local.install
+mix archive.build
+mix archive.install dialyxir-0.2.6.ez
 mix dialyzer.plt
 ```
 
