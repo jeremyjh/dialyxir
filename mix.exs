@@ -5,7 +5,7 @@ defmodule Dialyxir.Mixfile do
     [
       app: :dialyxir,
       version: "0.2.6",
-      elixir: "~> 0.15.1"
+      elixir: "~> 1.0"
     ]
   end
 end
