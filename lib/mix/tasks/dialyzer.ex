@@ -31,7 +31,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   def run(args) do
     puts "Starting Dialyzer"
-    args = List.flatten [args, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags, "#{dialyzer_paths}"]
+    args = List.flatten [args, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags, dialyzer_paths]
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, _} = System.cmd("dialyzer", args, [])
     puts ret
