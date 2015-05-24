@@ -8,7 +8,7 @@ Clone this repository. Then from the local repository:
 
 ```console
 mix archive.build
-mix archive.install dialyxir-0.2.6.ez
+mix archive.install
 mix dialyzer.plt
 ```
 
