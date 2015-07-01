@@ -37,8 +37,6 @@ defmodule Mix.Tasks.Dialyzer do
     puts ret
   end
 
-  import Enum, only: [join: 2]
-
   defp dialyzer_flags do
     Mix.Project.config[:dialyzer][:flags]
     || ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]
