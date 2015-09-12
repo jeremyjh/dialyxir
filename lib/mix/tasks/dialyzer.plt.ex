@@ -84,8 +84,8 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     case Enum.filter(deps_apps || [], &(&1 in cons_apps)) do
       [] -> []
       apps ->
-        Enum.map_join(apps, fn(a) ->
-          ["-pa", "deps/" <> Atom.to_string(a) <> "/ebin"] end)
+        Enum.map(apps, fn(a) ->
+          ["-pa", "_build/" <> "#{Mix.env}/lib/" <> Atom.to_string(a) <> "/ebin"] end)
     end
   end
 
