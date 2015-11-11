@@ -111,7 +111,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     puts "Some apps are missing and will be added:"
     puts Enum.join(apps, " ")
     puts "Adding Erlang/OTP Apps to existing PLT ... this will take a little time"
-    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file}", "--apps", apps]
+    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file}", include_pa, "--apps", apps]
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, _} = cmd("dialyzer", args, [])
     puts ret
