@@ -4,8 +4,24 @@ defmodule Dialyxir.Mixfile do
   def project do
     [
       app: :dialyxir,
-      version: "0.2.7",
-      elixir: "~> 1.0"
+      version: "0.2.8",
+      elixir: "~> 1.0",
+      description: description,
+      package: package,
+      deps: []
     ]
+  end
+
+  defp description do
+    """
+    Mix tasks to simplify use of Dialyzer in Elixir projects.
+    """
+  end
+
+  defp package do
+    [files: ["lib", "mix.exs", "README.md", "LICENSE"],
+     maintainers: ["Jeremy Huffman"],
+     licenses: ["Apache 2.0"],
+     links: %{"GitHub" => "https://github.com/jeremyjh/dialyxir"}]
   end
 end

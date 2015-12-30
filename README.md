@@ -4,18 +4,42 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 ## TL;DR
 
-Clone this repository. Then from the local repository:
+Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir/0.2.8). 
+
+You can either add it as a dependency in your mix.exs, or install it globally as an archive task.
+
+To add it to a mix project, just add a line like this in your deps function in mex.exs:
+
+```elixir
+defp deps do
+  [{:dialyxir, "~> 0.2", only: [:dev]}]
+end
+```
 
 ```console
+mix deps.get
+mix deps.compile
+```
+ 
+To install globally as an archive:
+
+```console
+git clone https://github.com/jeremyjh/dialyxir
+cd dialyxir
 mix archive.build
 mix archive.install
+```
+
+The first time you use Dialyxir, or each time that you upgrade your Erlang or Elixir version you will need to rebuild the PLT:
+
+```console
 mix dialyzer.plt
 ```
 
-Now, change to the directory of the project you want to analyze:
+
+Use it from directory of the mix project you want to analyze:
 
 ```console
-cd ~/my_project
 mix compile
 mix dialyzer
 ```
