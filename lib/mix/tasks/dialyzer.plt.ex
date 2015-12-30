@@ -81,7 +81,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp cons_apps, do: ((plt_apps || (default_apps ++ plt_add_apps)) ++ include_deps)
 
   defp include_pa do
-    case Enum.filter(deps_apps || [], &(&1 in cons_apps)) do
+    case Enum.filter(deps_apps, &(&1 in cons_apps)) do
       [] -> []
       apps ->
         Enum.map(apps, fn(a) ->
