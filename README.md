@@ -37,10 +37,9 @@ mix dialyzer.plt
 ```
 
 
-Use it from directory of the mix project you want to analyze:
+Use it from directory of the mix project you want to analyze; the project will be automatically compiled if needed (pass `--no-compile` to disable this).
 
 ```console
-mix compile
 mix dialyzer
 ```
 
