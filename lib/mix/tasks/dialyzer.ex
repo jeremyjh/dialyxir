@@ -2,8 +2,19 @@ defmodule Mix.Tasks.Dialyzer do
   @shortdoc "Runs dialyzer with default or project-defined flags."
 
   @moduledoc """
-  Runs dialyzer with default flags:
+  Compiles the mix project if needed and runs dialyzer with default flags:
     -Wunmatched_returns -Werror_handling -Wrace_conditions -Wunderspecs
+
+  ## Command line options
+
+    * `--no-compile`      - do not compile even if needed.
+
+  Any other arguments passed to this task are passed on to the dialyzer command.
+
+  e.g.
+    mix dialyzer --raw
+
+  ## Configuration
 
   You can define a dialyzer_flags key in your Mix project config to override defaults.
   You can also include a dialyzer_paths key to override default path (only Mix.Project.app_path()/ebin)
@@ -18,10 +29,6 @@ defmodule Mix.Tasks.Dialyzer do
       ]
     end
 
-  Any arguments passed to this task are passed on to the dialyzer command.
-
-  e.g.
-    mix dialyzer --raw
 
   """
 
@@ -30,8 +37,10 @@ defmodule Mix.Tasks.Dialyzer do
   import Dialyxir.Helpers
 
   def run(args) do
+    {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
+    if compile == [], do: Mix.Project.compile([])
+    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags, dialyzer_paths]
     puts "Starting Dialyzer"
-    args = List.flatten [args, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags, dialyzer_paths]
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, _} = System.cmd("dialyzer", args, [])
     puts ret
