@@ -4,7 +4,7 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 ## TL;DR
 
-Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir/0.2.8). 
+Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir). 
 
 You can either add it as a dependency in your mix.exs, or install it globally as an archive task.
 
