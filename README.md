@@ -8,7 +8,7 @@ Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir).
 
 You can either add it as a dependency in your mix.exs, or install it globally as an archive task.
 
-To add it to a mix project, just add a line like this in your deps function in mex.exs:
+To add it to a mix project, just add a line like this in your deps function in mix.exs:
 
 ```elixir
 defp deps do
