@@ -7,7 +7,9 @@ defmodule Mix.Tasks.Dialyzer do
 
   ## Command line options
 
-    * `--no-compile`      - do not compile even if needed.
+    * `--no-compile`       - do not compile even if needed.
+    * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
+      useful for CI. do not use with `mix do`.
 
   Any other arguments passed to this task are passed on to the dialyzer command.
 
@@ -38,12 +40,16 @@ defmodule Mix.Tasks.Dialyzer do
 
   def run(args) do
     {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
+    {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
     if compile == [], do: Mix.Project.compile([])
     args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags, dialyzer_paths]
     puts "Starting Dialyzer"
     puts "dialyzer " <> Enum.join(args, " ")
-    {ret, _} = System.cmd("dialyzer", args, [])
+    {ret, exit_status} = System.cmd("dialyzer", args, [])
     puts ret
+    if halt != [] do
+      :erlang.halt(exit_status)
+    end
   end
 
   defp dialyzer_flags do
