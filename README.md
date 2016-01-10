@@ -97,7 +97,7 @@ end
 
 ### Paths
 
-By default only the ebin in the `_build` directory for the current mix environment of your project is included in paths to search for BEAM files to perform analysis on. You may well want to add your deps to the analysis, but I would recommend trying them one at a time. Also as the deps can significantly slow down your analysis you may want to add them them to your PLT.
+By default only the ebin in the `_build` directory for the current mix environment of your project is included in paths to search for BEAM files to perform analysis on. You may well want to add your deps to the analysis, but I would recommend trying them one at a time. Also as the deps can significantly slow down your analysis you may want to add them to your PLT.
 
 ```elixir
 def project do
