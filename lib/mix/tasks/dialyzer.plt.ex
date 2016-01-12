@@ -138,7 +138,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp ex_lib_path do
     code_dir = Path.join(:code.lib_dir(:elixir), "..")
-    ~w[eex elixir ex_unit iex mix]
+    ~w[eex elixir ex_unit iex logger mix]
     |> Enum.map(&Path.join([ code_dir, &1, "ebin" ]))
   end
 end
