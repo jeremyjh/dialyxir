@@ -57,19 +57,19 @@ defmodule Mix.Tasks.Dialyzer do
     || ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]
   end
 
-  defp umbrella_childeren_apps do
+  defp umbrella_children_apps do
     (Mix.Project.config[:apps_path] <> "/*/mix.exs")
     |> Path.wildcard
     |> Enum.map(&Path.basename(Path.dirname(&1)))
   end
 
-  defp app_path(app_name) do
+  defp build_path(app_name) do
     Path.join([Path.relative_to_cwd(Mix.Project.build_path), "lib", app_name, "ebin"])
   end
 
   defp default_paths(true = _umbrella?) do
-    umbrella_childeren_apps
-    |> Enum.map(&app_path/1)
+    umbrella_children_apps
+    |> Enum.map(&build_path/1)
   end
   defp default_paths(false = _umbrella?) do
     [ Path.join(Mix.Project.app_path, "ebin") ]
