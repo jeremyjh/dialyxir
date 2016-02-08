@@ -95,8 +95,18 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp include_deps, do: (if Mix.Project.config[:dialyzer][:plt_add_deps], do: deps_apps, else: [])
   defp deps_apps do
-    Mix.Project.config[:deps] |> Enum.map(&elem(&1,0))
+    Mix.Project.config[:deps]
+      |> Enum.filter(&env_dep(&1))
+      |> Enum.map(&elem(&1,0))
   end
+
+  defp env_dep(dep) do
+    only_envs = dep_only(dep)
+    only_envs == nil || Mix.env in List.wrap(only_envs)
+  end
+  defp dep_only({_, opts}) when is_list(opts), do: opts[:only]
+  defp dep_only({_, _, opts}) when is_list(opts), do: opts[:only]
+  defp dep_only(_), do: nil
 
   defp need_build? do
     not File.exists?(plt_file)
