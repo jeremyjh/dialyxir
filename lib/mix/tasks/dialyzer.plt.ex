@@ -4,16 +4,7 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   @moduledoc """
   Builds PLT with default core Erlang applications:
     erts kernel stdlib crypto public_key
-
-
-    def project do
-      [ app: :my_app,
-        version: "0.0.1",
-        deps: deps,
-        dialyzer: plt_add_apps: [:mnesia, :erlzmq]
-      ]
-    end
-  Also includes all libraries included in the current Elixir.
+  Also includes all modules in the Elixir standard library.
 
 
   ## Configuration
@@ -29,21 +20,31 @@ defmodule Mix.Tasks.Dialyzer.Plt do
         ]
       end
 
-  * `dialyzer: :plt_add_apps` - applications to include *in addition* to the core named above e.g.
+  * `dialyzer: :plt_add_apps` - OTP or project dependency applications to include *in addition* to the core applications.
 
-      [:mnesia]
 
   * `dialyzer: :plt_apps` - a list of applications to include that will replace the default,
   include all the apps you need e.g.
 
       [:erts, :kernel, :stdlib, :mnesia]
 
+  * `dialyzer: :plt_add_deps` - :project - include the project's dependencies in the PLT.
+  :transitive - include the full dependency set in the PLT.
+
+
+      def project do
+        [ app: :my_app,
+          version: "0.0.1",
+          deps: deps,
+          dialyzer: plt_add_deps: :transitive
+        ]
+      end
+
+
   * `dialyzer: :plt_file` - specify the plt file name to create and use - default is to use
-  a shared PLT in the user's home directory specific to the version of Erlang/Elixir
+  a shared PLT in the user's home directory specific to the version of Erlang/Elixir.
 
-     ".local.plt"
 
-  * `dialyzer: :plt_add_deps` - Bool - include the project's dependencies in the PLT. Defaults false.
 
   """
 
@@ -52,12 +53,8 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   import Dialyxir.Helpers
 
   def run(_) do
-    if need_build? do
-      build_plt
-      if need_add?, do: add_plt
-    else
-      if need_add?, do: add_plt, else: puts "Nothing to do."
-    end
+    if need_add?, do: add_plt
+    check_plt
   end
 
   def plt_file do
@@ -65,9 +62,26 @@ defmodule Mix.Tasks.Dialyzer.Plt do
       || "#{user_home!}/.dialyxir_core_#{:erlang.system_info(:otp_release)}_#{version}.plt"
   end
 
-  defp build_plt do
-    puts "Starting PLT Core Build ... this will take awhile"
-    args = List.flatten ["--output_plt", "#{plt_file}", "--build_plt", include_pa, "--apps", include_apps, "-r", ex_lib_path]
+  defp check_plt do
+    action = if need_build? do
+      puts "Starting PLT Core Build ... this will take awhile"
+      ["--build_plt", "--output_plt"]
+    else
+      puts "Checking PLT for updated apps."
+      ["--check_plt", "--plt"]
+    end
+    args = List.flatten [action, "#{plt_file}", include_pa, "--apps", include_apps, "-r", ex_lib_path]
+    puts "dialyzer " <> Enum.join(args, " ")
+    {ret, _} = cmd("dialyzer", args, [])
+    puts ret
+  end
+
+  defp add_plt do
+    apps = missing_apps
+    puts "Some apps are missing and will be added:"
+    puts Enum.join(apps, " ")
+    puts "Adding apps to existing PLT ... this will take a little time"
+    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file}", include_pa, "--apps", apps]
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, _} = cmd("dialyzer", args, [])
     puts ret
@@ -125,19 +139,14 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   end
 
   defp need_add? do
-    missing_apps != []
+    if !need_build? do
+      IO.puts "Checking PLT for missing apps."
+      missing_apps != []
+    else
+      false
+    end
   end
 
-  defp add_plt do
-    apps = missing_apps
-    puts "Some apps are missing and will be added:"
-    puts Enum.join(apps, " ")
-    puts "Adding Erlang/OTP Apps to existing PLT ... this will take a little time"
-    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file}", include_pa, "--apps", apps]
-    puts "dialyzer " <> Enum.join(args, " ")
-    {ret, _} = cmd("dialyzer", args, [])
-    puts ret
-  end
 
   defp missing_apps do
     missing_apps = include_apps
