@@ -2,7 +2,7 @@
 
 Mix tasks to simplify use of Dialyzer in Elixir projects.
 
-## TL;DR
+## Installation
 
 Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir). 
 
@@ -30,7 +30,9 @@ mix archive.build
 mix archive.install
 ```
 
-The first time you use Dialyxir, or each time that you upgrade your Erlang or Elixir version you will need to rebuild the PLT:
+## Usage
+
+The first time you use Dialyxir, or each time that you upgrade your Erlang or Elixir version you will need to rebuild the PLT.
 
 ```console
 mix dialyzer.plt
@@ -48,31 +50,46 @@ mix dialyzer
 [Dialyzer](http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html) is a static analysis tool for Erlang and other languages that compile to BEAM bytecode for the Erlang VM. It can analyze the BEAM files and provide warnings about problems in your code including type mismatches and other issues that are commonly detected by static language compilers. The analysis can be improved by inclusion of type hints (called [specs](http://elixir-lang.org/docs/stable/elixir/typespecs.html)) but it can be useful even without those. For more information I highly recommend the [Success Typings](http://user.it.uu.se/~kostis/Papers/succ_types.pdf) paper that describes the theory behind the tool.
 
 
-Beyond the TL;DR for these tasks, the main things to be aware of are the settings you may need to add to your mix.exs.
+Usage is straightforward but you should be aware of the available configuration settings you may wish to add to your mix.exs file.
 
 ### PLT
 
 The Persistent Lookup Table (PLT) is basically a cached output of the analysis. This is important because you'd probably stab yourself in the eye with
-a fork if you had to wait for Dialyzer to complete this for all the standard library and OTP functions you are using everytime you ran it.
-Running the mix task dialyzer.plt builds a PLT in `HOME/.dialyxir_core_[OTP Version]_[Elixir Version].plt` which includes a basic set of OTP applications,
-as well as all of the Elixir standard libraries. This may well meet your needs, but if you are using additional OTP applications in your project you'll want to add those as well.
-The apps included by default are `[ :erts, :kernel, :stdlib, :crypto, :public_key]`. If you need additional ones, add them to a `dialyzer: plt_add_apps: key` in your mix.exs:
+a fork if you had to wait for Dialyzer to analyze all the standard library and OTP modules you are using everytime you ran it.
+Running the mix task dialyzer.plt builds a PLT in `HOME/.dialyxir_core_[OTP Version]_[Elixir Version].plt`.
+
+If you don't want all your projects to share a PLT you can specify a :plt_file key with a string containing the filename you want e.g. `dialyzer: plt_file: ".local.plt"`.
+
+The default PLT includes a basic set of OTP applications, as well as all of the Elixir standard libraries.
+This may well meet your needs, but if you are using additional OTP applications in your project you'll want to add those as well.
+The apps included by default are `[ :erts, :kernel, :stdlib, :crypto, :public_key]`. If you need additional ones, add them to a `dialyzer: plt_add_apps: key` in your mix.exs (you can also add individual project dependencies this way):
 
 ```elixir
 def project do
  [ app: :my_app,
    version: "0.0.1",
    deps: deps,
-   dialyzer: [plt_add_apps: [:mnesia]]
+   dialyzer: [plt_add_apps: [:mnesia, :ecto]]
  ]
 end
 ```
 
-If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you do want in the PLT.
-There is also a `:plt_add_deps` option you can set true, and automatically all the apps and paths in your mix.exs deps list will be included in the PLT using the -pa flag.
-If you don't want to include all your deps in the PLT, you can list individual deps applications in `:plt_add_apps` and those paths are added with the -pa flag so they will be included.
+If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT.
 
-Finally, if you don't want all your projects to share a PLT you can specify a :plt_file key with a string containing the filename you want e.g. `plt_file: ".local.plt"`
+#### Dependencies
+There is also a `:plt_add_deps` option you can set to automatically add dependencies to the PLT. You can set this key to either :project (or true) - which adds only your project's direct dependencies - or :transitive - which will pull in the project's full dependency tree.
+
+
+```elixir
+def project do
+ [ app: :my_app,
+   version: "0.0.1",
+   deps: deps,
+   dialyzer: [plt_add_deps: :transitive]
+ ]
+end
+```
+
 
 You can re-run the dialyzer.plt task at any time. It will check all the libraries to see if they need to be updated in the PLT, and it will add any new apps you've added to your
 project config. It will only rebuild the PLT if you delete it or if you upgrade your Erlang or Elixir version.

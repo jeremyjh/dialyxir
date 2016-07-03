@@ -80,8 +80,9 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp cons_apps, do: ((plt_apps || (default_apps ++ plt_add_apps)) ++ include_deps)
 
+  #paths for dependencies that are specified in plt_apps, plt_add_apps, or plt_add_deps
   defp include_pa do
-    case Enum.filter(deps_apps, &(&1 in cons_apps)) do
+    case Enum.filter(deps_transitive, &(&1 in cons_apps)) do
       [] -> []
       apps ->
         Enum.map(apps, fn(a) ->
@@ -93,11 +94,22 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || []
   defp default_apps, do: [:erts, :kernel, :stdlib, :crypto, :public_key]
 
-  defp include_deps, do: (if Mix.Project.config[:dialyzer][:plt_add_deps], do: deps_apps, else: [])
-  defp deps_apps do
+  defp include_deps do
+    case Mix.Project.config[:dialyzer][:plt_add_deps] do
+      true -> deps_project #compatibility
+      :project -> deps_project
+      :transitive -> deps_transitive
+      _ -> []
+    end
+  end
+  defp deps_project do
     Mix.Project.config[:deps]
       |> Enum.filter(&env_dep(&1))
       |> Enum.map(&elem(&1,0))
+  end
+  defp deps_transitive do
+    Mix.Project.deps_paths
+    |> Map.keys
   end
 
   defp env_dep(dep) do
