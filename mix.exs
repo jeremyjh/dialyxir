@@ -6,8 +6,8 @@ defmodule Dialyxir.Mixfile do
       app: :dialyxir,
       version: "0.3.5",
       elixir: "~> 1.0",
-      description: description,
-      package: package,
+      description: description(),
+      package: package(),
       deps: []
     ]
   end

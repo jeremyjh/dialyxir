@@ -42,7 +42,7 @@ defmodule Mix.Tasks.Dialyzer do
     {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
     {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
     if compile == [], do: Mix.Project.compile([])
-    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags, dialyzer_paths]
+    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags(), dialyzer_paths()]
     puts "Starting Dialyzer"
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, exit_status} = System.cmd("dialyzer", args, [])
@@ -68,7 +68,7 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp default_paths(true = _umbrella?) do
-    umbrella_childeren_apps
+    umbrella_childeren_apps()
     |> Enum.map(&app_path/1)
   end
   defp default_paths(false = _umbrella?) do

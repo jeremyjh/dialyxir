@@ -53,50 +53,50 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   import Dialyxir.Helpers
 
   def run(_) do
-    if need_add?, do: add_plt
-    check_plt
+    if need_add?(), do: add_plt()
+    check_plt()
   end
 
   def plt_file do
     Mix.Project.config[:dialyzer][:plt_file]
-      || "#{user_home!}/.dialyxir_core_#{:erlang.system_info(:otp_release)}_#{version}.plt"
+      || "#{user_home!()}/.dialyxir_core_#{:erlang.system_info(:otp_release)}_#{version()}.plt"
   end
 
   defp check_plt do
-    action = if need_build? do
+    action = if need_build?() do
       puts "Starting PLT Core Build ... this will take awhile"
       ["--build_plt", "--output_plt"]
     else
       puts "Checking PLT for updated apps."
       ["--check_plt", "--plt"]
     end
-    args = List.flatten [action, "#{plt_file}", include_pa, "--apps", include_apps, "-r", ex_lib_path]
+    args = List.flatten [action, "#{plt_file()}", include_pa(), "--apps", include_apps(), "-r", ex_lib_path()]
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, _} = cmd("dialyzer", args, [])
     puts ret
   end
 
   defp add_plt do
-    apps = missing_apps
+    apps = missing_apps()
     puts "Some apps are missing and will be added:"
     puts Enum.join(apps, " ")
     puts "Adding apps to existing PLT ... this will take a little time"
-    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file}", include_pa, "--apps", apps]
+    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file()}", include_pa(), "--apps", apps]
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, _} = cmd("dialyzer", args, [])
     puts ret
   end
 
-  defp include_apps, do: Enum.map(cons_apps, &to_binary_if_atom(&1))
+  defp include_apps, do: Enum.map(cons_apps(), &to_binary_if_atom(&1))
 
   defp to_binary_if_atom(b) when is_binary(b), do: b
   defp to_binary_if_atom(a) when is_atom(a), do: Atom.to_string(a)
 
-  defp cons_apps, do: ((plt_apps || (default_apps ++ plt_add_apps)) ++ include_deps)
+  defp cons_apps, do: ((plt_apps() || (default_apps() ++ plt_add_apps())) ++ include_deps())
 
   #paths for dependencies that are specified in plt_apps, plt_add_apps, or plt_add_deps
   defp include_pa do
-    case Enum.filter(deps_transitive, &(&1 in cons_apps)) do
+    case Enum.filter(deps_transitive(), &(&1 in cons_apps())) do
       [] -> []
       apps ->
         Enum.map(apps, fn(a) ->
@@ -110,9 +110,9 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp include_deps do
     case Mix.Project.config[:dialyzer][:plt_add_deps] do
-      true -> deps_project #compatibility
-      :project -> deps_project
-      :transitive -> deps_transitive
+      true -> deps_project() #compatibility
+      :project -> deps_project()
+      :transitive -> deps_transitive()
       _ -> []
     end
   end
@@ -135,13 +135,13 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp dep_only(_), do: nil
 
   defp need_build? do
-    not File.exists?(plt_file)
+    not File.exists?(plt_file())
   end
 
   defp need_add? do
-    if !need_build? do
+    if !need_build?() do
       IO.puts "Checking PLT for missing apps."
-      missing_apps != []
+      missing_apps() != []
     else
       false
     end
@@ -149,9 +149,9 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
 
   defp missing_apps do
-    missing_apps = include_apps
+    missing_apps = include_apps()
       |> Enum.filter(fn(app) ->
-          not core_plt_contains?(app,plt_file)
+          not core_plt_contains?(app,plt_file())
          end)
     missing_apps
   end
