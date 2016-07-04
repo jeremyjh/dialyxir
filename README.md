@@ -2,6 +2,9 @@
 
 Mix tasks to simplify use of Dialyzer in Elixir projects.
 
+## Quickstart
+If you are planning to use Dialyzer with an application built with the [Phoenix Framework](http://www.phoenixframework.org/), check out the [Quickstart wiki](https://github.com/jeremyjh/dialyxir/wiki/Phoenix-Dialyxir-Quickstart).
+
 ## Installation
 
 Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir). 
@@ -12,7 +15,7 @@ To add it to a mix project, just add a line like this in your deps function in m
 
 ```elixir
 defp deps do
-  [{:dialyxir, "~> 0.3", only: [:dev]}]
+  [{:dialyxir, "~> 0.3.5", only: [:dev]}]
 end
 ```
 
