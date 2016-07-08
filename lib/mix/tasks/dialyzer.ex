@@ -35,14 +35,20 @@ defmodule Mix.Tasks.Dialyzer do
   """
 
   use Mix.Task
-  alias Mix.Tasks.Dialyzer.Plt, as: Plt
   import Dialyxir.Helpers
+  import System, only: [user_home!: 0]
+  alias Dialyxir.Plt, as: Plt
 
   def run(args) do
     {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
     {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
     if compile == [], do: Mix.Project.compile([])
-    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.plt_file}", dialyzer_flags(), dialyzer_paths()]
+    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.deps_plt()}", dialyzer_flags(), dialyzer_paths()]
+    compatibility_notice()
+    dialyze(args, halt)
+  end
+
+  defp dialyze(args, halt) do
     puts "Starting Dialyzer"
     puts "dialyzer " <> Enum.join(args, " ")
     {ret, exit_status} = System.cmd("dialyzer", args, [])
@@ -76,5 +82,22 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp dialyzer_paths do
     Mix.Project.config[:dialyzer][:paths] || default_paths(Mix.Project.umbrella?)
+  end
+
+  defp compatibility_notice do
+    old_plt = "#{user_home!()}/.dialyxir_core_*.plt"
+    if File.exists?(old_plt) && (!File.exists?(Plt.erlang_plt()) || !File.exists?(Plt.elixir_plt())) do
+
+      puts """
+      COMPATIBILITY NOTICE
+      ------------------------
+      Previous usage of a pre-0.4 version of Dialyxir detected. Please be aware that the 0.4 release
+      makes a number of changes to previous defaults. Among other things, the PLT task is automatically
+      run when dialyzer is run, PLT paths have changed,
+      transitive dependencies are included by default in the PLT, and no additional warning flags
+      beyond the dialyzer defaults are included. All these properties can be changed in configuration.
+      (see `mix help dialyzer` and `mix help dialyzer.plt`).
+      """
+    end
   end
 end

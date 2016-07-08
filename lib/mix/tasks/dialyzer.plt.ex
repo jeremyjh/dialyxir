@@ -49,64 +49,18 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   """
 
   use Mix.Task
-  import System, only: [cmd: 3, user_home!: 0, version: 0]
-  import Dialyxir.Helpers
+  import Dialyxir.Plt
 
   def run(_) do
-    if need_add?(), do: add_plt()
-    check_plt()
+    Mix.Tasks.Deps.Check.run([]) #compile & load all deps paths
+    Mix.Project.compile([]) # compile & load current project paths
+    plts_list(cons_apps()) |> check()
   end
 
-  def plt_file do
-    Mix.Project.config[:dialyzer][:plt_file]
-      || "#{user_home!()}/.dialyxir_core_#{:erlang.system_info(:otp_release)}_#{version()}.plt"
-  end
-
-  defp check_plt do
-    action = if need_build?() do
-      puts "Starting PLT Core Build ... this will take awhile"
-      ["--build_plt", "--output_plt"]
-    else
-      puts "Checking PLT for updated apps."
-      ["--check_plt", "--plt"]
-    end
-    args = List.flatten [action, "#{plt_file()}", include_pa(), "--apps", include_apps(), "-r", ex_lib_path()]
-    puts "dialyzer " <> Enum.join(args, " ")
-    {ret, _} = cmd("dialyzer", args, [])
-    puts ret
-  end
-
-  defp add_plt do
-    apps = missing_apps()
-    puts "Some apps are missing and will be added:"
-    puts Enum.join(apps, " ")
-    puts "Adding apps to existing PLT ... this will take a little time"
-    args = List.flatten ["--add_to_plt", "--plt", "#{plt_file()}", include_pa(), "--apps", apps]
-    puts "dialyzer " <> Enum.join(args, " ")
-    {ret, _} = cmd("dialyzer", args, [])
-    puts ret
-  end
-
-  defp include_apps, do: Enum.map(cons_apps(), &to_binary_if_atom(&1))
-
-  defp to_binary_if_atom(b) when is_binary(b), do: b
-  defp to_binary_if_atom(a) when is_atom(a), do: Atom.to_string(a)
-
-  defp cons_apps, do: ((plt_apps() || (default_apps() ++ plt_add_apps())) ++ include_deps())
-
-  #paths for dependencies that are specified in plt_apps, plt_add_apps, or plt_add_deps
-  defp include_pa do
-    case Enum.filter(deps_transitive(), &(&1 in cons_apps())) do
-      [] -> []
-      apps ->
-        Enum.map(apps, fn(a) ->
-          ["-pa", "_build/" <> "#{Mix.env}/lib/" <> Atom.to_string(a) <> "/ebin"] end)
-    end
-  end
+  defp cons_apps, do: (plt_apps() || (plt_add_apps() ++ include_deps()))
 
   defp plt_apps, do: Mix.Project.config[:dialyzer][:plt_apps]
   defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || []
-  defp default_apps, do: [:erts, :kernel, :stdlib, :crypto, :public_key]
 
   defp include_deps do
     case Mix.Project.config[:dialyzer][:plt_add_deps] do
@@ -116,14 +70,22 @@ defmodule Mix.Tasks.Dialyzer.Plt do
       _ -> []
     end
   end
+
   defp deps_project do
-    Mix.Project.config[:deps]
-      |> Enum.filter(&env_dep(&1))
-      |> Enum.map(&elem(&1,0))
+    deps = Mix.Project.config[:deps]
+              |> Enum.filter(&env_dep(&1))
+              |> Enum.map(&elem(&1,0))
+    Enum.uniq(deps_app() ++ deps)
   end
   defp deps_transitive do
-    Mix.Project.deps_paths
-    |> Map.keys
+    deps = (Mix.Project.deps_paths
+              |> Map.keys)
+    Enum.uniq(deps_app() ++ deps)
+  end
+  defp deps_app do
+    app = Keyword.fetch!(Mix.Project.config(), :app)
+    :ok = Application.load(app)
+    Application.spec(app, :applications)
   end
 
   defp env_dep(dep) do
@@ -133,43 +95,4 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   defp dep_only({_, opts}) when is_list(opts), do: opts[:only]
   defp dep_only({_, _, opts}) when is_list(opts), do: opts[:only]
   defp dep_only(_), do: nil
-
-  defp need_build? do
-    not File.exists?(plt_file())
-  end
-
-  defp need_add? do
-    if !need_build?() do
-      IO.puts "Checking PLT for missing apps."
-      missing_apps() != []
-    else
-      false
-    end
-  end
-
-
-  defp missing_apps do
-    missing_apps = include_apps()
-      |> Enum.filter(fn(app) ->
-          not core_plt_contains?(app,plt_file())
-         end)
-    missing_apps
-  end
-
-  defp core_plt_contains?(app, plt_file) do
-    app = to_char_list(app)
-    plt_file = to_char_list(plt_file)
-    :dialyzer.plt_info(plt_file)
-    |> elem(1) |> Keyword.get(:files)
-    |> Enum.find(fn(s) ->
-                   :string.str(s, app) > 0
-                 end)
-    |> is_list
-  end
-
-  defp ex_lib_path do
-    code_dir = Path.join(:code.lib_dir(:elixir), "..")
-    ~w[eex elixir ex_unit iex logger mix]
-    |> Enum.map(&Path.join([ code_dir, &1, "ebin" ]))
-  end
 end
