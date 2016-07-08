@@ -18,15 +18,15 @@ defmodule Mix.Tasks.Dialyzer do
 
   ## Configuration
 
-  You can define a dialyzer_flags key in your Mix project config to override defaults.
-  You can also include a dialyzer_paths key to override default path (only Mix.Project.app_path()/ebin)
+  You can define a dialyzer: :flags key in your Mix project Keywords to provide additional args (such as optional warnings).
+  You can include a dialyzer: :paths key to override paths of beam files you want to analyze (defaults to Mix.project.app_path()/ebin)
 
   e.g.
     def project do
       [ app: :my_app,
         version: "0.0.1",
         deps: deps,
-        dialyzer: [flags: ["-Werror_handling", "-Wrace_conditions"],
+        dialyzer: [flags: ["-Wunmatched_returns"],
                    paths: ["ebin", "deps/foo/ebin"]]
       ]
     end
@@ -53,8 +53,7 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp dialyzer_flags do
-    Mix.Project.config[:dialyzer][:flags]
-    || ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]
+    Mix.Project.config[:dialyzer][:flags] || []
   end
 
   defp umbrella_childeren_apps do
