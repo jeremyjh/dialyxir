@@ -52,9 +52,36 @@ defmodule Mix.Tasks.Dialyzer.Plt do
   import Dialyxir.Plt
 
   def run(_) do
-    Mix.Tasks.Deps.Check.run([]) #compile & load all deps paths
-    Mix.Project.compile([]) # compile & load current project paths
-    plts_list(cons_apps()) |> check()
+    IO.puts "Checking PLT..."
+    {apps, hash} = dependency_hash
+    if check_hash?(hash) do
+      IO.puts "PLT is up to date!"
+    else
+      Mix.Tasks.Deps.Check.run([]) #compile & load all deps paths
+      Mix.Project.compile([]) # compile & load current project paths
+      plts_list(apps) |> check()
+      File.write(plt_hash_file, hash)
+    end
+  end
+
+  @spec check_hash?(binary()) :: boolean()
+  defp check_hash?(hash) do
+	  case File.read(plt_hash_file) do
+      {:ok, stored_hash} -> hash == stored_hash
+      _ -> false
+    end
+  end
+
+  defp plt_hash_file do
+	  deps_plt() <> ".hash"
+  end
+
+  @spec dependency_hash :: {[atom()], binary()}
+  def dependency_hash do
+    lock_file = Mix.Dep.Lock.read |> :erlang.term_to_binary
+    apps = cons_apps
+    hash = :crypto.hash(:sha, lock_file <> :erlang.term_to_binary(apps))
+    {apps, hash}
   end
 
   defp cons_apps, do: (plt_apps() || (plt_add_apps() ++ include_deps()))

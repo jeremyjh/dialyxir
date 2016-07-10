@@ -4,7 +4,7 @@ defmodule Dialyxir.Mixfile do
   def project do
     [
       app: :dialyxir,
-      version: "0.3.5",
+      version: "0.4.0",
       elixir: "~> 1.0",
       description: description(),
       package: package(),
@@ -14,7 +14,7 @@ defmodule Dialyxir.Mixfile do
   end
 
   def application do
-    [applications: [:dialyzer, :mix]]
+    [applications: [:dialyzer, :crypto, :mix]]
   end
 
   defp description do

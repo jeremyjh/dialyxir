@@ -8,6 +8,7 @@ defmodule Mix.Tasks.Dialyzer do
   ## Command line options
 
     * `--no-compile`       - do not compile even if needed.
+    * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
       useful for CI. do not use with `mix do`.
 
@@ -42,9 +43,11 @@ defmodule Mix.Tasks.Dialyzer do
   def run(args) do
     {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
     {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
+    {dargs, no_check} = Enum.partition(dargs, &(&1 != "--no-check"))
     if compile == [], do: Mix.Project.compile([])
     args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.deps_plt()}", dialyzer_flags(), dialyzer_paths()]
     compatibility_notice()
+    unless no_check, do: Mix.Tasks.Dialyzer.Plt.run([])
     dialyze(args, halt)
   end
 
