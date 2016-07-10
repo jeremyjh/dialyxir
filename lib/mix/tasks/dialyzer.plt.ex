@@ -59,15 +59,21 @@ defmodule Mix.Tasks.Dialyzer.Plt do
 
   defp cons_apps, do: (plt_apps() || (plt_add_apps() ++ include_deps()))
 
-  defp plt_apps, do: Mix.Project.config[:dialyzer][:plt_apps]
-  defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || []
+  defp plt_apps, do: Mix.Project.config[:dialyzer][:plt_apps] |> load_apps()
+  defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || [] |> load_apps()
+  defp load_apps(apps) do
+    if apps do
+      Enum.map(apps, &Application.load/1)
+      apps
+    end
+  end
 
   defp include_deps do
     case Mix.Project.config[:dialyzer][:plt_add_deps] do
-      true -> deps_project() #compatibility
+      false    -> []
+      true     -> deps_project() #compatibility
       :project -> deps_project()
-      :transitive -> deps_transitive()
-      _ -> []
+      _        -> deps_transitive()
     end
   end
 
@@ -75,18 +81,37 @@ defmodule Mix.Tasks.Dialyzer.Plt do
     deps = Mix.Project.config[:deps]
               |> Enum.filter(&env_dep(&1))
               |> Enum.map(&elem(&1,0))
-    Enum.uniq(deps_app() ++ deps)
+    Enum.uniq(deps_app(false) ++ deps)
   end
   defp deps_transitive do
     deps = (Mix.Project.deps_paths
               |> Map.keys)
-    Enum.uniq(deps_app() ++ deps)
+    Enum.uniq(deps_app(true) ++ deps)
   end
-  defp deps_app do
+
+  @spec deps_app(boolean()) :: [atom]
+  defp deps_app(recursive) do
     app = Keyword.fetch!(Mix.Project.config(), :app)
-    :ok = Application.load(app)
-    Application.spec(app, :applications)
+    deps_app(app,recursive) |> Enum.uniq
   end
+  @spec deps_app(atom(), boolean()) :: [atom]
+  defp deps_app(app, recursive) do
+    with_each = if recursive do
+                  &deps_app(&1,true)
+                else
+                  fn _ -> [] end
+                end
+    Application.load(app)
+    case Application.spec(app, :applications) do
+      []        -> []
+      nil       -> []
+      this_apps ->
+        Enum.map(this_apps, with_each)
+        |> List.flatten
+        |> Enum.concat(this_apps)
+    end
+  end
+
 
   defp env_dep(dep) do
     only_envs = dep_only(dep)

@@ -8,8 +8,13 @@ defmodule Dialyxir.Mixfile do
       elixir: "~> 1.0",
       description: description(),
       package: package(),
-      deps: []
+      deps: [],
+      dialyzer: [plt_add_apps: [:syntax_tools]]
     ]
+  end
+
+  def application do
+    [applications: [:dialyzer, :mix]]
   end
 
   defp description do
