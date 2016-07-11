@@ -5,8 +5,11 @@
 defmodule Dialyxir.Plt do
 
   def plts_list(deps) do
-    [{deps_plt(), deps}, {elixir_plt(), [:elixir]},
-      {erlang_plt(), [:erts, :kernel, :stdlib, :crypto]}]
+    elixir_apps = [:elixir]
+    erlang_apps = [:erts, :kernel, :stdlib, :crypto]
+    [{deps_plt(), deps ++ elixir_apps ++ erlang_apps},
+     {elixir_plt(), elixir_apps},
+     {erlang_plt(), erlang_apps}]
   end
 
   def erlang_plt(), do: global_plt("erlang-" <> otp_vsn())
