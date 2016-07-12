@@ -121,26 +121,14 @@ defmodule Mix.Tasks.Dialyzer do
     Mix.Project.config[:dialyzer][:flags] || []
   end
 
-  defp umbrella_childeren_apps do
-    (Mix.Project.config[:apps_path] <> "/*/mix.exs")
-    |> Path.wildcard
-    |> Enum.map(&Path.basename(Path.dirname(&1)))
-  end
-
-  defp app_path(app_name) do
-    Path.join([Path.relative_to_cwd(Mix.Project.build_path), "lib", app_name, "ebin"])
-  end
-
-  defp default_paths(true = _umbrella?) do
-    umbrella_childeren_apps()
-    |> Enum.map(&app_path/1)
-  end
-  defp default_paths(false = _umbrella?) do
-    [ Path.join(Mix.Project.app_path, "ebin") ]
+  defp default_paths() do
+    reduce_umbrella_children([], fn(paths) ->
+      [Mix.Project.compile_path | paths]
+    end)
   end
 
   defp dialyzer_paths do
-    Mix.Project.config[:dialyzer][:paths] || default_paths(Mix.Project.umbrella?)
+    Mix.Project.config[:dialyzer][:paths] || default_paths()
   end
 
   defp compatibility_notice do
@@ -180,7 +168,7 @@ defmodule Mix.Tasks.Dialyzer do
     {apps, hash}
   end
 
-  defp cons_apps, do: (plt_apps() || (plt_add_apps() ++ include_deps())) |> Enum.sort
+  defp cons_apps, do: (plt_apps() || (plt_add_apps() ++ include_deps()))
 
   defp plt_apps, do: Mix.Project.config[:dialyzer][:plt_apps] |> load_apps()
   defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || [] |> load_apps()
@@ -192,30 +180,33 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp include_deps do
-    case Mix.Project.config[:dialyzer][:plt_add_deps] do
-      false    -> []
-      true     -> deps_project() #compatibility
-      :project -> deps_project()
-      _        -> deps_transitive()
-    end
+    method = Mix.Project.config[:dialyzer][:plt_add_deps]
+    reduce_umbrella_children([],fn(deps) ->
+      deps ++ case method do
+        false    -> []
+        true     -> deps_project() #compatibility
+        :project -> deps_project()
+        _        -> deps_transitive()
+      end
+    end) |> Enum.sort |> Enum.uniq |> IO.inspect
   end
 
   defp deps_project do
     deps = Mix.Project.config[:deps]
               |> Enum.filter(&env_dep(&1))
               |> Enum.map(&elem(&1,0))
-    Enum.uniq(deps_app(false) ++ deps)
+    deps_app(false) ++ deps
   end
   defp deps_transitive do
     deps = (Mix.Project.deps_paths
               |> Map.keys)
-    Enum.uniq(deps_app(true) ++ deps)
+    deps_app(true) ++ deps
   end
 
   @spec deps_app(boolean()) :: [atom]
   defp deps_app(recursive) do
     app = Keyword.fetch!(Mix.Project.config(), :app)
-    deps_app(app,recursive) |> Enum.uniq
+    deps_app(app, recursive)
   end
   @spec deps_app(atom(), boolean()) :: [atom]
   defp deps_app(app, recursive) do
@@ -243,4 +234,18 @@ defmodule Mix.Tasks.Dialyzer do
   defp dep_only({_, opts}) when is_list(opts), do: opts[:only]
   defp dep_only({_, _, opts}) when is_list(opts), do: opts[:only]
   defp dep_only(_), do: nil
+
+  @spec reduce_umbrella_children(a, (a -> a)) :: a when a: term()
+  defp reduce_umbrella_children(acc,f) do
+    if Mix.Project.umbrella? do
+      children = Mix.Dep.Umbrella.loaded
+      Enum.reduce(children, acc,
+        fn(child, acc) ->
+          Mix.Project.in_project(child.app, child.opts[:path],
+                                 fn _ -> reduce_umbrella_children(acc,f) end)
+        end)
+    else
+      f.(acc)
+    end
+  end
 end
