@@ -51,8 +51,8 @@ defmodule Mix.Tasks.Dialyzer do
         ]
       end
 
-  * `dialyzer: :plt_add_apps` - OTP or project dependency applications to include
-     *in addition* to the core applications.
+  * `dialyzer: :plt_add_apps` - applications to include
+     *in addition* to the core applications and project dependencies.
 
 
   * `dialyzer: :plt_apps` - a list of applications to include that will replace the default,
@@ -60,15 +60,19 @@ defmodule Mix.Tasks.Dialyzer do
 
       [:erts, :kernel, :stdlib, :mnesia]
 
-  * `dialyzer: :plt_add_deps` - :project - include the project's dependencies in the PLT.
-  :transitive - include the full dependency set in the PLT.
+  * `dialyzer: :plt_add_deps` - controls which dependencies are added to the PLT defaults to :transitive. In all cases the dependency list is recurisvely built for mix umbrella projects.
+       *  :transitive - include the full dependency tree (from mix deps and applications) in the PLT.
+       *  :project - include the project's direct dependencies (from mix deps and applications) in the PLT.
+       *  :apps_tree - include the full OTP application dependency tree (`mix app.tree`) but not the mix dependencies
+       *  :apps_direct - include only the direct OTP application dependencies for the app(s) in the mix project
+       *  :false - do not include any dependencies in the project PLT (you'll need to specify your dependencies with a plt_add_apps key)
 
 
       def project do
         [ app: :my_app,
           version: "0.0.1",
           deps: deps,
-          dialyzer: plt_add_deps: :transitive
+          dialyzer: [plt_add_deps: :apps_tree]
         ]
       end
 
@@ -148,7 +152,7 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-    @spec check_hash?(binary()) :: boolean()
+  @spec check_hash?(binary()) :: boolean()
   defp check_hash?(hash) do
 	  case File.read(plt_hash_file) do
       {:ok, stored_hash} -> hash == stored_hash
@@ -183,24 +187,25 @@ defmodule Mix.Tasks.Dialyzer do
     method = Mix.Project.config[:dialyzer][:plt_add_deps]
     reduce_umbrella_children([],fn(deps) ->
       deps ++ case method do
-        false    -> []
-        true     -> deps_project() #compatibility
-        :project -> deps_project()
-        _        -> deps_transitive()
+        false         -> []
+        true          -> deps_project()  ++ deps_app(false) #compatibility
+        :project      -> deps_project() ++ deps_app(false)
+        :apps_direct  -> deps_app(false)
+        :apps_tree    -> deps_app(true)
+        _transitive   -> deps_transitive() ++ deps_app(true)
       end
     end) |> Enum.sort |> Enum.uniq |> IO.inspect
   end
 
   defp deps_project do
-    deps = Mix.Project.config[:deps]
-              |> Enum.filter(&env_dep(&1))
-              |> Enum.map(&elem(&1,0))
-    deps_app(false) ++ deps
+    Mix.Project.config[:deps]
+      |> Enum.filter(&env_dep(&1))
+      |> Enum.map(&elem(&1,0))
   end
+
   defp deps_transitive do
-    deps = (Mix.Project.deps_paths
-              |> Map.keys)
-    deps_app(true) ++ deps
+    Mix.Project.deps_paths
+      |> Map.keys
   end
 
   @spec deps_app(boolean()) :: [atom]
