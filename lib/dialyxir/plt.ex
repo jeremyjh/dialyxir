@@ -4,10 +4,10 @@
 
 defmodule Dialyxir.Plt do
 
-  def plts_list(deps) do
+  def plts_list(deps, path) do
     elixir_apps = [:elixir]
     erlang_apps = [:erts, :kernel, :stdlib, :crypto]
-    [{deps_plt(), deps ++ elixir_apps ++ erlang_apps},
+    [{path, deps ++ elixir_apps ++ erlang_apps},
      {elixir_plt(), elixir_apps},
      {erlang_plt(), erlang_apps}]
   end

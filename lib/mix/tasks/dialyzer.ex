@@ -60,12 +60,12 @@ defmodule Mix.Tasks.Dialyzer do
 
       [:erts, :kernel, :stdlib, :mnesia]
 
-  * `dialyzer: :plt_add_deps` - controls which dependencies are added to the PLT defaults to :transitive. In all cases the dependency list is recurisvely built for mix umbrella projects.
+  * `dialyzer: :plt_add_deps` - controls which dependencies are added to the PLT - defaults to :transitive. In all cases the dependency list is recurisvely built for mix umbrella projects.
        *  :transitive - include the full dependency tree (from mix deps and applications) in the PLT.
        *  :project - include the project's direct dependencies (from mix deps and applications) in the PLT.
-       *  :apps_tree - include the full OTP application dependency tree (`mix app.tree`) but not the mix dependencies
-       *  :apps_direct - include only the direct OTP application dependencies for the app(s) in the mix project
-       *  :false - do not include any dependencies in the project PLT (you'll need to specify your dependencies with a plt_add_apps key)
+       *  :apps_tree - include the full OTP application dependency tree (`mix app.tree`) but not the mix dependencies.
+       *  :apps_direct - include only the direct OTP application dependencies for the app(s) in the mix project.
+       *  :false - do not include any dependencies in the project PLT (you'll need to specify your dependencies with a plt_add_apps key).
 
 
       def project do
@@ -77,8 +77,7 @@ defmodule Mix.Tasks.Dialyzer do
       end
 
 
-  * `dialyzer: :plt_file` - specify the plt file name to create and use - default is to use
-  a shared PLT in the user's home directory specific to the version of Erlang/Elixir.
+  * `dialyzer: :plt_file` - Deprecated - specify the plt file name to create and use - default is to create one in the project's current build environmnet (e.g. _build/dev/) specific to the Erlang/Elixir version used. Note that use of this key in version 0.4 or later will produce a deprecation warning - you can silence the warning by providing a pair with key :no_warn e.g. `plt_file: {:no_warn,"filename"}`.
 
   """
 
@@ -89,12 +88,13 @@ defmodule Mix.Tasks.Dialyzer do
 
   def run(args) do
     compatibility_notice()
+    check_config()
     {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
     {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
     {dargs, no_check} = Enum.partition(dargs, &(&1 != "--no-check"))
     if compile == [], do: Mix.Project.compile([])
     unless no_check != [], do: check_plt()
-    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Plt.deps_plt()}", dialyzer_flags(), dialyzer_paths()]
+    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{project_plt()}", dialyzer_flags(), dialyzer_paths()]
     dialyze(args, halt)
   end
 
@@ -106,10 +106,29 @@ defmodule Mix.Tasks.Dialyzer do
     else
       Mix.Tasks.Deps.Check.run([]) #compile & load all deps paths
       Mix.Project.compile([]) # compile & load current project paths
-      Plt.plts_list(apps) |> Plt.check()
+      Plt.plts_list(apps, project_plt()) |> Plt.check()
       File.write(plt_hash_file, hash)
     end
   end
+
+  defp check_config do
+    if is_binary(Mix.Project.config[:dialyzer][:plt_file]) do
+      IO.puts """
+      Notice: :plt_path is deprecated as Dialyxir now uses project-private PLT files by default.
+      If you want to use this setting without seeing this warning, provide it in a pair
+      with the :no_warn key e.g. `dialyzer: plt_file: {:no_warn, "~/mypltfile"}`
+      """
+    end
+  end
+
+  defp project_plt() do
+    plt_path(Mix.Project.config[:dialyzer][:plt_file])
+      || Plt.deps_plt()
+  end
+
+  defp plt_path(file) when is_binary(file), do: Path.expand(file)
+  defp plt_path({:no_warn, file}) when is_binary(file), do: Path.expand(file)
+  defp plt_path(_),  do: false
 
   defp dialyze(args, halt) do
     puts "Starting Dialyzer"
@@ -148,6 +167,8 @@ defmodule Mix.Tasks.Dialyzer do
       transitive dependencies are included by default in the PLT, and no additional warning flags
       beyond the dialyzer defaults are included. All these properties can be changed in configuration.
       (see `mix help dialyzer` and `mix help dialyzer.plt`).
+
+      If you no longer use the older Dialyxir in any projects and do not want to see this notice each time you upgrade your Erlang/Elixir distribution, you can delete your old pre-0.4 PLT files. ( rm ~/.dialyxir_core_*.plt )
       """
     end
   end
@@ -160,9 +181,7 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp plt_hash_file do
-	  Plt.deps_plt() <> ".hash"
-  end
+  defp plt_hash_file, do: project_plt() <> ".hash"
 
   @spec dependency_hash :: {[atom()], binary()}
   def dependency_hash do
@@ -172,7 +191,10 @@ defmodule Mix.Tasks.Dialyzer do
     {apps, hash}
   end
 
-  defp cons_apps, do: (plt_apps() || (plt_add_apps() ++ include_deps()))
+  defp cons_apps do
+    (plt_apps() || (plt_add_apps() ++ include_deps()))
+      |> Enum.sort |> Enum.uniq |> IO.inspect
+  end
 
   defp plt_apps, do: Mix.Project.config[:dialyzer][:plt_apps] |> load_apps()
   defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || [] |> load_apps()
@@ -194,7 +216,7 @@ defmodule Mix.Tasks.Dialyzer do
         :apps_tree    -> deps_app(true)
         _transitive   -> deps_transitive() ++ deps_app(true)
       end
-    end) |> Enum.sort |> Enum.uniq |> IO.inspect
+    end)
   end
 
   defp deps_project do
@@ -210,7 +232,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   @spec deps_app(boolean()) :: [atom]
   defp deps_app(recursive) do
-    app = Keyword.fetch!(Mix.Project.config(), :app)
+    app = Mix.Project.config[:app]
     deps_app(app, recursive)
   end
   @spec deps_app(atom(), boolean()) :: [atom]
