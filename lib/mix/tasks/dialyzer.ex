@@ -60,7 +60,7 @@ defmodule Mix.Tasks.Dialyzer do
 
       [:erts, :kernel, :stdlib, :mnesia]
 
-  * `dialyzer: :plt_add_deps` - controls which dependencies are added to the PLT - defaults to :transitive. In all cases the dependency list is recurisvely built for mix umbrella projects.
+  * `dialyzer: :plt_add_deps` - controls which dependencies are added to the PLT - defaults to :apps_tree. In all cases the dependency list is recurisvely built for mix umbrella projects.
        *  :transitive - include the full dependency tree (from mix deps and applications) in the PLT.
        *  :project - include the project's direct dependencies (from mix deps and applications) in the PLT.
        *  :apps_tree - include the full OTP application dependency tree (`mix app.tree`) but not the mix dependencies.
@@ -72,7 +72,7 @@ defmodule Mix.Tasks.Dialyzer do
         [ app: :my_app,
           version: "0.0.1",
           deps: deps,
-          dialyzer: [plt_add_deps: :apps_tree]
+          dialyzer: [plt_add_deps: :apps_direct]
         ]
       end
 
@@ -213,8 +213,8 @@ defmodule Mix.Tasks.Dialyzer do
         true          -> deps_project()  ++ deps_app(false) #compatibility
         :project      -> deps_project() ++ deps_app(false)
         :apps_direct  -> deps_app(false)
-        :apps_tree    -> deps_app(true)
-        _transitive   -> deps_transitive() ++ deps_app(true)
+        :transitive   -> deps_transitive() ++ deps_app(true)
+        _apps_tree    -> deps_app(true)
       end
     end)
   end
