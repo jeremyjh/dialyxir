@@ -3,6 +3,7 @@
 # https://github.com/fishcakez/dialyze
 
 defmodule Dialyxir.Plt do
+  @moduledoc false
 
   def plts_list(deps, path) do
     elixir_apps = [:elixir]
