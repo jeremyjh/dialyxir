@@ -19,7 +19,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   ## Configuration
 
-  All configuration is included under a dialyzer key in the project entry.
+  All configuration is included under a dialyzer key in the mix project keyword list.
 
   You can define a dialyzer: :flags key in your Mix project Keywords to provide additional args (such as optional warnings).
   You can include a dialyzer: :paths key to override paths of beam files you want to analyze (defaults to Mix.project.app_path()/ebin)
@@ -39,8 +39,8 @@ defmodule Mix.Tasks.Dialyzer do
   The task will build a PLT with default core Erlang applications: erts kernel stdlib crypto
   It also includes all modules in the Elixir standard library.
 
-  Includes all project dependencies defined in the mix deps keyword and/or
-  the OTP applications list for the project.
+  By default the PLT includes all project dependencies defined in the mix deps keyword and/or
+  the OTP applications list for the project but this can be configured.
 
       def project do
         [ app: :my_app,
@@ -84,6 +84,8 @@ defmodule Mix.Tasks.Dialyzer do
   use Mix.Task
   import Dialyxir.Helpers
   import System, only: [user_home!: 0]
+  alias Dialyxir.Project
+  alias Dialyxir.Plt
 
   def run(args) do
     compatibility_notice()
@@ -103,7 +105,7 @@ defmodule Mix.Tasks.Dialyzer do
     if check_hash?(hash) do
       IO.puts "PLT is up to date!"
     else
-      Plt.plts_list(apps, Project.plt_file()) |> Plt.check()
+      Project.plts_list(apps) |> Plt.check()
       File.write(plt_hash_file, hash)
     end
   end
@@ -125,7 +127,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp compatibility_notice do
     old_plt = "#{user_home!()}/.dialyxir_core_*.plt"
-    if File.exists?(old_plt) && (!File.exists?(Plt.erlang_plt()) || !File.exists?(Plt.elixir_plt())) do
+    if File.exists?(old_plt) && (!File.exists?(Project.erlang_plt()) || !File.exists?(Project.elixir_plt())) do
 
       puts """
       COMPATIBILITY NOTICE
@@ -135,7 +137,7 @@ defmodule Mix.Tasks.Dialyzer do
       run when dialyzer is run, PLT paths have changed,
       transitive dependencies are included by default in the PLT, and no additional warning flags
       beyond the dialyzer defaults are included. All these properties can be changed in configuration.
-      (see `mix help dialyzer` and `mix help dialyzer.plt`).
+      (see `mix help dialyzer`).
 
       If you no longer use the older Dialyxir in any projects and do not want to see this notice each time you upgrade your Erlang/Elixir distribution, you can delete your old pre-0.4 PLT files. ( rm ~/.dialyxir_core_*.plt )
       """

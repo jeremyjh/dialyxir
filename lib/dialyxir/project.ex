@@ -2,17 +2,24 @@ defmodule Dialyxir.Project do
   alias Dialyxir.Plt
   @moduledoc false
 
-  def plt_file() do
-    plt_path(Mix.Project.config[:dialyzer][:plt_file])
-    || Plt.deps_plt()
+  def plts_list(deps) do
+    elixir_apps = [:elixir]
+    erlang_apps = [:erts, :kernel, :stdlib, :crypto]
+    [{plt_file(), deps ++ elixir_apps ++ erlang_apps},
+     {elixir_plt(), elixir_apps},
+     {erlang_plt(), erlang_apps}]
   end
 
+  def plt_file() do
+    plt_path(dialyzer_config[:plt_file])
+    || deps_plt()
+  end
   defp plt_path(file) when is_binary(file), do: Path.expand(file)
   defp plt_path({:no_warn, file}) when is_binary(file), do: Path.expand(file)
   defp plt_path(_),  do: false
 
   def check_config do
-    if is_binary(Mix.Project.config[:dialyzer][:plt_file]) do
+    if is_binary(dialyzer_config[:plt_file]) do
       IO.puts """
       Notice: :plt_path is deprecated as Dialyxir now uses project-private PLT files by default.
       If you want to use this setting without seeing this warning, provide it in a pair
@@ -29,7 +36,53 @@ defmodule Dialyxir.Project do
   end
 
   def dialyzer_paths do
-    Mix.Project.config[:dialyzer][:paths] || default_paths()
+    dialyzer_config[:paths] || default_paths()
+  end
+
+  def elixir_plt() do
+    global_plt("erlang-#{otp_vsn()}_elixir-#{System.version()}")
+  end
+
+  def erlang_plt(), do: global_plt("erlang-" <> otp_vsn())
+
+  defp otp_vsn() do
+    major = :erlang.system_info(:otp_release)
+    vsn_file = Path.join([:code.root_dir(), "releases", major, "OTP_VERSION"])
+    try do
+      {:ok, contents} = File.read(vsn_file)
+      String.split(contents, "\n", trim: true)
+    else
+      [full] ->
+        full
+      _ ->
+        major
+    catch
+      :error, _ ->
+        major
+    end
+  end
+
+  def deps_plt do
+    name = "erlang-#{otp_vsn()}_elixir-#{System.version()}_deps-#{build_env()}"
+    local_plt(name)
+  end
+
+  defp build_env() do
+    config = Mix.Project.config()
+    case Keyword.fetch!(config, :build_per_environment) do
+      true -> Atom.to_string(Mix.env())
+      false -> "shared"
+    end
+  end
+
+  defp global_plt(name) do
+    Path.join(core_path(), "dialyxir_" <> name <> ".plt")
+  end
+
+  defp core_path(), do: dialyzer_config[:plt_core_path] || Mix.Utils.mix_home()
+
+  defp local_plt(name) do
+    Path.join(Mix.Project.build_path(), "dialyxir_" <> name <> ".plt")
   end
 
   defp default_paths() do
@@ -38,8 +91,8 @@ defmodule Dialyxir.Project do
     end)
   end
 
-  defp plt_apps, do: Mix.Project.config[:dialyzer][:plt_apps] |> load_apps()
-  defp plt_add_apps, do: Mix.Project.config[:dialyzer][:plt_add_apps] || [] |> load_apps()
+  defp plt_apps, do: dialyzer_config[:plt_apps] |> load_apps()
+  defp plt_add_apps, do: dialyzer_config[:plt_add_apps] || [] |> load_apps()
   defp load_apps(apps) do
     if apps do
       Enum.map(apps, &Application.load/1)
@@ -48,7 +101,7 @@ defmodule Dialyxir.Project do
   end
 
   defp include_deps do
-    method = Mix.Project.config[:dialyzer][:plt_add_deps]
+    method = dialyzer_config[:plt_add_deps]
     reduce_umbrella_children([],fn(deps) ->
       deps ++ case method do
         false         -> []
@@ -117,4 +170,6 @@ defmodule Dialyxir.Project do
       f.(acc)
     end
   end
+
+  defp dialyzer_config(), do: Mix.Project.config[:dialyzer]
 end

@@ -5,58 +5,6 @@
 defmodule Dialyxir.Plt do
   @moduledoc false
 
-  def plts_list(deps, path) do
-    elixir_apps = [:elixir]
-    erlang_apps = [:erts, :kernel, :stdlib, :crypto]
-    [{path, deps ++ elixir_apps ++ erlang_apps},
-     {elixir_plt(), elixir_apps},
-     {erlang_plt(), erlang_apps}]
-  end
-
-  def erlang_plt(), do: global_plt("erlang-" <> otp_vsn())
-
-  defp otp_vsn() do
-    major = :erlang.system_info(:otp_release)
-    vsn_file = Path.join([:code.root_dir(), "releases", major, "OTP_VERSION"])
-    try do
-      {:ok, contents} = File.read(vsn_file)
-      String.split(contents, "\n", trim: true)
-    else
-      [full] ->
-        full
-      _ ->
-        major
-    catch
-      :error, _ ->
-        major
-    end
-  end
-
-  def elixir_plt() do
-    global_plt("erlang-#{otp_vsn()}_elixir-#{System.version()}")
-  end
-
-  def deps_plt do
-    name = "erlang-#{otp_vsn()}_elixir-#{System.version()}_deps-#{build_env()}"
-    local_plt(name)
-  end
-
-  defp build_env() do
-    config = Mix.Project.config()
-    case Keyword.fetch!(config, :build_per_environment) do
-      true -> Atom.to_string(Mix.env())
-      false -> "shared"
-    end
-  end
-
-  defp global_plt(name) do
-    Path.join(Mix.Utils.mix_home(), "dialyxir_" <> name <> ".plt")
-  end
-
-  defp local_plt(name) do
-    Path.join(Mix.Project.build_path(), "dialyxir_" <> name <> ".plt")
-  end
-
   def check(plts) do
     info("Finding suitable PLTs")
     find_plts(plts, [])

@@ -56,4 +56,23 @@ defmodule Dialyxir.ProjectTest do
       refute Enum.member?(Project.cons_apps, :asn1) #indirect
     end
   end
+
+  test "Core PLT files located in mix home by default" do
+    in_project :default_apps, fn ->
+      assert String.contains?(Project.erlang_plt(), Mix.Utils.mix_home())
+    end
+  end
+
+  test "Core PLT file paths can be specified with :plt_core_path" do
+    in_project :alt_core_path, fn ->
+      assert String.contains?(Project.erlang_plt(), "_build")
+    end
+  end
+
+  test "By default core elixir and erlang plts are in mix.home" do
+    in_project :default_apps, fn ->
+      assert String.contains?(Project.erlang_plt(), Mix.Utils.mix_home())
+    end
+  end
+
 end
