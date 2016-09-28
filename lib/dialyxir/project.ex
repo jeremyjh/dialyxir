@@ -28,7 +28,7 @@ defmodule Dialyxir.Project do
   end
 
   def cons_apps do
-    Mix.Tasks.Deps.Check.run([]) #compile & load all deps paths
+    Mix.Tasks.Deps.Loadpaths.run([]) #compile & load all deps paths
     Mix.Project.compile([]) # compile & load current project paths
     (plt_apps() || (plt_add_apps() ++ include_deps()))
       |> Enum.sort |> Enum.uniq
