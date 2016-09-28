@@ -82,6 +82,7 @@ defmodule Mix.Tasks.Dialyzer do
   """
 
   use Mix.Task
+  alias Dialyxir.Project
   import Dialyxir.Helpers
   import System, only: [user_home!: 0]
 
