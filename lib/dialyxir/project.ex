@@ -1,5 +1,4 @@
 defmodule Dialyxir.Project do
-  alias Dialyxir.Plt
   @moduledoc false
 
   def plts_list(deps) do

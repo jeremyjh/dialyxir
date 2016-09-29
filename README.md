@@ -15,13 +15,12 @@ To add it to a mix project, just add a line like this in your deps function in m
 
 ```elixir
 defp deps do
-  [{:dialyxir, "~> 0.3.5", only: [:dev]}]
+  [{:dialyxir, "~> 0.4", only: [:dev]}]
 end
 ```
 
 ```console
-mix deps.get
-mix deps.compile
+mix do deps.get, deps.compile
 ```
  
 To install globally as an archive:
@@ -29,20 +28,12 @@ To install globally as an archive:
 ```console
 git clone https://github.com/jeremyjh/dialyxir
 cd dialyxir
-mix archive.build
-mix archive.install
+mix do compile, archive.build, archive.install
 ```
 
 ## Usage
 
-The first time you use Dialyxir, or each time that you upgrade your Erlang or Elixir version you will need to rebuild the PLT.
-
-```console
-mix dialyzer.plt
-```
-
-
-Use it from directory of the mix project you want to analyze; the project will be automatically compiled if needed (pass `--no-compile` to disable this).
+Use dialyxir from directory of the mix project you want to analyze; a PLT file will be created or updated if required and the project will be automatically compiled (pass command arguments `--no-compile` to disable compilation and --no-check to skip the PLT check).
 
 ```console
 mix dialyzer
@@ -59,29 +50,16 @@ Usage is straightforward but you should be aware of the available configuration 
 
 The Persistent Lookup Table (PLT) is basically a cached output of the analysis. This is important because you'd probably stab yourself in the eye with
 a fork if you had to wait for Dialyzer to analyze all the standard library and OTP modules you are using everytime you ran it.
-Running the mix task dialyzer.plt builds several PLT files:
+Running the mix task `dialyzer` by default builds several PLT files:
     * A core Erlang file in $MIX_HOME/dialyxir_erlang-[OTP Version].plt
     * A core Elixir file in $MIX_HOME/dialyxir_erlang-[OTP Version]_elixir-[Elixir Version].plt
-    * A project specific file in _build/env/dialyze_erlang-[OTP Version]_elixir-[Elixir Version]_deps-dev.plt
+    * A project environment specific file in _build/env/dialyze_erlang-[OTP Version]_elixir-[Elixir Version]_deps-dev.plt
 
 The core files are simply copied to your project folder when you run `dialyxir` for the first time with a given version of Erlang and Elixir. By default, all
-the modules in the project PLT are checked against your dependencies to be sure they are up to date. 
+the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path.
 
-If you don't want all your projects to share a PLT you can specify a :plt_file key with a string containing the filename you want e.g. `dialyzer: plt_file: ".local.plt"`.
-
-The default PLT includes a basic set of OTP applications, as well as all of the Elixir standard libraries.
-This may well meet your needs, but if you are using additional OTP applications in your project you'll want to add those as well.
-The apps included by default are `[ :erts, :kernel, :stdlib, :crypto, :public_key]`. If you need additional ones, add them to a `dialyzer: plt_add_apps: key` in your mix.exs (you can also add individual project dependencies this way):
-
-```elixir
-def project do
- [ app: :my_app,
-   version: "0.0.1",
-   deps: deps,
-   dialyzer: [plt_add_apps: [:mnesia, :ecto]]
- ]
-end
-```
+The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries.
+The apps included by default are `[ :erts, :kernel, :stdlib, :crypto, :public_key]`. 
 
 If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT.
 
@@ -98,10 +76,6 @@ def project do
  ]
 end
 ```
-
-
-You can re-run the dialyzer.plt task at any time. It will check all the libraries to see if they need to be updated in the PLT, and it will add any new apps you've added to your
-project config. It will only rebuild the PLT if you delete it or if you upgrade your Erlang or Elixir version.
 
 ### Warning Flags
 
