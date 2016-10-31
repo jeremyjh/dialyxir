@@ -94,6 +94,12 @@ defmodule Mix.Tasks.Dialyzer do
     {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
     {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
     {dargs, no_check} = Enum.partition(dargs, &(&1 != "--no-check"))
+    no_check = if in_child? do
+                  IO.puts "In an Umbrella child, not checking PLT..."
+                  ["--no-check"]
+               else
+                 no_check
+               end
     if compile == [], do: Mix.Project.compile([])
     unless no_check != [], do: check_plt()
     args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
@@ -109,6 +115,10 @@ defmodule Mix.Tasks.Dialyzer do
       Project.plts_list(apps) |> Plt.check()
       File.write(plt_hash_file, hash)
     end
+  end
+
+  defp in_child?() do
+    String.contains?(Mix.Project.config[:lockfile], "..")
   end
 
   defp dialyze(args, halt) do
