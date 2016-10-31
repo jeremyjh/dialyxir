@@ -89,6 +89,7 @@ defmodule Mix.Tasks.Dialyzer do
   alias Dialyxir.Plt
 
   def run(args) do
+    check_dialyzer()
     compatibility_notice()
     Project.check_config()
     {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
@@ -117,7 +118,7 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp in_child?() do
+  defp in_child? do
     String.contains?(Mix.Project.config[:lockfile], "..")
   end
 
@@ -135,6 +136,30 @@ defmodule Mix.Tasks.Dialyzer do
     Mix.Project.config[:dialyzer][:flags] || []
   end
 
+  defp check_dialyzer do
+    if not Code.ensure_loaded?(:dialyzer) do
+       IO.puts """
+       DEPENDENCY MISSING
+       ------------------------
+       If you are reading this message, then Elixir and Erlang are installed but the
+       Erlang Dialyzer is not available. Probably this is because you installed Erlang
+       with your OS package manager and the Dialyzer package is separate.
+
+       On Debian/Ubuntu:
+
+         `apt-get install erlang-dialyzer`
+
+       Fedora:
+
+          `yum install erlang-dialyzer`
+
+       Arch and Homebrew include Dialyzer in their base erlang packages. Please report a Github
+       issue to add or correct distribution-specific information.
+       """
+       :erlang.halt(3)
+    end
+
+  end
 
   defp compatibility_notice do
     old_plt = "#{user_home!()}/.dialyxir_core_*.plt"
