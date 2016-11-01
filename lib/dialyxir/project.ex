@@ -108,7 +108,7 @@ defmodule Dialyxir.Project do
         :project      -> deps_project() ++ deps_app(false)
         :apps_direct  -> deps_app(false)
         :transitive   -> deps_transitive() ++ deps_app(true)
-        _apps_tree    -> deps_app(true)
+        _app_tree     -> deps_app(true)
       end
     end)
   end

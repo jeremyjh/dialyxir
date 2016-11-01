@@ -59,45 +59,49 @@ The core files are simply copied to your project folder when you run `dialyxir` 
 the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path.
 
 The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries.
-The apps included by default are `[ :erts, :kernel, :stdlib, :crypto, :public_key]`. 
+The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`. 
 
-If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT.
+If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT. Using this option will mean dependencies are not added automatically (see below). If you want to just add an application to the list of defaults and dependencies you can use the `:plt_add_apps` key.
 
 #### Dependencies
-There is also a `:plt_add_deps` option you can set to automatically add dependencies to the PLT. You can set this key to either :project (or true) - which adds only your project's direct dependencies - or :transitive - which will pull in the project's full dependency tree.
+OTP application dependencies are (transitively) added to your PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
+  * :project - Direct Mix and OTP dependencies
+  * :apps_direct - Only Direct OTP application dependencies - not the entire tree
+  * :transitive - Include Mix and OTP application dependencies recursively
+  * :app_tree - Transitive OTP application dependencies e.g. `mix app.tree` (default)
 
+
+The example below changes the default to include only direct OTP dependencies, and adds another specific dependency to the list. This can be helpful if a large dependency tree is creating memory issues and only some of the transitive dependencies are required for analysis.
 
 ```elixir
 def project do
  [ app: :my_app,
    version: "0.0.1",
    deps: deps,
-   dialyzer: [plt_add_deps: :transitive]
+   dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: :wx]
  ]
 end
 ```
 
-### Warning Flags
+### Flags
 
-There are a number of warning flags used to enable or disable certain kinds of analysis features.
-You may find yourself reaching a point where one of these warnings is bothering you much more than it is helping you.
-In that case you can remove that warning by adjusting your flags.
-The default flags are "-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs". You can specify the full list in the flags key:
+You can specify any `dialyzer` command line argument with the :flags keyword.
+
+Dialyzer supports a number of warning flags used to enable or disable certain kinds of analysis features. Until version 0.4, `dialyxir` used by default the additional warning flags shown in the example below. However some of these create warnings that are often more confusing than helpful, particularly to new users of Dialyzer. As of 0.4, there are no longer any flags used by default. To get the old behavior, specify them in your Mix project file e.g.
 
 ```elixir
 def project do
  [ app: :my_app,
    version: "0.0.1",
    deps: deps,
-   dialyzer: [plt_apps: [:erts, :kernel, :stdlib, :mnesia],
-             flags: ["-Wunmatched_returns","-Werror_handling","-Wrace_conditions", "-Wno_opaque"]]
+   dialyzer: [ flags: ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]]
  ]
 end
 ```
 
 ### Paths
 
-By default only the ebin in the `_build` directory for the current mix environment of your project is included in paths to search for BEAM files to perform analysis on. You may well want to add your deps to the analysis, but I would recommend trying them one at a time. Also as the deps can significantly slow down your analysis you may want to add them to your PLT.
+By default only the ebin in the `_build` directory for the current mix environment of your project is included in paths to search for BEAM files to perform analysis on. You can specify a list of locations to find BEAMS for analysis with :paths keyword.
 
 ```elixir
 def project do
