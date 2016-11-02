@@ -8,8 +8,15 @@ defmodule Dialyxir.Mixfile do
       elixir: "> 1.3.2",
       description: description(),
       package: package(),
-      deps: [],
-      dialyzer: [plt_add_apps: [:syntax_tools]]
+      deps: [ {:ex_doc, ">= 0.0.0", only: :dev} ],
+      dialyzer: [plt_add_apps: [:syntax_tools]],
+
+      # Docs
+      name: "Dialyxir",
+      source_url: "https://github.com/jeremyjh/dialyxir",
+      homepage_url: "https://github.com/jeremyjh/dialyxir",
+      docs: [main: "readme", # The main page in the docs
+             extras: ["README.md"]]
     ]
   end
 

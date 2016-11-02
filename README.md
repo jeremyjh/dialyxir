@@ -39,6 +39,18 @@ Use dialyxir from directory of the mix project you want to analyze; a PLT file w
 mix dialyzer
 ```
 
+### Command line options
+
+  * `--no-compile`       - do not compile even if needed.
+  * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
+  * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
+    useful for CI. do not use with `mix do`.
+
+Any other arguments passed to this task are passed on to the dialyzer command.
+
+  e.g.
+    `mix dialyzer --raw`
+
 ## With Explaining Stuff
 
 [Dialyzer](http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html) is a static analysis tool for Erlang and other languages that compile to BEAM bytecode for the Erlang VM. It can analyze the BEAM files and provide warnings about problems in your code including type mismatches and other issues that are commonly detected by static language compilers. The analysis can be improved by inclusion of type hints (called [specs](http://elixir-lang.org/docs/stable/elixir/typespecs.html)) but it can be useful even without those. For more information I highly recommend the [Success Typings](http://user.it.uu.se/~kostis/Papers/succ_types.pdf) paper that describes the theory behind the tool.

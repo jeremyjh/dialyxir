@@ -2,8 +2,7 @@ defmodule Mix.Tasks.Dialyzer do
   @shortdoc "Runs dialyzer with default or project-defined flags."
 
   @moduledoc """
-  Compiles the mix project if needed and runs dialyzer with default flags:
-    -Wunmatched_returns -Werror_handling -Wrace_conditions -Wunderspecs
+  This task compiles the mix project, creates a PLT with dependencies if needed and runs `dialyzer`. Much of its behavior can be managed in configuration as described below.
 
   ## Command line options
 
@@ -15,67 +14,58 @@ defmodule Mix.Tasks.Dialyzer do
   Any other arguments passed to this task are passed on to the dialyzer command.
 
   e.g.
-    mix dialyzer --raw
+    `mix dialyzer --raw`
 
   ## Configuration
 
   All configuration is included under a dialyzer key in the mix project keyword list.
 
-  You can define a dialyzer: :flags key in your Mix project Keywords to provide additional args (such as optional warnings).
-  You can include a dialyzer: :paths key to override paths of beam files you want to analyze (defaults to Mix.project.app_path()/ebin)
+  ### Flags
 
-  e.g.
-    def project do
-      [ app: :my_app,
-        version: "0.0.1",
-        deps: deps,
-        dialyzer: [flags: ["-Wunmatched_returns"],
-                   paths: ["ebin", "deps/foo/ebin"]]
-      ]
-    end
+  You can specify any `dialyzer` command line argument with the :flags keyword.
 
-  ## PLT Configuration
+  Dialyzer supports a number of warning flags used to enable or disable certain kinds of analysis features. Until version 0.4, `dialyxir` used by default the additional warning flags shown in the example below. However some of these create warnings that are often more confusing than helpful, particularly to new users of Dialyzer. As of 0.4, there are no longer any flags used by default. To get the old behavior, specify them in your Mix project file e.g.
 
-  The task will build a PLT with default core Erlang applications: erts kernel stdlib crypto
-  It also includes all modules in the Elixir standard library.
+  ```elixir
+  def project do
+    [ app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [ flags: ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]]
+    ]
+  end
+  ```
 
-  By default the PLT includes all project dependencies defined in the mix deps keyword and/or
-  the OTP applications list for the project but this can be configured.
+  ### PLT Configuration
 
-      def project do
-        [ app: :my_app,
-          version: "0.0.1",
-          deps: deps,
-          dialyzer: plt_add_apps: [:mnesia]
-                  , plt_file: ".private.plt"
-        ]
-      end
+  The task will build a PLT with default core Erlang applications: `:erts :kernel :stdlib :crypto` and re-use this core file in multiple projects - another core file is created for Elixir. 
+
+  OTP application dependencies are (transitively) added to your project's PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
+
+  * :project - Direct Mix and OTP dependencies
+  * :apps_direct - Only Direct OTP application dependencies - not the entire tree
+  * :transitive - Include Mix and OTP application dependencies recursively
+  * :app_tree - Transitive OTP application dependencies e.g. `mix app.tree` (default)
+
+  ```
+  def project do
+    [ app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: :wx]
+    ]
+  end
+  ```
+
+  You can also configure applications to include in the PLT more directly:
 
   * `dialyzer: :plt_add_apps` - applications to include
-     *in addition* to the core applications and project dependencies.
-
+  *in addition* to the core applications and project dependencies.
 
   * `dialyzer: :plt_apps` - a list of applications to include that will replace the default,
   include all the apps you need e.g.
 
-      [:erts, :kernel, :stdlib, :mnesia]
-
-  * `dialyzer: :plt_add_deps` - controls which dependencies are added to the PLT - defaults to :apps_tree. In all cases the dependency list is recurisvely built for mix umbrella projects.
-       *  :transitive - include the full dependency tree (from mix deps and applications) in the PLT.
-       *  :project - include the project's direct dependencies (from mix deps and applications) in the PLT.
-       *  :apps_tree - include the full OTP application dependency tree (`mix app.tree`) but not the mix dependencies.
-       *  :apps_direct - include only the direct OTP application dependencies for the app(s) in the mix project.
-       *  :false - do not include any dependencies in the project PLT (you'll need to specify your dependencies with a plt_add_apps key).
-
-
-      def project do
-        [ app: :my_app,
-          version: "0.0.1",
-          deps: deps,
-          dialyzer: [plt_add_deps: :apps_direct]
-        ]
-      end
-
+  ### Other Configuration
 
   * `dialyzer: :plt_file` - Deprecated - specify the plt file name to create and use - default is to create one in the project's current build environmnet (e.g. _build/dev/) specific to the Erlang/Elixir version used. Note that use of this key in version 0.4 or later will produce a deprecation warning - you can silence the warning by providing a pair with key :no_warn e.g. `plt_file: {:no_warn,"filename"}`.
 
@@ -83,7 +73,6 @@ defmodule Mix.Tasks.Dialyzer do
   """
 
   use Mix.Task
-  import Dialyxir.Helpers
   import System, only: [user_home!: 0]
   alias Dialyxir.Project
   alias Dialyxir.Plt
@@ -123,10 +112,10 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp dialyze(args, halt) do
-    puts "Starting Dialyzer"
-    puts "dialyzer " <> Enum.join(args, " ")
+    IO.puts "Starting Dialyzer"
+    IO.puts "dialyzer " <> Enum.join(args, " ")
     {ret, exit_status} = System.cmd("dialyzer", args, [])
-    puts ret
+    IO.puts ret
     if halt != [] do
       :erlang.halt(exit_status)
     end
@@ -165,7 +154,7 @@ defmodule Mix.Tasks.Dialyzer do
     old_plt = "#{user_home!()}/.dialyxir_core_*.plt"
     if File.exists?(old_plt) && (!File.exists?(Project.erlang_plt()) || !File.exists?(Project.elixir_plt())) do
 
-      puts """
+      IO.puts """
       COMPATIBILITY NOTICE
       ------------------------
       Previous usage of a pre-0.4 version of Dialyxir detected. Please be aware that the 0.4 release
