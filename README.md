@@ -2,6 +2,10 @@
 
 Mix tasks to simplify use of Dialyzer in Elixir projects.
 
+## Changes in 0.4
+
+If you've been using earlier versions of Dialyxir there are some changes you may need to make in the configuration of your existing projects. A summary of the most common issues and changes are found in the Wiki [page](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.4).
+
 ## Quickstart
 If you are planning to use Dialyzer with an application built with the [Phoenix Framework](http://www.phoenixframework.org/), check out the [Quickstart wiki](https://github.com/jeremyjh/dialyxir/wiki/Phoenix-Dialyxir-Quickstart).
 
@@ -33,7 +37,7 @@ mix do compile, archive.build, archive.install
 
 ## Usage
 
-Use dialyxir from directory of the mix project you want to analyze; a PLT file will be created or updated if required and the project will be automatically compiled (pass command arguments `--no-compile` to disable compilation and --no-check to skip the PLT check).
+Use dialyxir from the directory of the mix project you want to analyze; a PLT file will be created or updated if required and the project will be automatically compiled.
 
 ```console
 mix dialyzer
@@ -68,7 +72,7 @@ Running the mix task `dialyzer` by default builds several PLT files:
     * A project environment specific file in _build/env/dialyze_erlang-[OTP Version]_elixir-[Elixir Version]_deps-dev.plt
 
 The core files are simply copied to your project folder when you run `dialyxir` for the first time with a given version of Erlang and Elixir. By default, all
-the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path.
+the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path. You can specify a different lcoation for the project PLT file with the :plt_file keyword - this is deprecated because people were using it with the old `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
 
 The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries.
 The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`. 

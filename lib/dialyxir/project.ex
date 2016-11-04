@@ -20,7 +20,7 @@ defmodule Dialyxir.Project do
   def check_config do
     if is_binary(dialyzer_config[:plt_file]) do
       IO.puts """
-      Notice: :plt_path is deprecated as Dialyxir now uses project-private PLT files by default.
+      Notice: :plt_file is deprecated as Dialyxir now uses project-private PLT files by default.
       If you want to use this setting without seeing this warning, provide it in a pair
       with the :no_warn key e.g. `dialyzer: plt_file: {:no_warn, "~/mypltfile"}`
       """
