@@ -32,7 +32,7 @@ To install globally as an archive:
 ```console
 git clone https://github.com/jeremyjh/dialyxir
 cd dialyxir
-mix do compile, archive.build, archive.install
+mix do deps.get, compile, archive.build, archive.install
 ```
 
 ## Usage
