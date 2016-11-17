@@ -28,7 +28,7 @@ defmodule Dialyxir.ProjectTest do
   test "Deprecation warning on use of bare :plt_file" do
     in_project :local_plt, fn ->
       out = capture_io(&Project.check_config/0)
-      assert Regex.match?(~r/.*plt_path.*deprecated.*/, out)
+      assert Regex.match?(~r/.*plt_file.*deprecated.*/, out)
     end
   end
 
