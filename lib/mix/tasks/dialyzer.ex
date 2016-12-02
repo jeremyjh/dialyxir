@@ -4,6 +4,8 @@ defmodule Mix.Tasks.Dialyzer do
   @moduledoc """
   This task compiles the mix project, creates a PLT with dependencies if needed and runs `dialyzer`. Much of its behavior can be managed in configuration as described below.
 
+  If executed outside of a mix project, it will build the core PLT files and exit.
+
   ## Command line options
 
     * `--no-compile`       - do not compile even if needed.
@@ -80,20 +82,25 @@ defmodule Mix.Tasks.Dialyzer do
   def run(args) do
     check_dialyzer()
     compatibility_notice()
-    Project.check_config()
-    {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
-    {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
-    {dargs, no_check} = Enum.partition(dargs, &(&1 != "--no-check"))
-    no_check = if in_child? do
-                  IO.puts "In an Umbrella child, not checking PLT..."
-                  ["--no-check"]
-               else
-                 no_check
-               end
-    if compile == [], do: Mix.Project.compile([])
-    unless no_check != [], do: check_plt()
-    args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
-    dialyze(args, halt)
+    if Mix.Project.get() do
+      Project.check_config()
+      {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
+      {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
+      {dargs, no_check} = Enum.partition(dargs, &(&1 != "--no-check"))
+      no_check = if in_child? do
+                    IO.puts "In an Umbrella child, not checking PLT..."
+                    ["--no-check"]
+                 else
+                   no_check
+                 end
+      if compile == [], do: Mix.Project.compile([])
+      unless no_check != [], do: check_plt()
+      args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
+      dialyze(args, halt)
+    else
+      IO.puts "No mix project found - checking core PLTs..."
+      Project.plts_list([], false) |> Plt.check()
+    end
   end
 
   defp check_plt() do

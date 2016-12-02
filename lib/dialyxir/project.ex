@@ -1,12 +1,15 @@
 defmodule Dialyxir.Project do
   @moduledoc false
 
-  def plts_list(deps) do
+  def plts_list(deps, include_project \\ true) do
     elixir_apps = [:elixir]
     erlang_apps = [:erts, :kernel, :stdlib, :crypto]
-    [{plt_file(), deps ++ elixir_apps ++ erlang_apps},
-     {elixir_plt(), elixir_apps},
-     {erlang_plt(), erlang_apps}]
+    core_plts = [ {elixir_plt(), elixir_apps}, {erlang_plt(), erlang_apps}]
+    if include_project do
+      [{plt_file(), deps ++ elixir_apps ++ erlang_apps} | core_plts]
+    else
+      core_plts
+    end
   end
 
   def plt_file() do
