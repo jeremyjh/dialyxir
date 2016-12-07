@@ -19,7 +19,7 @@ To add it to a mix project, just add a line like this in your deps function in m
 
 ```elixir
 defp deps do
-  [{:dialyxir, "~> 0.4", only: [:dev]}]
+  [{:dialyxir, "~> 0.4", only: [:dev], runtime: false}]
 end
 ```
 
