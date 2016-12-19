@@ -130,3 +130,48 @@ def project do
  ]
 end
 ```
+
+### Ignore Warnings
+
+If you want to ignore well-known warnings, you can specify a file path in `:ignore_warnings`.
+
+```elixir
+def project do
+ [ app: :my_app,
+   version: "0.0.1",
+   deps: deps,
+   dialyzer: [ignore_warnings: "dialyzer.ignore-warnings"]
+ ]
+end
+```
+
+Any line of dialyzer output (partially) matching a line in `"dialyzer.ignore-warnings"` is filtered.
+
+For example, in project where `mix dialyzer` outputs:
+
+```
+  Proceeding with analysis...
+config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination withthe ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
+config.ex:79: Guard test is_binary(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
+config.ex:79: Guard test is_atom(_@6::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
+ done in 0m1.32s
+done (warnings were emitted)
+```
+
+If you wanted to ignore the last two warnings about guard tests, you could add to `dialyzer.ignore-warnings`:
+
+```
+Guard test is_binary(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
+Guard test is_atom(_@6::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
+```
+
+And then run `mix dialyzer` would output:
+
+```
+  Proceeding with analysis...
+config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination withthe ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
+ done in 0m1.32s
+done (warnings were emitted)
+```
+
+`:ignore_warnings` works as you may expect with `--halt-exit-status` - by resetting the exit status to 0 if all warnings are filtered.

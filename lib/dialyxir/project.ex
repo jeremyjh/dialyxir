@@ -41,6 +41,22 @@ defmodule Dialyxir.Project do
     dialyzer_config[:paths] || default_paths()
   end
 
+  def dialyzer_ignore_warnings do
+    dialyzer_config[:ignore_warnings]
+  end
+
+  def filter_warnings(output, pattern) do
+    lines = output
+            |> String.trim_trailing("\n")
+            |> String.split("\n")
+    patterns = pattern
+               |> String.trim_trailing("\n")
+               |> String.split("\n")
+    cp = :binary.compile_pattern(patterns)
+
+    Enum.filter(lines, &(not String.contains?(&1, cp)))
+  end
+
   def elixir_plt() do
     global_plt("erlang-#{otp_vsn()}_elixir-#{System.version()}")
   end
