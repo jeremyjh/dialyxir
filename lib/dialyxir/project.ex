@@ -41,6 +41,10 @@ defmodule Dialyxir.Project do
     dialyzer_config[:paths] || default_paths()
   end
 
+  def dialyzer_ignore_warnings do
+    dialyzer_config[:ignore_warnings]
+  end
+
   def elixir_plt() do
     global_plt("erlang-#{otp_vsn()}_elixir-#{System.version()}")
   end

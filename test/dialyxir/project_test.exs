@@ -105,4 +105,10 @@ defmodule Dialyxir.ProjectTest do
     end
   end
 
+  test "By default a dialyzer ignore file is nil" do
+    in_project :default_apps, fn ->
+      assert Project.dialyzer_ignore_warnings == nil
+    end
+  end
+
 end

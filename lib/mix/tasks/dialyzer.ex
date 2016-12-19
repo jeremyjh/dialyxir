@@ -95,8 +95,9 @@ defmodule Mix.Tasks.Dialyzer do
                  end
       if compile == [], do: Mix.Project.compile([])
       unless no_check != [], do: check_plt()
+      ignore_warnings = Project.dialyzer_ignore_warnings()
       args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
-      dialyze(args, halt)
+      dialyze(args, halt, ignore_warnings)
     else
       IO.puts "No mix project found - checking core PLTs..."
       Project.plts_list([], false) |> Plt.check()
@@ -118,13 +119,43 @@ defmodule Mix.Tasks.Dialyzer do
     String.contains?(Mix.Project.config[:lockfile], "..")
   end
 
-  defp dialyze(args, halt) do
+  defp dialyze(args, halt, ignore_warnings) do
     IO.puts "Starting Dialyzer"
     IO.puts "dialyzer " <> Enum.join(args, " ")
-    {ret, exit_status} = System.cmd("dialyzer", args, [])
-    IO.puts ret
-    if halt != [] do
-      :erlang.halt(exit_status)
+    case ignore_warnings do
+      nil ->
+        {ret, exit_status} = System.cmd("dialyzer", args, [])
+        IO.puts ret
+        exit_status
+        if halt != [] do
+          :erlang.halt(exit_status)
+        end
+      _ ->
+        tmp = ignore_warnings <> ".tmp"
+        stream = File.stream!(tmp)
+        # stdout to `tmp` file
+        {_stream, _exit_status} = System.cmd("dialyzer", args, [into: stream])
+        # fgrep -v -f dialyzer.ignore-warnings
+        {ret, _exit_status} = System.cmd("fgrep", ["-v", "-f", ignore_warnings, tmp], [])
+        _ = File.rm(tmp)
+
+        IO.puts ret
+        if halt != [] do
+          # Split a message like follows:
+          #
+          #     Proceeding with analysis...
+          #   project.ex:9: Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
+          #   project.ex:9: Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
+          #    done in 0m6.01s
+          #   done (warnings were emitted)
+          if length(String.split(ret, "\n")) <= 4 do
+            # all warnings filtered
+            :erlang.halt(0)
+          else
+            # have warnings
+            :erlang.halt(1)
+          end
+        end
     end
   end
 
