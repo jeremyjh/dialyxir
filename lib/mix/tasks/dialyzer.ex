@@ -122,33 +122,29 @@ defmodule Mix.Tasks.Dialyzer do
   defp dialyze(args, halt, ignore_warnings) do
     IO.puts "Starting Dialyzer"
     IO.puts "dialyzer " <> Enum.join(args, " ")
+    {ret, exit_status} = System.cmd("dialyzer", args, [])
     case ignore_warnings do
       nil ->
-        {ret, exit_status} = System.cmd("dialyzer", args, [])
         IO.puts ret
-        exit_status
         if halt != [] do
           :erlang.halt(exit_status)
         end
       _ ->
-        tmp = ignore_warnings <> ".tmp"
-        stream = File.stream!(tmp)
-        # stdout to `tmp` file
-        {_stream, _exit_status} = System.cmd("dialyzer", args, [into: stream])
-        # fgrep -v -f dialyzer.ignore-warnings
-        {ret, _exit_status} = System.cmd("fgrep", ["-v", "-f", ignore_warnings, tmp], [])
-        _ = File.rm(tmp)
+        pattern = File.read!(ignore_warnings)
+        lines = Project.filter_warnings(ret, pattern)
+        for line <- lines do
+          IO.puts line
+        end
 
-        IO.puts ret
         if halt != [] do
-          # Split a message like follows:
+          # `lines` is like follows:
           #
-          #     Proceeding with analysis...
-          #   project.ex:9: Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
-          #   project.ex:9: Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
-          #    done in 0m6.01s
-          #   done (warnings were emitted)
-          if length(String.split(ret, "\n")) <= 4 do
+          #   ["  Proceeding with analysis...",
+          #    "project.ex:9: Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed",
+          #    "project.ex:9: Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed",
+          #    " done in 0m6.01s",
+          #    "done (warnings were emitted)"]
+          if length(lines) <= 3 do
             # all warnings filtered
             :erlang.halt(0)
           else
