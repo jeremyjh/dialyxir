@@ -72,6 +72,8 @@ defmodule Mix.Tasks.Dialyzer do
   * `dialyzer: :plt_file` - Deprecated - specify the plt file name to create and use - default is to create one in the project's current build environmnet (e.g. _build/dev/) specific to the Erlang/Elixir version used. Note that use of this key in version 0.4 or later will produce a deprecation warning - you can silence the warning by providing a pair with key :no_warn e.g. `plt_file: {:no_warn,"filename"}`.
 
   * `dialyzer: :plt_core_path` - specify an alternative to MIX_HOME to use to store the Erlang and Elixir core files.
+
+  * `dialyzer: :ignore_warnings` - specify file path to filter well-known warnings.
   """
 
   use Mix.Task
@@ -95,8 +97,9 @@ defmodule Mix.Tasks.Dialyzer do
                  end
       if compile == [], do: Mix.Project.compile([])
       unless no_check != [], do: check_plt()
+      ignore_warnings = Project.dialyzer_ignore_warnings()
       args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
-      dialyze(args, halt)
+      dialyze(args, halt, ignore_warnings)
     else
       IO.puts "No mix project found - checking core PLTs..."
       Project.plts_list([], false) |> Plt.check()
@@ -118,13 +121,39 @@ defmodule Mix.Tasks.Dialyzer do
     String.contains?(Mix.Project.config[:lockfile], "..")
   end
 
-  defp dialyze(args, halt) do
+  defp dialyze(args, halt, ignore_warnings) do
     IO.puts "Starting Dialyzer"
     IO.puts "dialyzer " <> Enum.join(args, " ")
     {ret, exit_status} = System.cmd("dialyzer", args, [])
-    IO.puts ret
-    if halt != [] do
-      :erlang.halt(exit_status)
+    case ignore_warnings do
+      nil ->
+        IO.puts ret
+        if halt != [] do
+          :erlang.halt(exit_status)
+        end
+      _ ->
+        pattern = File.read!(ignore_warnings)
+        lines = Project.filter_warnings(ret, pattern)
+        for line <- lines do
+          IO.puts line
+        end
+
+        if halt != [] do
+          # `lines` is like follows:
+          #
+          #   ["  Proceeding with analysis...",
+          #    "project.ex:9: Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed",
+          #    "project.ex:9: Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed",
+          #    " done in 0m6.01s",
+          #    "done (warnings were emitted)"]
+          if length(lines) <= 3 do
+            # all warnings filtered
+            :erlang.halt(0)
+          else
+            # have warnings
+            :erlang.halt(1)
+          end
+        end
     end
   end
 
