@@ -95,7 +95,7 @@ defmodule Mix.Tasks.Dialyzer do
                  end
       if compile == [], do: Mix.Project.compile([])
       unless no_check != [], do: check_plt()
-      args = List.flatten [dargs, "--no_check_plt", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
+      args = List.flatten [dargs, "--no_check_plt", "--plt", "--fullpath", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
       dialyze(args, halt)
     else
       IO.puts "No mix project found - checking core PLTs..."
