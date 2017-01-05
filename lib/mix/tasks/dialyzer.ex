@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   ### PLT Configuration
 
-  The task will build a PLT with default core Erlang applications: `:erts :kernel :stdlib :crypto` and re-use this core file in multiple projects - another core file is created for Elixir. 
+  The task will build a PLT with default core Erlang applications: `:erts :kernel :stdlib :crypto` and re-use this core file in multiple projects - another core file is created for Elixir.
 
   OTP application dependencies are (transitively) added to your project's PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
 
@@ -89,7 +89,7 @@ defmodule Mix.Tasks.Dialyzer do
       {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
       {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
       {dargs, no_check} = Enum.partition(dargs, &(&1 != "--no-check"))
-      no_check = if in_child? do
+      no_check = if in_child?() do
                     IO.puts "In an Umbrella child, not checking PLT..."
                     ["--no-check"]
                  else
@@ -108,12 +108,12 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp check_plt() do
     IO.puts "Checking PLT..."
-    {apps, hash} = dependency_hash
+    {apps, hash} = dependency_hash()
     if check_hash?(hash) do
       IO.puts "PLT is up to date!"
     else
       Project.plts_list(apps) |> Plt.check()
-      File.write(plt_hash_file, hash)
+      File.write(plt_hash_file(), hash)
     end
   end
 
@@ -207,7 +207,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   @spec check_hash?(binary()) :: boolean()
   defp check_hash?(hash) do
-	  case File.read(plt_hash_file) do
+	  case File.read(plt_hash_file()) do
       {:ok, stored_hash} -> hash == stored_hash
       _ -> false
     end
