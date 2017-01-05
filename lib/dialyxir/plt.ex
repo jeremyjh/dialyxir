@@ -25,7 +25,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp check_plts(plts) do
-    {last_plt, beams, _cache} = Enum.reduce(plts, {nil, HashSet.new(), %{}},
+    {last_plt, beams, _cache} = Enum.reduce(plts, {nil, MapSet.new(), %{}},
       fn({plt, apps, beams}, acc) ->
         check_plt(plt, apps, beams, acc)
       end)
@@ -109,7 +109,7 @@ defmodule Dialyxir.Plt do
     case :code.where_is_file(beam) do
       path when is_list(path) ->
         path = Path.expand(path)
-        HashSet.put(beams, path)
+        MapSet.put(beams, path)
       :non_existing ->
         error("Unknown module #{inspect(module)}")
         beams
@@ -131,11 +131,11 @@ defmodule Dialyxir.Plt do
   end
 
   defp check_beams(plt, beams, old_beams) do
-    remove = HashSet.difference(old_beams, beams)
+    remove = MapSet.difference(old_beams, beams)
     plt_remove(plt, remove)
-    check = HashSet.intersection(beams, old_beams)
+    check = MapSet.intersection(beams, old_beams)
     plt_check(plt, check)
-    add = HashSet.difference(beams, old_beams)
+    add = MapSet.difference(beams, old_beams)
     plt_add(plt, add)
   end
 
@@ -156,7 +156,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp plt_add(plt, files) do
-    case HashSet.size(files) do
+    case MapSet.size(files) do
       0 ->
         :ok
       n ->
@@ -170,7 +170,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp plt_remove(plt, files) do
-    case HashSet.size(files) do
+    case MapSet.size(files) do
       0 ->
         :ok
       n ->
@@ -184,7 +184,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp plt_check(plt, files) do
-    case HashSet.size(files) do
+    case MapSet.size(files) do
       0 ->
         :ok
       n ->
@@ -218,7 +218,7 @@ defmodule Dialyxir.Plt do
     case plt_info(plt) do
       {:ok, info} ->
         Keyword.fetch!(info, :files)
-        |> Enum.reduce(HashSet.new(), &HashSet.put(&2, Path.expand(&1)))
+        |> Enum.reduce(MapSet.new(), &MapSet.put(&2, Path.expand(&1)))
       {:error, :no_such_file} ->
         nil
       {:error, reason} ->
