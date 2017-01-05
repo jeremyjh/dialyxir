@@ -13,7 +13,7 @@ defmodule Dialyxir.Project do
   end
 
   def plt_file() do
-    plt_path(dialyzer_config[:plt_file])
+    plt_path(dialyzer_config()[:plt_file])
     || deps_plt()
   end
   defp plt_path(file) when is_binary(file), do: Path.expand(file)
@@ -21,7 +21,7 @@ defmodule Dialyxir.Project do
   defp plt_path(_),  do: false
 
   def check_config do
-    if is_binary(dialyzer_config[:plt_file]) do
+    if is_binary(dialyzer_config()[:plt_file]) do
       IO.puts """
       Notice: :plt_file is deprecated as Dialyxir now uses project-private PLT files by default.
       If you want to use this setting without seeing this warning, provide it in a pair
@@ -38,11 +38,11 @@ defmodule Dialyxir.Project do
   end
 
   def dialyzer_paths do
-    dialyzer_config[:paths] || default_paths()
+    dialyzer_config()[:paths] || default_paths()
   end
 
   def dialyzer_ignore_warnings do
-    dialyzer_config[:ignore_warnings]
+    dialyzer_config()[:ignore_warnings]
   end
 
   def filter_warnings(output, pattern) do
@@ -97,7 +97,7 @@ defmodule Dialyxir.Project do
     Path.join(core_path(), "dialyxir_" <> name <> ".plt")
   end
 
-  defp core_path(), do: dialyzer_config[:plt_core_path] || Mix.Utils.mix_home()
+  defp core_path(), do: dialyzer_config()[:plt_core_path] || Mix.Utils.mix_home()
 
   defp local_plt(name) do
     Path.join(Mix.Project.build_path(), "dialyxir_" <> name <> ".plt")
@@ -109,8 +109,8 @@ defmodule Dialyxir.Project do
     end)
   end
 
-  defp plt_apps, do: dialyzer_config[:plt_apps] |> load_apps()
-  defp plt_add_apps, do: dialyzer_config[:plt_add_apps] || [] |> load_apps()
+  defp plt_apps, do: dialyzer_config()[:plt_apps] |> load_apps()
+  defp plt_add_apps, do: dialyzer_config()[:plt_add_apps] || [] |> load_apps()
   defp load_apps(apps) do
     if apps do
       Enum.map(apps, &Application.load/1)
@@ -119,7 +119,7 @@ defmodule Dialyxir.Project do
   end
 
   defp include_deps do
-    method = dialyzer_config[:plt_add_deps]
+    method = dialyzer_config()[:plt_add_deps]
     reduce_umbrella_children([],fn(deps) ->
       deps ++ case method do
         false         -> []
