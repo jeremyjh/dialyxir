@@ -2,6 +2,8 @@
 
 Mix tasks to simplify use of Dialyzer in Elixir projects.
 
+[![Build Status](https://travis-ci.org/jeremyjh/dialyxir.svg?branch=master)](https://travis-ci.org/jeremyjh/dialyxir)
+
 ## Changes in 0.4
 
 If you've been using earlier versions of Dialyxir there are some changes you may need to make in the configuration of your existing projects. A summary of the most common issues and changes are found in the Wiki [page](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.4).
