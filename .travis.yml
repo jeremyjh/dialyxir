@@ -8,3 +8,6 @@ script:
   - mix test
   - MIX_ENV=prod mix do compile, archive.build, archive.install --force
   - MIX_ENV=prod mix dialyzer --halt-exit-status
+branches:
+  except:
+    - /^[0-9]\.[0-9]/
