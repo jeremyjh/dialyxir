@@ -12,6 +12,7 @@ defmodule Mix.Tasks.Dialyzer do
     * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
       useful for CI. do not use with `mix do`.
+    * `--plt`              - only build the required plt(s) and exit.
 
   Any other arguments passed to this task are passed on to the dialyzer command.
 
@@ -81,25 +82,32 @@ defmodule Mix.Tasks.Dialyzer do
   alias Dialyxir.Project
   alias Dialyxir.Plt
 
+  @command_options [ no_compile: :boolean,
+                     no_check: :boolean,
+                     halt_exit_status: :boolean,
+                     plt: :boolean ]
+
   def run(args) do
     check_dialyzer()
     compatibility_notice()
     if Mix.Project.get() do
       Project.check_config()
-      {dargs, compile} = Enum.partition(args, &(&1 != "--no-compile"))
-      {dargs, halt} = Enum.partition(dargs, &(&1 != "--halt-exit-status"))
-      {dargs, no_check} = Enum.partition(dargs, &(&1 != "--no-check"))
+      {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
+      dargs = Enum.map(dargs, &elem(&1,0))
+
       no_check = if in_child?() do
                     IO.puts "In an Umbrella child, not checking PLT..."
-                    ["--no-check"]
+                    true
                  else
-                   no_check
+                   opts[:no_check]
                  end
-      if compile == [], do: Mix.Project.compile([])
-      unless no_check != [], do: check_plt()
+      unless opts[:no_compile], do: Mix.Project.compile([])
+      unless no_check, do: check_plt()
       ignore_warnings = Project.dialyzer_ignore_warnings()
-      args = List.flatten [dargs, "--no_check_plt", "--fullpath", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
-      dialyze(args, halt, ignore_warnings)
+      unless opts[:plt] do
+        args = List.flatten [dargs, "--no_check_plt", "--fullpath", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
+        dialyze(args, opts[:halt_exit_status], ignore_warnings)
+      end
     else
       IO.puts "No mix project found - checking core PLTs..."
       Project.plts_list([], false) |> Plt.check()
@@ -151,10 +159,7 @@ defmodule Mix.Tasks.Dialyzer do
           exit_status
         end
     end
-    if halt != [] do
-      :erlang.halt(exit_status)
-    end
-
+    if halt, do: :erlang.halt(exit_status)
   end
 
   defp dialyzer_flags do

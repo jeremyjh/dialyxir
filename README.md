@@ -51,6 +51,7 @@ mix dialyzer
   * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
   * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
     useful for CI. do not use with `mix do`.
+  * `--plt`              - only build the required plt(s) and exit.
 
 Any other arguments passed to this task are passed on to the dialyzer command.
 
