@@ -9,7 +9,8 @@ defmodule Dialyxir.Mixfile do
       description: description(),
       package: package(),
       deps: [ {:ex_doc, ">= 0.0.0", only: :dev} ],
-      dialyzer: [plt_add_apps: [:syntax_tools]],
+      dialyzer: [ plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib],
+                  ignore_warnings: ".dialyzer_ignore"],
 
       # Docs
       name: "Dialyxir",
