@@ -80,7 +80,7 @@ defmodule Dialyxir.Project do
     end
   end
 
-  def deps_plt do
+  def deps_plt() do
     name = "erlang-#{otp_vsn()}_elixir-#{System.version()}_deps-#{build_env()}"
     local_plt(name)
   end

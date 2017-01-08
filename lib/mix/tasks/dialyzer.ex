@@ -95,16 +95,21 @@ defmodule Mix.Tasks.Dialyzer do
       {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
       dargs = Enum.map(dargs, &elem(&1,0))
 
-      no_check = if in_child?() do
-                    IO.puts "In an Umbrella child, not checking PLT..."
-                    true
-                 else
-                   opts[:no_check]
+      no_check = case {in_child?, no_plt?} do
+                   {true, true} ->
+                     IO.puts "In an Umbrella child and no PLT found - building that first."
+                     build_parent_plt()
+                     true
+                   {true, false} ->
+                     IO.puts "In an Umbrella child, not checking PLT..."
+                     true
+                   _ -> opts[:no_check]
                  end
+
       unless opts[:no_compile], do: Mix.Project.compile([])
       unless no_check, do: check_plt()
-      ignore_warnings = Project.dialyzer_ignore_warnings()
       unless opts[:plt] do
+        ignore_warnings = Project.dialyzer_ignore_warnings()
         args = List.flatten [dargs, "--no_check_plt", "--fullpath", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
         dialyze(args, opts[:halt_exit_status], ignore_warnings)
       end
@@ -127,6 +132,10 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp in_child? do
     String.contains?(Mix.Project.config[:lockfile], "..")
+  end
+
+  defp no_plt? do
+    not File.exists?(Project.deps_plt())
   end
 
   defp dialyze(args, halt, ignore_warnings) do
@@ -161,6 +170,18 @@ defmodule Mix.Tasks.Dialyzer do
     end
     if halt, do: :erlang.halt(exit_status)
   end
+
+  defp build_parent_plt() do
+    parent = Mix.Project.config[:lockfile] |> Path.expand |> Path.dirname
+    opts = [ into: IO.stream(:stdio, :line),
+             stderr_to_stdout: true,
+             cd: parent ]
+    # It would seem more natural to use Mix.in_project here to start in our parent project.
+    # However part of the app.tree resolution includes loading all sub apps, and we will
+    # hit an exception when we try to do that for *this* child, which is already loaded.
+    System.cmd("mix", ["dialyzer", "--plt"], opts)
+  end
+
 
   defp dialyzer_flags do
     Mix.Project.config[:dialyzer][:flags] || []
