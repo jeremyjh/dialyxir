@@ -95,7 +95,7 @@ defmodule Mix.Tasks.Dialyzer do
       {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
       dargs = Enum.map(dargs, &elem(&1,0))
 
-      no_check = case {in_child?, no_plt?} do
+      no_check = case {in_child?(), no_plt?()} do
                    {true, true} ->
                      IO.puts "In an Umbrella child and no PLT found - building that first."
                      build_parent_plt()
