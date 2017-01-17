@@ -138,19 +138,19 @@ defmodule Mix.Tasks.Dialyzer do
     not File.exists?(Project.deps_plt())
   end
 
-  defp dialyze(args, halt, ignore_warnings) do
+  defp dialyze(args, halt, ignore_warnings, format \\ &Dialyxir.Output.format/1) do
     IO.puts "Starting Dialyzer"
     IO.puts "dialyzer " <> Enum.join(args, " ")
     {ret, exit_status} = System.cmd("dialyzer", args, [])
     exit_status = case ignore_warnings do
       nil ->
-        IO.puts ret
+        IO.puts format.(ret)
         exit_status
       _ ->
         pattern = File.read!(ignore_warnings)
         lines = Project.filter_warnings(ret, pattern)
         for line <- lines do
-          IO.puts line
+          IO.puts format.(line)
         end
 
         # `lines` is like follows:
