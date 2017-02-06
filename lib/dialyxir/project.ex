@@ -46,15 +46,24 @@ defmodule Dialyxir.Project do
   end
 
   def filter_warnings(output, pattern) do
-    lines = output
-            |> String.trim_trailing("\n")
-            |> String.split("\n")
-    patterns = pattern
-               |> String.trim_trailing("\n")
-               |> String.split("\n")
-    cp = :binary.compile_pattern(patterns)
+    case pattern do
+      "" -> output
+      nil -> output
+      pattern ->
+        lines = output
+        |> String.trim_trailing("\n")
+        |> String.split("\n")
+        patterns = pattern
+        |> String.trim_trailing("\n")
+        |> String.split("\n")
+        try do
+          cp = :binary.compile_pattern(patterns)
+          Enum.filter(lines, &(not String.contains?(&1, cp)))
+        rescue
+          _ -> output
+        end
 
-    Enum.filter(lines, &(not String.contains?(&1, cp)))
+    end
   end
 
   def elixir_plt() do
