@@ -107,7 +107,7 @@ defmodule Mix.Tasks.Dialyzer do
                  end
 
       unless opts[:no_compile], do: Mix.Project.compile([])
-      unless no_check, do: check_plt()
+      _ = unless no_check, do: check_plt()
       unless opts[:plt] do
         ignore_warnings = Project.dialyzer_ignore_warnings()
         args = List.flatten [dargs, "--no_check_plt", "--fullpath", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
@@ -179,7 +179,10 @@ defmodule Mix.Tasks.Dialyzer do
     # It would seem more natural to use Mix.in_project here to start in our parent project.
     # However part of the app.tree resolution includes loading all sub apps, and we will
     # hit an exception when we try to do that for *this* child, which is already loaded.
-    System.cmd("mix", ["dialyzer", "--plt"], opts)
+    {out, rc} = System.cmd("mix", ["dialyzer", "--plt"], opts)
+    if rc != 0 do
+      IO.puts("Error building parent PLT, process returned code: #{rc}\n#{out}")
+    end
   end
 
 

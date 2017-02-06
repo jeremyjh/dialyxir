@@ -113,7 +113,7 @@ defmodule Dialyxir.Project do
   defp plt_add_apps, do: dialyzer_config()[:plt_add_apps] || [] |> load_apps()
   defp load_apps(apps) do
     if apps do
-      Enum.map(apps, &Application.load/1)
+      Enum.each(apps, &Application.load/1)
       apps
     end
   end
@@ -155,7 +155,12 @@ defmodule Dialyxir.Project do
                 else
                   fn _ -> [] end
                 end
-    Application.load(app)
+    case Application.load(app) do
+      :ok -> ()
+      {:error, {:already_loaded, _}} -> ()
+      {:error, err} -> ()
+        IO.puts "Error loading #{app}, dependency list may be incomplete.\n #{err}"
+    end
     case Application.spec(app, :applications) do
       []        -> []
       nil       -> []
@@ -175,7 +180,7 @@ defmodule Dialyxir.Project do
   defp dep_only({_, _, opts}) when is_list(opts), do: opts[:only]
   defp dep_only(_), do: nil
 
-  @spec reduce_umbrella_children(a, (a -> a)) :: a when a: term()
+  @spec reduce_umbrella_children(list(), (list() -> list())) :: list()
   defp reduce_umbrella_children(acc,f) do
     if Mix.Project.umbrella? do
       children = Mix.Dep.Umbrella.loaded

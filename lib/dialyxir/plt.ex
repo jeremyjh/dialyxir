@@ -25,11 +25,10 @@ defmodule Dialyxir.Plt do
   end
 
   defp check_plts(plts) do
-    {last_plt, beams, _cache} = Enum.reduce(plts, {nil, MapSet.new(), %{}},
+    _ =Enum.reduce(plts, {nil, MapSet.new(), %{}},
       fn({plt, apps, beams}, acc) ->
         check_plt(plt, apps, beams, acc)
       end)
-    {last_plt, beams}
   end
 
   defp check_plt(plt, apps, old_beams, {prev_plt, prev_beams, prev_cache}) do
