@@ -1,7 +1,7 @@
 defmodule Dialyxir.Output do
   alias IO.ANSI
 
-  @warning_regex ~r/\w+.ex:\d+:/
+  @warning_regex ~r/\w+.ex:\d+:|:dialyzer.run error/
 
   def format(input) do
     if ANSI.enabled? do
