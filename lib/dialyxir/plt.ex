@@ -5,7 +5,7 @@
 defmodule Dialyxir.Plt do
   @moduledoc false
 
-  import Dialyxir.Output, only: [format: 1]
+  import Dialyxir.Output, only: [color: 2]
 
   def check(plts) do
     info("Finding suitable PLTs")
@@ -201,7 +201,7 @@ defmodule Dialyxir.Plt do
       :dialyzer.run([check_plt: false] ++ opts)
     catch
       {:dialyzer_error, msg} ->
-        IO.puts format(":dialyzer.run error: #{msg}")
+        IO.puts color(":dialyzer.run error: #{msg}", :red)
     end
   end
 

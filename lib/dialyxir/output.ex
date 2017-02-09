@@ -1,28 +1,20 @@
 defmodule Dialyxir.Output do
   alias IO.ANSI
 
-  @warning_regex ~r/\w+.ex:\d+:|:dialyzer.run error/
-
-  def format(input) do
+  def color(text, color) when is_binary(text) do
     if ANSI.enabled? do
-      String.split(input, "\n")
-      |> Enum.map_join("\n", &colorize(&1))
+      case color do
+        :red ->
+          ANSI.red() <> text <> ANSI.reset()
+        :yellow ->
+          ANSI.yellow() <> text <> ANSI.reset()
+        :green ->
+          ANSI.green() <> text <> ANSI.reset()
+        _ ->
+          text
+      end
     else
-      input
-    end
-  end
-
-  defp colorize(line, color), do: color <> line <> ANSI.reset()
-
-  defp colorize("done (passed successfully)" = line), do: colorize(line, ANSI.green())
-
-  defp colorize("done (warnings were emitted)" = line), do: colorize(line, ANSI.yellow())
-
-  defp colorize(line) do
-    if String.match?(line, @warning_regex) do
-      colorize(line, ANSI.red())
-    else
-      line
+      text
     end
   end
 end
