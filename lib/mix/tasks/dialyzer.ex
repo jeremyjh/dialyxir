@@ -81,6 +81,7 @@ defmodule Mix.Tasks.Dialyzer do
   import System, only: [user_home!: 0]
   alias Dialyxir.Project
   alias Dialyxir.Plt
+  alias Dialyxir.Dialyzer
 
   @command_options [ no_compile: :boolean,
                      no_check: :boolean,
@@ -92,30 +93,28 @@ defmodule Mix.Tasks.Dialyzer do
     compatibility_notice()
     if Mix.Project.get() do
       Project.check_config()
-      {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
-      dargs = Enum.map(dargs, &elem(&1,0))
 
-      no_check = case {in_child?(), no_plt?()} do
-                   {true, true} ->
-                     IO.puts "In an Umbrella child and no PLT found - building that first."
-                     build_parent_plt()
-                     true
-                   {true, false} ->
-                     IO.puts "In an Umbrella child, not checking PLT..."
-                     true
-                   _ -> opts[:no_check]
-                 end
+      {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
 
       unless opts[:no_compile], do: Mix.Project.compile([])
-      _ = unless no_check, do: check_plt()
-      unless opts[:plt] do
-        ignore_warnings = Project.dialyzer_ignore_warnings()
-        args = List.flatten [dargs, "--no_check_plt", "--fullpath", "--plt", "#{Project.plt_file()}", dialyzer_flags(), Project.dialyzer_paths()]
-        dialyze(args, opts[:halt_exit_status], ignore_warnings)
-      end
+      _ = unless no_check?(opts), do: check_plt()
+      unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
       IO.puts "No mix project found - checking core PLTs..."
       Project.plts_list([], false) |> Plt.check()
+    end
+  end
+
+  defp no_check?(opts) do
+    case {in_child?(), no_plt?()} do
+      {true, true} ->
+        IO.puts "In an Umbrella child and no PLT found - building that first."
+        build_parent_plt()
+        true
+      {true, false} ->
+        IO.puts "In an Umbrella child, not checking PLT..."
+        true
+      _ -> opts[:no_check]
     end
   end
 
@@ -130,45 +129,36 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
+  defp run_dialyzer(opts, dargs) do
+    raw_opts = Project.dialyzer_flags() ++ Enum.map(dargs, &elem(&1,0))
+    args = [ {:check_plt, false},
+             {:init_plt, String.to_charlist(Project.plt_file()) },
+             {:files_rec, Project.dialyzer_paths() },
+             {:warnings, transform(raw_opts) }]
+
+    IO.puts "Starting Dialyzer"
+    IO.inspect args, label: "dialyzer args:"
+    { _, exit_status, result } = Dialyzer.dialyze(args)
+    Enum.each(result, &IO.puts/1)
+    if opts[:halt_exit_status], do: :erlang.halt(exit_status)
+  end
+
+  defp transform(options) when is_list(options), do: Enum.map(options, &transform/1)
+  defp transform(option) when is_atom(option), do: option
+  defp transform(option) when is_binary(option) do
+    option
+    |> String.replace_leading("-W", "")
+    |> String.replace("--", "")
+    |> String.to_atom()
+  end
+
+
   defp in_child? do
     String.contains?(Mix.Project.config[:lockfile], "..")
   end
 
   defp no_plt? do
     not File.exists?(Project.deps_plt())
-  end
-
-  defp dialyze(args, halt, ignore_warnings, format \\ &Dialyxir.Output.format/1) do
-    IO.puts "Starting Dialyzer"
-    IO.puts "dialyzer " <> Enum.join(args, " ")
-    {ret, exit_status} = System.cmd("dialyzer", args, [])
-    exit_status = case ignore_warnings do
-      nil ->
-        IO.puts format.(ret)
-        exit_status
-      _ ->
-        pattern = File.read!(ignore_warnings)
-        lines = Project.filter_warnings(ret, pattern)
-        for line <- lines do
-          IO.puts format.(line)
-        end
-
-        # `lines` is like follows:
-        #
-        #   ["  Proceeding with analysis...",
-        #    "project.ex:9: Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed",
-        #    "project.ex:9: Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed",
-        #    " done in 0m6.01s",
-        #    "done (warnings were emitted)"]
-        if length(lines) <= 3 do
-          # all warnings filtered
-          0
-        else
-          # have warnings
-          exit_status
-        end
-    end
-    if halt, do: :erlang.halt(exit_status)
   end
 
   defp build_parent_plt() do
@@ -183,11 +173,6 @@ defmodule Mix.Tasks.Dialyzer do
     if rc != 0 do
       IO.puts("Error building parent PLT, process returned code: #{rc}\n#{out}")
     end
-  end
-
-
-  defp dialyzer_flags do
-    Mix.Project.config[:dialyzer][:flags] || []
   end
 
   defp check_dialyzer do
