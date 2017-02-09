@@ -38,7 +38,8 @@ defmodule Dialyxir.Project do
 
   def dialyzer_paths do
     paths = dialyzer_config()[:paths] || default_paths()
-    paths |> Enum.map(&String.to_charlist/1)
+    excluded_paths = dialyzer_config()[:excluded_paths] || []
+    paths -- excluded_paths |> Enum.map(&String.to_charlist/1)
   end
 
   def dialyzer_flags do

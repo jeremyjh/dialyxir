@@ -137,7 +137,7 @@ defmodule Mix.Tasks.Dialyzer do
              {:warnings, transform(raw_opts) }]
 
     IO.puts "Starting Dialyzer"
-    IO.inspect args, label: "dialyzer args:"
+    IO.inspect args, label: "dialyzer args"
     { _, exit_status, result } = Dialyzer.dialyze(args)
     Enum.each(result, &IO.puts/1)
     if opts[:halt_exit_status], do: :erlang.halt(exit_status)
