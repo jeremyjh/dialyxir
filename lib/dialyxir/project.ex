@@ -42,6 +42,10 @@ defmodule Dialyxir.Project do
     paths -- excluded_paths |> Enum.map(&String.to_charlist/1)
   end
 
+  def dialyzer_removed_defaults do
+    dialyzer_config()[:remove_defaults] || []
+  end
+
   def dialyzer_flags do
     Mix.Project.config[:dialyzer][:flags] || []
   end

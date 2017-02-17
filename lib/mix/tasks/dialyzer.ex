@@ -83,6 +83,7 @@ defmodule Mix.Tasks.Dialyzer do
   alias Dialyxir.Plt
   alias Dialyxir.Dialyzer
 
+  @default_warnings [ :unknown ]
   @command_options [ no_compile: :boolean,
                      no_check: :boolean,
                      halt_exit_status: :boolean,
@@ -130,17 +131,21 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp run_dialyzer(opts, dargs) do
-    raw_opts = Project.dialyzer_flags() ++ Enum.map(dargs, &elem(&1,0))
-    args = [ {:check_plt, false},
-             {:init_plt, String.to_charlist(Project.plt_file()) },
-             {:files_rec, Project.dialyzer_paths() },
-             {:warnings, transform(raw_opts) }]
+    args = [ { :check_plt, false },
+             { :init_plt, String.to_charlist(Project.plt_file()) },
+             { :files_rec, Project.dialyzer_paths() },
+             { :warnings, dialyzer_warnings(dargs) } ]
 
     IO.puts "Starting Dialyzer"
     IO.inspect args, label: "dialyzer args"
     { _, exit_status, result } = Dialyzer.dialyze(args)
     Enum.each(result, &IO.puts/1)
     if opts[:halt_exit_status], do: :erlang.halt(exit_status)
+  end
+
+  defp dialyzer_warnings(dargs) do
+    raw_opts = Project.dialyzer_flags() ++ Enum.map(dargs, &elem(&1,0))
+    transform(raw_opts) ++ @default_warnings -- Project.dialyzer_removed_defaults()
   end
 
   defp transform(options) when is_list(options), do: Enum.map(options, &transform/1)
