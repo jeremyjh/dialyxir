@@ -113,21 +113,18 @@ defmodule Dialyxir.ProjectTest do
 
   test "Filtered dialyzer warnings" do
     in_project :default_apps, fn ->
-      output = ~S"""
-        Proceeding with analysis...
+      output_list = ~S"""
+      project.ex:9 This should still be here
       project.ex:9: Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
       project.ex:9: Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
-       done in 0m6.69s
-      done (warnings were emitted)
-      """
+      """ |> String.trim_trailing("\n") |> String.split("\n")
+
       pattern = ~S"""
       Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
       Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
       """
-      lines = Project.filter_warnings(output, pattern)
-      assert lines == ["  Proceeding with analysis...",
-                       " done in 0m6.69s",
-                       "done (warnings were emitted)"]
+      lines = Project.filter_warnings(output_list, pattern)
+      assert lines == ["project.ex:9 This should still be here"]
     end
   end
 end

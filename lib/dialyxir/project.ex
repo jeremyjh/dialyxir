@@ -13,8 +13,7 @@ defmodule Dialyxir.Project do
   end
 
   def plt_file() do
-    plt_path(dialyzer_config()[:plt_file])
-    || deps_plt()
+    plt_path(dialyzer_config()[:plt_file]) || deps_plt()
   end
   defp plt_path(file) when is_binary(file), do: Path.expand(file)
   defp plt_path({:no_warn, file}) when is_binary(file), do: Path.expand(file)
@@ -38,11 +37,27 @@ defmodule Dialyxir.Project do
   end
 
   def dialyzer_paths do
-    dialyzer_config()[:paths] || default_paths()
+    paths = dialyzer_config()[:paths] || default_paths()
+    excluded_paths = dialyzer_config()[:excluded_paths] || []
+    paths -- excluded_paths |> Enum.map(&String.to_charlist/1)
   end
 
-  def dialyzer_ignore_warnings do
-    dialyzer_config()[:ignore_warnings]
+  def dialyzer_removed_defaults do
+    dialyzer_config()[:remove_defaults] || []
+  end
+
+  def dialyzer_flags do
+    Mix.Project.config[:dialyzer][:flags] || []
+  end
+
+  def filter_warnings(output) do
+    ignore_file = dialyzer_ignore_warnings()
+    case ignore_file do
+      nil -> output
+      _ ->
+        pattern = File.read!(ignore_file)
+        filter_warnings(output, pattern)
+    end
   end
 
   def filter_warnings(output, pattern) do
@@ -50,9 +65,8 @@ defmodule Dialyxir.Project do
       "" -> output
       nil -> output
       pattern ->
-        lines = output
-        |> String.trim_trailing("\n")
-        |> String.split("\n")
+        lines = Enum.map(output, &String.trim_trailing/1)
+
         patterns = pattern
         |> String.trim_trailing("\n")
         |> String.split("\n")
@@ -62,8 +76,11 @@ defmodule Dialyxir.Project do
         rescue
           _ -> output
         end
-
     end
+  end
+
+  def dialyzer_ignore_warnings do
+    dialyzer_config()[:ignore_warnings]
   end
 
   def elixir_plt() do
