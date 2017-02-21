@@ -4,6 +4,12 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 [![Build Status](https://travis-ci.org/jeremyjh/dialyxir.svg?branch=master)](https://travis-ci.org/jeremyjh/dialyxir)
 
+## Changes in 0.5
+
+In version 0.5, `dialyxir` uses the Erlang `:dialyzer` module's API to perform analysis rather than shelling out and creating a second VM. Efforts have been made to preserve compatibility as much as possible.
+
+If you've been using the `:ignore_warnings` feature you may have to make small changes to the format of your file to match the output in 0.5. 
+
 ## Changes in 0.4
 
 If you've been using earlier versions of Dialyxir there are some changes you may need to make in the configuration of your existing projects. A summary of the most common issues and changes are found in the Wiki [page](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.4).
@@ -21,7 +27,7 @@ To add it to a mix project, just add a line like this in your deps function in m
 
 ```elixir
 defp deps do
-  [{:dialyxir, "~> 0.4", only: [:dev], runtime: false}]
+  [{:dialyxir, "~> 0.5", only: [:dev], runtime: false}]
 end
 ```
 
