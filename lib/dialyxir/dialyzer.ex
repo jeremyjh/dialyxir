@@ -21,7 +21,7 @@ defmodule Dialyxir.Dialyzer do
     end
 
     defp format_warning(warning) do
-      :dialyzer.format_warning(warning)
+      :dialyzer.format_warning(warning, :fullpath)
       |> Chars.to_string
       |> String.replace_trailing("\n", "")
     end
