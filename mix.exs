@@ -11,7 +11,8 @@ defmodule Dialyxir.Mixfile do
       deps: [ {:ex_doc, ">= 0.0.0", only: :dev} ],
       dialyzer: [ plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib],
                   ignore_warnings: ".dialyzer_ignore",
-                  flags: ["-Wunmatched_returns", "-Werror_handling", "-Wunderspecs"]
+                  flags: ["-Wunmatched_returns", "-Werror_handling", "-Wunderspecs"],
+                  remove_defaults: [ :unknown ]
                 ],
 
       # Docs
