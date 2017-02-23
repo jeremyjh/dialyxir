@@ -4,15 +4,9 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 [![Build Status](https://travis-ci.org/jeremyjh/dialyxir.svg?branch=master)](https://travis-ci.org/jeremyjh/dialyxir)
 
-## Changes in 0.5
+## Changes in 0.4 and 0.5
 
-In version 0.5, `dialyxir` uses the Erlang `:dialyzer` module's API to perform analysis rather than shelling out and creating a second VM. Efforts have been made to preserve compatibility as much as possible.
-
-If you've been using the `:ignore_warnings` feature you may have to make small changes to the format of your file to match the output in 0.5. 
-
-## Changes in 0.4
-
-If you've been using earlier versions of Dialyxir there are some changes you may need to make in the configuration of your existing projects. A summary of the most common issues and changes are found in the Wiki [page](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.4).
+If you've been using earlier versions of Dialyxir there are some changes you may need to make in the configuration of your existing projects. A summary of the most common issues and changes are found in the Wiki pages for [0.4](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.4) and [0.5](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.5).
 
 ## Quickstart
 If you are planning to use Dialyzer with an application built with the [Phoenix Framework](http://www.phoenixframework.org/), check out the [Quickstart wiki](https://github.com/jeremyjh/dialyxir/wiki/Phoenix-Dialyxir-Quickstart).
@@ -59,10 +53,10 @@ mix dialyzer
     useful for CI. do not use with `mix do`.
   * `--plt`              - only build the required plt(s) and exit.
 
-Any other arguments passed to this task are passed on to the dialyzer command.
+Warning flags passed to this task are passed on to `:dialyzer`.
 
   e.g.
-    `mix dialyzer --raw`
+    `mix dialyzer --unmatched_returns`
 
 ## With Explaining Stuff
 
@@ -112,14 +106,14 @@ end
 
 You can specify any `dialyzer` command line argument with the :flags keyword.
 
-Dialyzer supports a number of warning flags used to enable or disable certain kinds of analysis features. Until version 0.4, `dialyxir` used by default the additional warning flags shown in the example below. However some of these create warnings that are often more confusing than helpful, particularly to new users of Dialyzer. As of 0.4, there are no longer any flags used by default. To get the old behavior, specify them in your Mix project file e.g.
+Dialyzer supports a number of warning flags used to enable or disable certain kinds of analysis features. Until version 0.4, `dialyxir` used by default the additional warning flags shown in the example below. However some of these create warnings that are often more confusing than helpful, particularly to new users of Dialyzer. As of 0.4, there are no longer any flags used by default. To get the old behavior, specify them in your Mix project file. For compatibility reasons you can use eiher the `-Wwarning` convention of the dialyzer CLI, or (preferred) the `WarnOpts` atoms supported by the [API](http://erlang.org/doc/man/dialyzer.html#gui-1).  e.g.
 
 ```elixir
 def project do
  [ app: :my_app,
    version: "0.0.1",
    deps: deps,
-   dialyzer: [ flags: ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]]
+   dialyzer: [ flags: ["-Wunmatched_returns", :error_handling, :race_conditions, :underspecs]]
  ]
 end
 ```
@@ -134,13 +128,17 @@ def project do
    version: "0.0.1",
    deps: deps,
    dialyzer: [plt_add_apps: [:mnesia],
-             flags: ["-Wunmatched_returns","-Werror_handling","-Wrace_conditions", "-Wno_opaque"],
+             flags: [:unmatched_returns,:error_handling,:race_conditions, :no_opaque],
              paths: ["_build/dev/lib/my_app/ebin", "_build/dev/lib/foo/ebin"]]
  ]
 end
 ```
 
 ### Ignore Warnings
+
+By default `dialyxir` has always included the `:unknown` warning option so that warnings about unknown functions are returned. This is usually a clue that the PLT is not complete and it may be best to leave it on, but it can be disabled entirely by specifying `remote_defaults: :unknown` in your config.
+
+A better option is to ignore the specific warnings you can't fix (maybe due to a bug upstream, or a dependency you just don't want to include in your PLT due to time/memory in building the PLT file.)
 
 If you want to ignore well-known warnings, you can specify a file path in `:ignore_warnings`.
 
