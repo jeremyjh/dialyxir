@@ -136,7 +136,7 @@ end
 
 ### Ignore Warnings
 
-By default `dialyxir` has always included the `:unknown` warning option so that warnings about unknown functions are returned. This is usually a clue that the PLT is not complete and it may be best to leave it on, but it can be disabled entirely by specifying `remote_defaults: :unknown` in your config.
+By default `dialyxir` has always included the `:unknown` warning option so that warnings about unknown functions are returned. This is usually a clue that the PLT is not complete and it may be best to leave it on, but it can be disabled entirely by specifying `remove_defaults: [:unknown]` in your config.
 
 A better option is to ignore the specific warnings you can't fix (maybe due to a bug upstream, or a dependency you just don't want to include in your PLT due to time/memory in building the PLT file.)
 
