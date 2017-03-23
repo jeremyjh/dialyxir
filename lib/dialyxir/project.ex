@@ -90,7 +90,7 @@ defmodule Dialyxir.Project do
   def erlang_plt(), do: global_plt("erlang-" <> otp_vsn())
 
   defp otp_vsn() do
-    major = :erlang.system_info(:otp_release)
+    major = :erlang.system_info(:otp_release) |> List.to_string
     vsn_file = Path.join([:code.root_dir(), "releases", major, "OTP_VERSION"])
     try do
       {:ok, contents} = File.read(vsn_file)
