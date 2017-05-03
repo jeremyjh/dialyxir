@@ -13,7 +13,7 @@ If you are planning to use Dialyzer with an application built with the [Phoenix 
 
 ## Installation
 
-Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir). 
+Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir).
 
 You can either add it as a dependency in your mix.exs, or install it globally as an archive task.
 
@@ -28,7 +28,7 @@ end
 ```console
 mix do deps.get, deps.compile
 ```
- 
+
 To install globally as an archive:
 
 ```console
@@ -78,7 +78,7 @@ The core files are simply copied to your project folder when you run `dialyxir` 
 the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path. You can specify a different location for the project PLT file with the :plt_file keyword - this is deprecated because people were using it with the old `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
 
 The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries.
-The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`. 
+The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`.
 
 If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT. Using this option will mean dependencies are not added automatically (see below). If you want to just add an application to the list of defaults and dependencies you can use the `:plt_add_apps` key.
 
@@ -97,7 +97,7 @@ def project do
  [ app: :my_app,
    version: "0.0.1",
    deps: deps,
-   dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: :wx]
+   dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
  ]
 end
 ```
