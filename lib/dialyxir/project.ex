@@ -182,9 +182,9 @@ defmodule Dialyxir.Project do
                   fn _ -> [] end
                 end
     case Application.load(app) do
-      :ok -> ()
-      {:error, {:already_loaded, _}} -> ()
-      {:error, err} -> ()
+      :ok -> nil
+      {:error, {:already_loaded, _}} -> nil
+      {:error, err} -> nil
         IO.puts "Error loading #{app}, dependency list may be incomplete.\n #{err}"
     end
     case Application.spec(app, :applications) do
