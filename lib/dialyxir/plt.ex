@@ -5,7 +5,7 @@
 defmodule Dialyxir.Plt do
   @moduledoc false
 
-  import Dialyxir.Output, only: [color: 2]
+  import Dialyxir.Output
 
   def check(plts, fun \\ &(check_plt/4)) do
     find_plts(plts, [], fun)
@@ -202,7 +202,7 @@ defmodule Dialyxir.Plt do
       :dialyzer.run([check_plt: false] ++ opts)
     catch
       {:dialyzer_error, msg} ->
-        IO.puts color(":dialyzer.run error: #{msg}", :red)
+        error color(":dialyzer.run error: #{msg}", :red)
     end
   end
 
@@ -232,9 +232,5 @@ defmodule Dialyxir.Plt do
         Mix.raise("Could not open #{plt}: #{:file.format_error(reason)}")
     end
   end
-
-  defp info(msg), do: apply(Mix.shell(), :info, [msg])
-
-  defp error(msg), do: apply(Mix.shell(), :error, [msg])
 
 end

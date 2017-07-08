@@ -17,4 +17,9 @@ defmodule Dialyxir.Output do
       text
     end
   end
+
+  def info(text), do: Mix.shell().info(text)
+
+  def error(text), do: Mix.shell().error(text)
+
 end

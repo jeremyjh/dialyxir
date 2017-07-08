@@ -1,5 +1,6 @@
 defmodule Dialyxir.Project do
   @moduledoc false
+  import Dialyxir.Output, only: [info: 1, error: 1]
 
   def plts_list(deps, include_project \\ true, exclude_core \\ false) do
     elixir_apps = [:elixir]

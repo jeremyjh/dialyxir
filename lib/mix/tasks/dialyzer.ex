@@ -85,6 +85,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   use Mix.Task
   import System, only: [user_home!: 0]
+  import Dialyxir.Output, only: [info: 1, error: 1]
   alias Dialyxir.Project
   alias Dialyxir.Plt
   alias Dialyxir.Dialyzer
@@ -136,12 +137,15 @@ defmodule Mix.Tasks.Dialyzer do
                    ]
 
   def run(args) do
+    {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
+    original_shell = Mix.shell()
+    if opts[:quiet], do: Mix.shell(Mix.Shell.Quiet)
+    opts = Keyword.delete(opts, :quiet)
     check_dialyzer()
     compatibility_notice()
     if Mix.Project.get() do
       Project.check_config()
 
-      {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
 
       unless opts[:no_compile], do: Mix.Project.compile([])
       _ = unless no_check?(opts) do
@@ -150,9 +154,10 @@ defmodule Mix.Tasks.Dialyzer do
       end
       unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
-      IO.puts "No mix project found - checking core PLTs..."
+      info "No mix project found - checking core PLTs..."
       Project.plts_list([], false) |> Plt.check()
     end
+    Mix.shell(original_shell)
   end
 
   def clean(opts, fun \\ &delete_plt/4) do
@@ -176,21 +181,21 @@ defmodule Mix.Tasks.Dialyzer do
   defp no_check?(opts) do
     case {in_child?(), no_plt?()} do
       {true, true} ->
-        IO.puts "In an Umbrella child and no PLT found - building that first."
+        info "In an Umbrella child and no PLT found - building that first."
         build_parent_plt()
         true
       {true, false} ->
-        IO.puts "In an Umbrella child, not checking PLT..."
+        info "In an Umbrella child, not checking PLT..."
         true
       _ -> opts[:no_check]
     end
   end
 
   defp check_plt() do
-    IO.puts "Checking PLT..."
+    info "Checking PLT..."
     {apps, hash} = dependency_hash()
     if check_hash?(hash) do
-      IO.puts "PLT is up to date!"
+      info "PLT is up to date!"
     else
       Project.plts_list(apps) |> Plt.check()
       File.write(plt_hash_file(), hash)
@@ -207,10 +212,14 @@ defmodule Mix.Tasks.Dialyzer do
              { :raw, opts[:raw] },
            ]
 
-    IO.puts "Starting Dialyzer"
-    IO.inspect args, label: "dialyzer args"
-    { _, exit_status, result } = Dialyzer.dialyze(args)
-    Enum.each(result, &IO.puts/1)
+    info "Starting Dialyzer"
+    args
+    |> inspect(label: "dialyzer args", pretty: true)
+    |> info
+    { status , exit_status, [time | result]} = Dialyzer.dialyze(args)
+    info(time)
+    report = if status == :ok, do: &info/1, else: &error/1
+    Enum.each(result, report)
     if opts[:halt_exit_status], do: :erlang.halt(exit_status)
   end
 
@@ -227,7 +236,6 @@ defmodule Mix.Tasks.Dialyzer do
     |> String.replace("--", "")
     |> String.to_atom()
   end
-
 
   defp in_child? do
     String.contains?(Mix.Project.config[:lockfile], "..")
@@ -253,7 +261,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp check_dialyzer do
     if not Code.ensure_loaded?(:dialyzer) do
-       IO.puts """
+       error """
        DEPENDENCY MISSING
        ------------------------
        If you are reading this message, then Elixir and Erlang are installed but the
@@ -280,7 +288,7 @@ defmodule Mix.Tasks.Dialyzer do
     old_plt = "#{user_home!()}/.dialyxir_core_*.plt"
     if File.exists?(old_plt) && (!File.exists?(Project.erlang_plt()) || !File.exists?(Project.elixir_plt())) do
 
-      IO.puts """
+      info """
       COMPATIBILITY NOTICE
       ------------------------
       Previous usage of a pre-0.4 version of Dialyxir detected. Please be aware that the 0.4 release
@@ -308,7 +316,8 @@ defmodule Mix.Tasks.Dialyzer do
   @spec dependency_hash :: {[atom()], binary()}
   def dependency_hash do
     lock_file = Mix.Dep.Lock.read |> :erlang.term_to_binary
-    apps = Project.cons_apps |> IO.inspect
+    apps = Project.cons_apps
+    apps |> inspect() |> info()
     hash = :crypto.hash(:sha, lock_file <> :erlang.term_to_binary(apps))
     {apps, hash}
   end
