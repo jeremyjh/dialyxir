@@ -70,6 +70,7 @@ defmodule Dialyxir.Project do
         patterns = pattern
         |> String.trim_trailing("\n")
         |> String.split("\n")
+        |> Enum.reject(&(&1 == ""))
         try do
           cp = :binary.compile_pattern(patterns)
           Enum.filter(lines, &(not String.contains?(&1, cp)))

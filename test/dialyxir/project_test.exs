@@ -121,6 +121,7 @@ defmodule Dialyxir.ProjectTest do
 
       pattern = ~S"""
       Guard test is_atom(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
+
       Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
       """
       lines = Project.filter_warnings(output_list, pattern)
