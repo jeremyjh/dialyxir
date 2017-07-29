@@ -1,9 +1,10 @@
 language: elixir
 elixir:
-  - 1.3.4
-  - 1.4.0
+  - 1.4.5
+  - 1.5.0
 otp_release:
   - 19.2
+  - 20.0
 script:
   - mix test
   - MIX_ENV=prod mix do compile --warnings-as-errors, archive.build, archive.install --force
