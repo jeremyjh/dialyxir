@@ -56,12 +56,13 @@ defmodule Dialyxir.Plt do
   defp resolve_apps(apps, cache) do
     apps
     |> Enum.uniq()
-    |> Enum.filter_map(&(not Map.has_key?(cache, &1)), &app_info/1)
+    |> Enum.filter(&(not Map.has_key?(cache, &1)))
+    |> Enum.map(&app_info/1)
     |> Enum.into(cache)
   end
 
   defp app_info(app) do
-    app_file = Atom.to_char_list(app) ++ '.app'
+    app_file = Atom.to_charlist(app) ++ '.app'
     case :code.where_is_file(app_file) do
       :non_existing ->
         error("Unknown application #{inspect(app)}")
@@ -106,7 +107,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp resolve_module(module, beams) do
-    beam = Atom.to_char_list(module) ++ '.beam'
+    beam = Atom.to_charlist(module) ++ '.beam'
     case :code.where_is_file(beam) do
       path when is_list(path) ->
         path = Path.expand(path)
