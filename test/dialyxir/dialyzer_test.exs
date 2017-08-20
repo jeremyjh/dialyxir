@@ -49,7 +49,7 @@ defmodule Dialyxir.DialyzerTest do
 
       assert expected_result_code == :error
       assert expected_exit_code == 1
-      assert expected_messages == ["\e[31mdialyzer failed\e[0m"]
+      assert expected_messages == ["", "\e[31mdialyzer failed\e[0m"]
     end
   end
 end
