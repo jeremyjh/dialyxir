@@ -36,6 +36,12 @@ git clone https://github.com/jeremyjh/dialyxir
 cd dialyxir
 MIX_ENV=prod mix do compile, archive.build, archive.install
 ```
+or, in Windows:
+```console
+git clone https://github.com/jeremyjh/dialyxir
+cd dialyxir
+set "MIX_ENV=prod" && mix do compile, archive.build, archive.install
+```
 
 ## Usage
 
