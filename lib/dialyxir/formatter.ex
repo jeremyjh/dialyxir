@@ -264,12 +264,12 @@ defmodule Dialyxir.Formatter do
 
   defp form_positions(arg_positions = [_]) do
     form_position_string = form_position_string(arg_positions)
-    "an opaque term in #{form_position_string}"
+    "an opaque term in #{form_position_string} argument"
   end
 
   defp form_positions(arg_positions) do
     form_position_string = form_position_string(arg_positions)
-    "opaque terms in #{form_position_string}"
+    "opaque terms in #{form_position_string} arguments"
   end
 
   # We know which positions N are to blame;
