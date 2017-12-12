@@ -25,7 +25,7 @@ defmodule Dialyxir.Formatter do
     |> String.replace_trailing("\n", "")
   end
 
-  defp format_warning({tag, {file, line}, message}, :dialyxir) do
+  defp format_warning({_tag, {file, line}, message}, :dialyxir) do
     base_name = :filename.basename(file)
     string = message_to_string(message)
 

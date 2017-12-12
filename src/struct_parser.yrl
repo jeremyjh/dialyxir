@@ -19,6 +19,7 @@ values -> value values : ['$1'] ++ '$2'.
 value -> '_' : {any}.
 value -> atom '(' ')' : {type, unwrap('$1')}.
 value -> atom '(' value ')' : {type, unwrap('$1'), '$3'}.
+value -> atom list : {type_list, unwrap('$1'), '$2'}.
 value -> '\'' int '..' int '\'' : {range, unwrap('$2'), unwrap('$4')}.
 value -> '\'' int '\'' : {int, unwrap('$2')}.
 value -> '\'' atom '\'' : {atom, unwrap('$2')}.
@@ -31,6 +32,7 @@ value -> function : '$1'.
 value -> value '|' value : {pipe_list, '$1', '$3'}.
 
 list -> '(' list_items ')' : {list, paren, '$2'}.
+list -> '[' ']' : {empty_list, square}.
 list -> '[' list_items ']' : {list, square, '$2'}.
 list_items -> value : ['$1'].
 list_items -> value ',' list_items : ['$1'] ++ '$3'.
