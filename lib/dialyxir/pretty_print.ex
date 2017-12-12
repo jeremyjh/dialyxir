@@ -76,7 +76,7 @@ defmodule Dialyzir.PrettyPrint do
     if struct_name do
       keys = Enum.reject(map_keys, &struct_name_entry?/1)
 
-      "%#{struct_name}{#{Enum.map_join(keys, ",", &do_pretty_print/1)}}"
+      "%#{struct_name}{#{Enum.map_join(keys, ", ", &do_pretty_print/1)}}"
     else
       "%{#{Enum.map_join(map_keys, ", ", &do_pretty_print/1)}}"
     end
@@ -104,52 +104,3 @@ defmodule Dialyzir.PrettyPrint do
   defp struct_name_entry?({:map_entry, {:atom, '__struct__'}, _value}), do: true
   defp struct_name_entry?(_), do: false
 end
-
-str1 = ~S"""
-(#{
-'__struct__':='Elixir.Plug.Conn',
-'adapter':={atom(),_},
-'assigns':=#{atom()=>_},
-'before_send':=[
-  fun(
-    (
-      #{
-        '__struct__':='Elixir.Plug.Conn',
-        'adapter':={_,_}, '
-        assigns':=map(),
-        'before_send':=[
-          fun((_) -> any())], _=>_}) -> #{'__struct__':='Elixir.Plug.Conn', 'adapter':={_,_}, 'assigns':=map(),
-'before_send':=[fun((_) -> any())], _=>_})],
-'body_params':=#{'__struct__'=>'Elixir.Plug.Conn.Unfetched', 'aspect'=>atom(), binary()=>binary() | [binary() | [any()] | #{binary()=>_}] | #{binary()=>binary() | [any()] | #{binary()=>_}}},
-'cookies':=#{'__struct__'=>'Elixir.Plug.Conn.Unfetched',
-'aspect'=>atom(),
-binary()=>binary()},
-'halted':=_,
-'host':=binary(),
-'method':=binary(),
-'owner':=pid(),
-'params':=#{
-  '__struct__'=>'Elixir.Plug.Conn.Unfetched',
-  'aspect'=>atom(),
-  binary()=>binary() | [binary() | [any()] | #{binary()=>_}] | #{binary()=>binary() | [any()] | #{binary()=>_}}
-},
-'path_info':=[binary()],
-'path_params':=#{binary()=>binary() | [binary() | [any()] | #{binary()=>_}] | #{binary()=>binary() | [any()] | #{binary()=>_}}},
-'peer':={{byte(),byte(),byte(),byte()} | {char(),char(),char(),char(),char(),char(),char(),char()},char()},
-'port':=char(),
-'private':=#{atom()=>_},
-'query_params':=#{'__struct__'=>'Elixir.Plug.Conn.Unfetched', 'aspect'=>atom(), binary()=>binary() | [binary() | [any()] | #{binary()=>_}] | #{binary()=>binary() | [any()] | #{binary()=>_}}},
-'query_string':=binary(),
-'remote_ip':={byte(),byte(),byte(),byte()} | {char(),char(),char(),char(),char(),char(),char(),char()},
-'req_cookies':=#{'__struct__'=>'Elixir.Plug.Conn.Unfetched', 'aspect'=>atom(), binary()=>binary()},
-'req_headers':=[{binary(),binary()}],
-'request_path':=binary(),
-'resp_body':='nil' | binary() | maybe_improper_list(binary() | maybe_improper_list(any(),binary() | []) | byte(),binary() | []),
-'resp_cookies':=#{binary()=>#{}}, 'resp_headers':=[{binary(),binary()}],
-'scheme':='http' | 'https',
-'script_name':=[binary()],
-'secret_key_base':='nil' | binary(), 'state':='chunked' | 'file' | 'sent' | 'set' | 'set_chunked' | 'set_file' | 'unset',
-'status':='nil' | 1..1114111},'Elixir.Hello13Web.ErrorView','404')
-"""
-
-Dialyzir.PrettyPrint.pretty_print(str1)
