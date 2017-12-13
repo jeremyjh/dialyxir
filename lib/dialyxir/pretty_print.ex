@@ -1,7 +1,12 @@
 defmodule Dialyzir.PrettyPrint do
 
   defp parse(str) do
-    {:ok, tokens, _} = str |> to_charlist() |> :struct_lexer.string()
+    {:ok, tokens, _} =
+      str
+      |> to_charlist()
+      |> :struct_lexer.string()
+
+    IO.inspect tokens, limit: :infinity
     {:ok, list} = :struct_parser.parse(tokens)
     list
   end
@@ -32,6 +37,10 @@ defmodule Dialyzir.PrettyPrint do
 
   defp do_pretty_print({:type_list, type, types}) do
     "#{type}#{do_pretty_print(types)}"
+  end
+
+  defp do_pretty_print({:range, from, to}) do
+    "#{from}..#{to}"
   end
 
   defp do_pretty_print({:int, int}) do

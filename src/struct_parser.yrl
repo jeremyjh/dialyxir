@@ -4,6 +4,7 @@ values value
 list list_items
 struct struct_items
 tuple tuple_items
+range
 function.
 
 Terminals
@@ -29,6 +30,7 @@ value -> struct : '$1'.
 value -> list : '$1'.
 value -> tuple : '$1'.
 value -> function : '$1'.
+value -> range : '$1'.
 value -> value '|' value : {pipe_list, '$1', '$3'}.
 
 list -> '(' list_items ')' : {list, paren, '$2'}.
@@ -47,6 +49,8 @@ struct_items -> value ':=' value : [{map_entry, '$1', '$3'}].
 struct_items -> value ':=' value ',' struct_items : [{map_entry, '$1', '$3'}] ++ '$5'.
 struct_items -> value '=>' value : [{map_entry, '$1', '$3'}].
 struct_items -> value '=>' value ',' struct_items : [{map_entry, '$1', '$3'}] ++ '$5'.
+
+range -> int '..' int : {range, unwrap('$1'), unwrap('$3')}.
 
 function -> 'fun(' list '->' value ')' : {function, {args, '$2'}, {return, '$4'}}.
 
