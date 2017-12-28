@@ -5,7 +5,7 @@ defmodule Dialyxir.Mixfile do
     [
       app: :dialyxir,
       version: "0.5.1",
-      elixir: "> 1.3.2",
+      elixir: ">= 1.6.0-dev",
       description: description(),
       package: package(),
       deps: [ {:ex_doc, ">= 0.0.0", only: :dev} ],

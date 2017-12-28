@@ -5,10 +5,11 @@ list list_items
 struct struct_items
 tuple tuple_items
 range
+contract
 function.
 
 Terminals
-nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_'.
+nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' ':' '...' '<<' '>>'.
 
 Rootsymbol document.
 
@@ -17,20 +18,28 @@ document -> values : '$1'.
 values -> value : ['$1'].
 values -> value values : ['$1'] ++ '$2'.
 
+value -> '<<' value ':' value '>>' : {binary, '$2', '$4'}.
+value -> struct : '$1'.
+value -> atom ':' ':' atom '(' ')' : {type, unwrap('$1'), unwrap('$4')}.
+value -> '\'' atom '\'' ':' atom '(' ')' : {type, unwrap('$2'), unwrap('$5')}.
+value -> atom ':' atom '(' ')' : {type, unwrap('$1'), unwrap('$3')}.
 value -> '_' : {any}.
+value -> '...' : {rest}.
 value -> atom '(' ')' : {type, unwrap('$1')}.
 value -> atom '(' value ')' : {type, unwrap('$1'), '$3'}.
 value -> atom list : {type_list, unwrap('$1'), '$2'}.
 value -> '\'' int '..' int '\'' : {range, unwrap('$2'), unwrap('$4')}.
+value -> int : {int, unwrap('$1')}.
 value -> '\'' int '\'' : {int, unwrap('$2')}.
 value -> '\'' atom '\'' : {atom, unwrap('$2')}.
 value -> '\'' nil '\''  : {nil}.
 value -> atom : {atom, unwrap('$1')}.
-value -> struct : '$1'.
 value -> list : '$1'.
 value -> tuple : '$1'.
 value -> function : '$1'.
+value -> contract : '$1'.
 value -> range : '$1'.
+
 value -> value '|' value : {pipe_list, '$1', '$3'}.
 
 list -> '(' list_items ')' : {list, paren, '$2'}.
@@ -53,6 +62,8 @@ struct_items -> value '=>' value ',' struct_items : [{map_entry, '$1', '$3'}] ++
 range -> int '..' int : {range, unwrap('$1'), unwrap('$3')}.
 
 function -> 'fun(' list '->' value ')' : {function, {args, '$2'}, {return, '$4'}}.
+
+contract -> list '->' value : {contract, {args, '$1'}, {return, '$3'}}.
 
 Erlang code.
 

@@ -26,7 +26,7 @@ defmodule Dialyxir.Formatter do
   end
 
   defp format_warning({_tag, {file, line}, message}, :dialyxir) do
-    base_name = :filename.basename(file)
+    base_name = Path.relative_to_cwd(file)
     string = message_to_string(message)
 
     "#{base_name}:#{line}\n#{string}\n"
@@ -35,11 +35,14 @@ defmodule Dialyxir.Formatter do
   # Warnings for general discrepancies
 
   defp message_to_string({:apply, [args, arg_positions, fail_reason, signature_args, signature_return, contract]}) do
-    "Fun application with arguments #{args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
+    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+
+    "Fun application with arguments #{pretty_args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
   end
 
   defp message_to_string({:app_call, [module, function, args, culprit, expected_type, actual_type]}) do
-    "The call #{module}:#{function}#{args} requires that #{culprit} is of type #{expected_type} not #{actual_type}."
+    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+    "The call #{module}:#{function}#{pretty_args} requires that #{culprit} is of type #{expected_type} not #{actual_type}."
   end
 
   defp message_to_string({:bin_construction, [culprit, size, segment, type]}) do
@@ -47,7 +50,8 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:call, [module, function, args, arg_positions, fail_reason, signature_args, signature_return, contract]}) do
-    "The call #{module}:#{function}#{args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
+    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+    "The call #{module}:#{function}#{pretty_args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
   end
 
   defp message_to_string({:call_to_missing, [module, function, arity]}) do
@@ -59,7 +63,8 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:fun_app_args, [args, type]}) do
-    "Fun application with arguments #{args} will fail since the function has type #{type}."
+    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+    "Fun application with arguments #{pretty_args} will fail since the function has type #{type}."
   end
 
   defp message_to_string({:fun_app_no_fun, [op, type, arity]}) do
@@ -133,6 +138,8 @@ defmodule Dialyxir.Formatter do
   # Warnings for specs and contracts
 
   defp message_to_string({:contract_diff, [module, function, _args, contract, signature]}) do
+    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+
     """
     Type specification is not equal to the success typing.
 
@@ -140,7 +147,7 @@ defmodule Dialyxir.Formatter do
     #{module}:#{function}
 
     Type specification:
-    #{contract}
+    #{pretty_contract}
 
     Success typing:
     #{signature}
@@ -151,11 +158,37 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:contract_subtype, [module, function, _args, contract, signature]}) do
-    "Type specification #{module}:#{function}#{contract} is a subtype of the success typing: #{module}:#{function}#{signature}."
+    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+
+    """
+    Type specification is a subtype of the success typing.
+
+    Function:
+    #{module}:#{function}
+
+    Type specification:
+    @spec #{function}#{pretty_contract}
+
+    Success typing:
+    #{signature}
+    """
   end
 
   defp message_to_string({:contract_supertype, [module, function, _args, contract, signature]}) do
-    "Type specification #{module}:#{function}#{contract} is a supertype of the success typing: #{module}:#{function}#{signature}."
+    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+
+    """
+    Type specification is a supertype of the success typing.
+
+    Function:
+    #{module}:#{function}
+
+    Type specification:
+    @spec #{function}#{pretty_contract}
+
+    Success typing:
+    #{signature}
+    """
   end
 
   defp message_to_string({:invalid_contract, [module, function, arity, signature]}) do
@@ -222,7 +255,8 @@ defmodule Dialyxir.Formatter do
   # Warnings for concurrency errors
 
   defp message_to_string({:race_condition, [module, function, args, reason]}) do
-    "The call #{module}:#{function}#{args} #{reason}."
+    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+    "The call #{module}:#{function}#{pretty_args} #{reason}."
   end
 
   # Erlang patterns
@@ -240,6 +274,7 @@ defmodule Dialyxir.Formatter do
   end
 
   defp call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, {overloaded?, contract}) do
+    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
     case fail_reason do
       :only_sig ->
         if Enum.empty?(arg_positions) do
@@ -252,13 +287,13 @@ defmodule Dialyxir.Formatter do
       :only_contract ->
         if Enum.empty?(arg_positions) or overloaded? do
 	  # We do not know which arguments caused the failure
-	  "breaks the contract #{contract}"
+	  "breaks the contract #{pretty_contract}"
         else
           position_string = form_position_string(arg_positions)
-	  "breaks the contract #{contract} in argument #{position_string}"
+	  "breaks the contract #{pretty_contract} in argument #{position_string}"
         end
       :both ->
-        "will never return since the success typing is #{signature_args} -> #{signature_return} and the contract is #{contract}"
+        "will never return since the success typing is #{signature_args} -> #{signature_return} and the contract is #{pretty_contract}"
     end
   end
 
@@ -274,12 +309,16 @@ defmodule Dialyxir.Formatter do
 
   # We know which positions N are to blame;
   # the list of triples will never be empty.
-  defp form_expected_without_opaque([{position, type, type_string}]) do
-    if :erl_types.t_is_opaque(type) do
-      "an opaque term of type #{type_string} in "
-    else
-      "a term of type #{type_string} (with opaque subterms) in "
-    end <> form_position_string([position])
+  defp form_expencted_without_opaque([{position, type, type_string}]) do
+    form_position_string = form_position_string([position])
+    message =
+      if :erl_types.t_is_opaque(type) do
+        "an opaque term of type #{type_string} in "
+      else
+        "a term of type #{type_string} (with opaque subterms) in "
+      end
+
+    message <> form_position_string
   end
 
   defp form_expected_without_opaque(expected_triples) do # TODO: can do much better here
