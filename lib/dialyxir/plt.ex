@@ -16,19 +16,21 @@ defmodule Dialyxir.Plt do
     case plt_files(plt) do
       nil ->
         find_plts(plts, [{plt, apps, nil} | acc])
+
       beams ->
-        apps_rest = Enum.flat_map(plts, fn({_plt2, apps2}) -> apps2 end)
+        apps_rest = Enum.flat_map(plts, fn {_plt2, apps2} -> apps2 end)
         apps = Enum.uniq(apps ++ apps_rest)
         check_plts([{plt, apps, beams} | acc])
     end
   end
+
   defp find_plts([], acc) do
     check_plts(acc)
   end
 
   defp check_plts(plts) do
-    _ =Enum.reduce(plts, {nil, MapSet.new(), %{}},
-      fn({plt, apps, beams}, acc) ->
+    _ =
+      Enum.reduce(plts, {nil, MapSet.new(), %{}}, fn {plt, apps, beams}, acc ->
         check_plt(plt, apps, beams, acc)
       end)
   end
@@ -44,13 +46,12 @@ defmodule Dialyxir.Plt do
   end
 
   defp cache_mod_diff(new, old) do
-    Enum.flat_map(new,
-      fn({app, {mods, _deps}}) ->
-        case Map.has_key?(old, app) do
-          true -> []
-          false -> mods
-        end
-      end)
+    Enum.flat_map(new, fn {app, {mods, _deps}} ->
+      case Map.has_key?(old, app) do
+        true -> []
+        false -> mods
+      end
+    end)
   end
 
   defp resolve_apps(apps, cache) do
@@ -63,10 +64,12 @@ defmodule Dialyxir.Plt do
 
   defp app_info(app) do
     app_file = Atom.to_charlist(app) ++ '.app'
+
     case :code.where_is_file(app_file) do
       :non_existing ->
         error("Unknown application #{inspect(app)}")
         {app, {[], []}}
+
       app_file ->
         Path.expand(app_file)
         |> read_app_info(app)
@@ -77,8 +80,9 @@ defmodule Dialyxir.Plt do
     case :file.consult(app_file) do
       {:ok, [{:application, ^app, info}]} ->
         parse_app_info(info, app)
+
       {:error, reason} ->
-        Mix.raise "Could not read #{app_file}: #{:file.format_error(reason)}"
+        Mix.raise("Could not read #{app_file}: #{:file.format_error(reason)}")
     end
   end
 
@@ -97,8 +101,8 @@ defmodule Dialyxir.Plt do
 
   defp parse_runtime_dep(runtime_dep) do
     runtime_dep = IO.chardata_to_string(runtime_dep)
-    regex =  ~r/^(.+)\-\d+(?|\.\d+)*$/
-    [app] = Regex.run(regex, runtime_dep, [capture: :all_but_first])
+    regex = ~r/^(.+)\-\d+(?|\.\d+)*$/
+    [app] = Regex.run(regex, runtime_dep, capture: :all_but_first)
     String.to_atom(app)
   end
 
@@ -108,10 +112,12 @@ defmodule Dialyxir.Plt do
 
   defp resolve_module(module, beams) do
     beam = Atom.to_charlist(module) ++ '.beam'
+
     case :code.where_is_file(beam) do
       path when is_list(path) ->
         path = Path.expand(path)
         MapSet.put(beams, path)
+
       :non_existing ->
         error("Unknown module #{inspect(module)}")
         beams
@@ -120,9 +126,11 @@ defmodule Dialyxir.Plt do
 
   defp check_beams(plt, beams, nil, prev_plt) do
     plt_ensure(plt, prev_plt)
+
     case plt_files(plt) do
       nil ->
         Mix.raise("Could not open #{plt}: #{:file.format_error(:enoent)}")
+
       old_beams ->
         check_beams(plt, beams, old_beams)
     end
@@ -147,8 +155,7 @@ defmodule Dialyxir.Plt do
   defp plt_new(plt) do
     info("Creating #{Path.basename(plt)}")
     plt = erl_path(plt)
-    _ = plt_run([analysis_type: :plt_build, output_plt: plt,
-      apps: [:erts]])
+    _ = plt_run(analysis_type: :plt_build, output_plt: plt, apps: [:erts])
     :ok
   end
 
@@ -161,12 +168,12 @@ defmodule Dialyxir.Plt do
     case MapSet.size(files) do
       0 ->
         :ok
+
       n ->
-        (Mix.shell()).info("Adding #{n} modules to #{Path.basename(plt)}")
+        Mix.shell().info("Adding #{n} modules to #{Path.basename(plt)}")
         plt = erl_path(plt)
         files = erl_files(files)
-        _ = plt_run([analysis_type: :plt_add, init_plt: plt,
-          files: files])
+        _ = plt_run(analysis_type: :plt_add, init_plt: plt, files: files)
         :ok
     end
   end
@@ -175,12 +182,12 @@ defmodule Dialyxir.Plt do
     case MapSet.size(files) do
       0 ->
         :ok
+
       n ->
         info("Removing #{n} modules from #{Path.basename(plt)}")
         plt = erl_path(plt)
         files = erl_files(files)
-        _ = plt_run([analysis_type: :plt_remove, init_plt: plt,
-          files: files])
+        _ = plt_run(analysis_type: :plt_remove, init_plt: plt, files: files)
         :ok
     end
   end
@@ -189,10 +196,11 @@ defmodule Dialyxir.Plt do
     case MapSet.size(files) do
       0 ->
         :ok
+
       n ->
-        (Mix.shell()).info("Checking #{n} modules in #{Path.basename(plt)}")
+        Mix.shell().info("Checking #{n} modules in #{Path.basename(plt)}")
         plt = erl_path(plt)
-        _ = plt_run([analysis_type: :plt_check, init_plt: plt])
+        _ = plt_run(analysis_type: :plt_check, init_plt: plt)
         :ok
     end
   end
@@ -202,7 +210,7 @@ defmodule Dialyxir.Plt do
       :dialyzer.run([check_plt: false] ++ opts)
     catch
       {:dialyzer_error, msg} ->
-        IO.puts color(":dialyzer.run error: #{msg}", :red)
+        IO.puts(color(":dialyzer.run error: #{msg}", :red))
     end
   end
 
@@ -212,7 +220,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp erl_files(files) do
-    Enum.reduce(files, [], &[erl_path(&1)|&2])
+    Enum.reduce(files, [], &[erl_path(&1) | &2])
   end
 
   defp erl_path(path) do
@@ -222,12 +230,15 @@ defmodule Dialyxir.Plt do
 
   defp plt_files(plt) do
     info("Looking up modules in #{Path.basename(plt)}")
+
     case plt_info(plt) do
       {:ok, info} ->
         Keyword.fetch!(info, :files)
         |> Enum.reduce(MapSet.new(), &MapSet.put(&2, Path.expand(&1)))
+
       {:error, :no_such_file} ->
         nil
+
       {:error, reason} ->
         Mix.raise("Could not open #{plt}: #{:file.format_error(reason)}")
     end
@@ -236,5 +247,4 @@ defmodule Dialyxir.Plt do
   defp info(msg), do: apply(Mix.shell(), :info, [msg])
 
   defp error(msg), do: apply(Mix.shell(), :error, [msg])
-
 end
