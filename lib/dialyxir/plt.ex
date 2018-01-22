@@ -67,7 +67,7 @@ defmodule Dialyxir.Plt do
 
     case :code.where_is_file(app_file) do
       :non_existing ->
-        error("Unknown application #{inspect(app)}")
+        error "Unknown application #{inspect(app)}"
         {app, {[], []}}
 
       app_file ->
@@ -153,14 +153,14 @@ defmodule Dialyxir.Plt do
   defp plt_ensure(plt, prev_plt), do: plt_copy(prev_plt, plt)
 
   defp plt_new(plt) do
-    info("Creating #{Path.basename(plt)}")
+    info "Creating #{Path.basename(plt)}"
     plt = erl_path(plt)
     _ = plt_run(analysis_type: :plt_build, output_plt: plt, apps: [:erts])
     :ok
   end
 
   defp plt_copy(plt, new_plt) do
-    info("Copying #{Path.basename(plt)} to #{Path.basename(new_plt)}")
+    info "Copying #{Path.basename(plt)} to #{Path.basename(new_plt)}"
     File.cp!(plt, new_plt)
   end
 
@@ -184,7 +184,7 @@ defmodule Dialyxir.Plt do
         :ok
 
       n ->
-        info("Removing #{n} modules from #{Path.basename(plt)}")
+        info "Removing #{n} modules from #{Path.basename(plt)}"
         plt = erl_path(plt)
         files = erl_files(files)
         _ = plt_run(analysis_type: :plt_remove, init_plt: plt, files: files)
@@ -229,7 +229,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp plt_files(plt) do
-    info("Looking up modules in #{Path.basename(plt)}")
+    info "Looking up modules in #{Path.basename(plt)}"
 
     case plt_info(plt) do
       {:ok, info} ->
