@@ -83,6 +83,13 @@ defmodule Mix.Tasks.Dialyzer do
   alias Dialyxir.Plt
   alias Dialyxir.Dialyzer
 
+  defmodule Build do
+    use Mix.Task
+    def run(args) do
+      Mix.Tasks.Dialyzer.run(["--plt" | args])
+    end
+  end
+
   @default_warnings [ :unknown ]
   @command_options [ no_compile: :boolean,
                      no_check: :boolean,
