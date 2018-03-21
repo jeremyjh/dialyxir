@@ -9,27 +9,32 @@ defmodule Dialyxir.Plt do
 
   def check(plts) do
     info("Finding suitable PLTs")
-    find_plts(plts, [])
+    find_plts(plts, [], &check_plt/4)
   end
 
-  defp find_plts([{plt, apps} | plts], acc) do
+  def clean(plts) do
+    info("Deleting PLTs")
+    find_plts(plts, [], &delete_plt/4)
+  end
+
+  defp find_plts([{plt, apps} | plts], acc, fun) do
     case plt_files(plt) do
       nil ->
-        find_plts(plts, [{plt, apps, nil} | acc])
+        find_plts(plts, [{plt, apps, nil} | acc], fun)
       beams ->
         apps_rest = Enum.flat_map(plts, fn({_plt2, apps2}) -> apps2 end)
         apps = Enum.uniq(apps ++ apps_rest)
-        check_plts([{plt, apps, beams} | acc])
+        check_plts([{plt, apps, beams} | acc], fun)
     end
   end
-  defp find_plts([], acc) do
-    check_plts(acc)
+  defp find_plts([], acc, fun) do
+    check_plts(acc, fun)
   end
 
-  defp check_plts(plts) do
+  defp check_plts(plts, fun) do
     _ =Enum.reduce(plts, {nil, MapSet.new(), %{}},
       fn({plt, apps, beams}, acc) ->
-        check_plt(plt, apps, beams, acc)
+        fun.(plt, apps, beams, acc)
       end)
   end
 
@@ -41,6 +46,11 @@ defmodule Dialyxir.Plt do
     beams = resolve_modules(mods, prev_beams)
     check_beams(plt, beams, old_beams, prev_plt)
     {plt, beams, cache}
+  end
+
+  defp delete_plt(plt, _, _, _) do
+    info("About to delete PLT file: #{Path.absname(plt)}")
+    Path.absname(plt) |> File.rm
   end
 
   defp cache_mod_diff(new, old) do

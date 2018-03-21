@@ -90,6 +90,13 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
+  defmodule Clean do
+    use Mix.Task
+    def run(_args) do
+      Mix.Tasks.Dialyzer.clean()
+    end
+  end
+
   @default_warnings [ :unknown ]
   @command_options [ no_compile: :boolean,
                      no_check: :boolean,
@@ -110,6 +117,19 @@ defmodule Mix.Tasks.Dialyzer do
     else
       IO.puts "No mix project found - checking core PLTs..."
       Project.plts_list([], false) |> Plt.check()
+    end
+  end
+
+  def clean() do
+    check_dialyzer()
+    compatibility_notice()
+    if Mix.Project.get() do
+      {apps, _hash} = dependency_hash()
+      Project.plts_list(apps) |> Plt.clean()
+      IO.puts "About to delete PLT hash file: #{plt_hash_file()}"
+      File.rm(plt_hash_file())
+    else
+      Project.plts_list([], false) |> Plt.clean()
     end
   end
 
