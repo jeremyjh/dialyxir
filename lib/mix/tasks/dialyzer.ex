@@ -112,7 +112,10 @@ defmodule Mix.Tasks.Dialyzer do
       {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
 
       unless opts[:no_compile], do: Mix.Project.compile([])
-      _ = unless no_check?(opts), do: check_plt()
+      _ = unless no_check?(opts) do
+        IO.puts "Finding suitable PLTs"
+        check_plt()
+      end
       unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
       IO.puts "No mix project found - checking core PLTs..."
@@ -120,17 +123,23 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  def clean() do
+  def clean(fun \\ &delete_plt/4) do
     check_dialyzer()
     compatibility_notice()
     if Mix.Project.get() do
       {apps, _hash} = dependency_hash()
-      Project.plts_list(apps) |> Plt.clean()
+      IO.puts "Deleting PLTs"
+      Project.plts_list(apps) |> Plt.check(fun)
       IO.puts "About to delete PLT hash file: #{plt_hash_file()}"
       File.rm(plt_hash_file())
     else
-      Project.plts_list([], false) |> Plt.clean()
+      Project.plts_list([], false) |> Plt.check(fun)
     end
+  end
+
+  def delete_plt(plt, _, _, _) do
+    IO.puts("About to delete PLT file: #{plt}")
+    File.rm(plt)
   end
 
   defp no_check?(opts) do

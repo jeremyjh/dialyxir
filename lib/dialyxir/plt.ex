@@ -7,15 +7,10 @@ defmodule Dialyxir.Plt do
 
   import Dialyxir.Output, only: [color: 2]
 
-  def check(plts) do
-    info("Finding suitable PLTs")
-    find_plts(plts, [], &check_plt/4)
+  def check(plts, fun \\ &(check_plt/4)) do
+    find_plts(plts, [], fun)
   end
 
-  def clean(plts) do
-    info("Deleting PLTs")
-    find_plts(plts, [], &delete_plt/4)
-  end
 
   defp find_plts([{plt, apps} | plts], acc, fun) do
     case plt_files(plt) do
@@ -46,11 +41,6 @@ defmodule Dialyxir.Plt do
     beams = resolve_modules(mods, prev_beams)
     check_beams(plt, beams, old_beams, prev_plt)
     {plt, beams, cache}
-  end
-
-  defp delete_plt(plt, _, _, _) do
-    info("About to delete PLT file: #{Path.absname(plt)}")
-    Path.absname(plt) |> File.rm
   end
 
   defp cache_mod_diff(new, old) do
