@@ -84,6 +84,16 @@ defmodule Mix.Tasks.Dialyzer do
   alias Dialyxir.Dialyzer
 
   defmodule Build do
+    @shortdoc "Build the required plt(s) and exit."
+
+    @moduledoc """
+    This task compiles the mix project and creates a PLT with dependencies if needed.
+    It is equivalent to running `mix dialyzer --plt`
+
+    ## Command line options
+
+    * `--no-compile`       - do not compile even if needed.
+    """
     use Mix.Task
     def run(args) do
       Mix.Tasks.Dialyzer.run(["--plt" | args])
@@ -91,6 +101,11 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defmodule Clean do
+    @shortdoc "Delete plt(s) and exit."
+
+    @moduledoc """
+    This task deletes PLT files and hash files.
+    """
     use Mix.Task
     def run(_args) do
       Mix.Tasks.Dialyzer.clean()
