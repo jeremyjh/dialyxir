@@ -84,9 +84,38 @@ defmodule Mix.Tasks.Dialyzer do
   alias Dialyxir.Dialyzer
 
   defmodule Build do
+    @shortdoc "Build the required plt(s) and exit."
+
+    @moduledoc """
+    This task compiles the mix project and creates a PLT with dependencies if needed.
+    It is equivalent to running `mix dialyzer --plt`
+
+    ## Command line options
+
+    * `--no-compile`       - do not compile even if needed.
+    """
     use Mix.Task
     def run(args) do
       Mix.Tasks.Dialyzer.run(["--plt" | args])
+    end
+  end
+
+  defmodule Clean do
+    @shortdoc "Delete plt(s) and exit."
+
+    @moduledoc """
+    This task deletes PLT files and hash files.
+
+    ## Command line options
+
+    * `--all`       - delete also core PLTs.
+    """
+    use Mix.Task
+
+    @command_options [ all: :boolean, ]
+    def run(args) do
+      {opts, _, _dargs} = OptionParser.parse(args, strict: @command_options)
+      Mix.Tasks.Dialyzer.clean(opts)
     end
   end
 
@@ -105,12 +134,33 @@ defmodule Mix.Tasks.Dialyzer do
       {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
 
       unless opts[:no_compile], do: Mix.Project.compile([])
-      _ = unless no_check?(opts), do: check_plt()
+      _ = unless no_check?(opts) do
+        IO.puts "Finding suitable PLTs"
+        check_plt()
+      end
       unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
       IO.puts "No mix project found - checking core PLTs..."
       Project.plts_list([], false) |> Plt.check()
     end
+  end
+
+  def clean(opts, fun \\ &delete_plt/4) do
+    check_dialyzer()
+    compatibility_notice()
+    if opts[:all], do: Project.plts_list([], false) |> Plt.check(fun)
+    if Mix.Project.get() do
+      {apps, _hash} = dependency_hash()
+      IO.puts "Deleting PLTs"
+      Project.plts_list(apps, true, true) |> Plt.check(fun)
+      IO.puts "About to delete PLT hash file: #{plt_hash_file()}"
+      File.rm(plt_hash_file())
+    end
+  end
+
+  def delete_plt(plt, _, _, _) do
+    IO.puts("About to delete PLT file: #{plt}")
+    File.rm(plt)
   end
 
   defp no_check?(opts) do
