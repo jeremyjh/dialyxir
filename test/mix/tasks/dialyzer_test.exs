@@ -11,7 +11,7 @@ defmodule Mix.Tasks.DialyzerTest do
 
   test "Delete PLT file name" do
     in_project(:local_plt, fn ->
-      fun = fn -> Mix.Tasks.Dialyzer.clean(&no_delete_plt/4) end
+      fun = fn -> Mix.Tasks.Dialyzer.clean([], &no_delete_plt/4) end
 
       assert Regex.match?(
                ~r/About to delete PLT file: .*\/test\/fixtures\/local_plt\/local.plt/,
@@ -19,4 +19,27 @@ defmodule Mix.Tasks.DialyzerTest do
              )
     end)
   end
+
+  test "Core PLTs are not deleted without --all flag" do
+    in_project(:local_plt, fn ->
+      fun = fn -> Mix.Tasks.Dialyzer.clean([], &no_delete_plt/4) end
+
+      assert not Regex.match?(
+        ~r/About to delete PLT file: .*dialyxir_erlang/,
+        capture_io(fun)
+      )
+    end)
+  end
+
+  test "Core PLTs are deleted with --all flag" do
+    in_project(:local_plt, fn ->
+      fun = fn -> Mix.Tasks.Dialyzer.clean([{:all, true}], &no_delete_plt/4) end
+
+      assert Regex.match?(
+        ~r/About to delete PLT file: .*dialyxir_erlang/,
+        capture_io(fun)
+      )
+    end)
+  end
+
 end

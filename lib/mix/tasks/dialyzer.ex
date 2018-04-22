@@ -105,10 +105,17 @@ defmodule Mix.Tasks.Dialyzer do
 
     @moduledoc """
     This task deletes PLT files and hash files.
+
+    ## Command line options
+
+    * `--all`       - delete also core PLTs.
     """
     use Mix.Task
-    def run(_args) do
-      Mix.Tasks.Dialyzer.clean()
+
+    @command_options [ all: :boolean, ]
+    def run(args) do
+      {opts, _, _dargs} = OptionParser.parse(args, strict: @command_options)
+      Mix.Tasks.Dialyzer.clean(opts)
     end
   end
 
@@ -138,17 +145,16 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  def clean(fun \\ &delete_plt/4) do
+  def clean(opts, fun \\ &delete_plt/4) do
     check_dialyzer()
     compatibility_notice()
+    if opts[:all], do: Project.plts_list([], false) |> Plt.check(fun)
     if Mix.Project.get() do
       {apps, _hash} = dependency_hash()
       IO.puts "Deleting PLTs"
-      Project.plts_list(apps) |> Plt.check(fun)
+      Project.plts_list(apps, true, true) |> Plt.check(fun)
       IO.puts "About to delete PLT hash file: #{plt_hash_file()}"
       File.rm(plt_hash_file())
-    else
-      Project.plts_list([], false) |> Plt.check(fun)
     end
   end
 
