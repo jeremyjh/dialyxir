@@ -118,8 +118,9 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:pattern_match, [pattern, type]}) do
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_contract(pattern)
     pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
-    "The #{pattern} can never match the type #{pretty_type}."
+    "The #{pretty_pattern} can never match the type #{pretty_type}."
   end
 
   defp message_to_string({:pattern_match_cov, [pattern, type]}) do
