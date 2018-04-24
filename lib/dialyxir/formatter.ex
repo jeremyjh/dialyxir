@@ -20,15 +20,26 @@ defmodule Dialyxir.Formatter do
         try do
           format_warning(warning, format)
         catch
+          {:error, :message, warning} ->
+            """
+            Please file a bug with this message.
+
+            Failed to parse warning:
+            #{inspect(warning)}
+
+            Legacy warning:
+            #{format_warning(warning, :dialyzer)}
+            """
+
           {:error, :parsing, failing_string} ->
             """
+            Please file a bug with this message.
+
             Failed to parse part of warning:
             #{inspect(warning)}
 
             Failing part:
             #{failing_string}
-
-            Please file a bug with this message.
 
             Legacy warning:
             #{format_warning(warning, :dialyzer)}
@@ -343,6 +354,10 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:record_matching, [string, name]}) do
     "The #{string} violates the declared type for ##{name}{}."
+  end
+
+  defp message_to_string(message) do
+    throw {:error, :message, message}
   end
 
   defp call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, {overloaded?, contract}) do
