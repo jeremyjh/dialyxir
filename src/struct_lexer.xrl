@@ -30,7 +30,9 @@ _ : {token, {'_',  TokenLine}}.
 \-\> : {token, {'->',  TokenLine}}.
 \| : {token, {'|',  TokenLine}}.
 \<\< : {token, {'<<', TokenLine}}.
+\< : {token, {'<', TokenLine}}.
 \>\> : {token, {'>>', TokenLine}}.
+\> : {token, {'>', TokenLine}}.
 \' : {token, {'\'',  TokenLine}}.
 , : {token, {',',  TokenLine}}.
 {RANGE} : {token, {'..', TokenLine}}.

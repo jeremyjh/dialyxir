@@ -103,6 +103,10 @@ defmodule Dialyxir.PrettyPrint do
     "nil"
   end
 
+  defp do_pretty_print({:pattern, pattern_items}) do
+    "<#{Enum.map_join(pattern_items, ", ", &do_pretty_print/1)}>"
+  end
+
   defp do_pretty_print({:pipe_list, head, tail}) do
     "#{do_pretty_print(head)} | #{do_pretty_print(tail)}"
   end

@@ -4,12 +4,13 @@ values value
 list list_items
 struct struct_items
 tuple tuple_items
+pattern pattern_items
 range
 contract
 function.
 
 Terminals
-nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' ':' '...' '<<' '>>'.
+nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' ':' '...' '<<' '>>' '<' '>'.
 
 Rootsymbol document.
 
@@ -36,6 +37,7 @@ value -> '\'' nil '\''  : {nil}.
 value -> atom : {atom, unwrap('$1')}.
 value -> list : '$1'.
 value -> tuple : '$1'.
+value -> pattern : '$1'.
 value -> function : '$1'.
 value -> contract : '$1'.
 value -> range : '$1'.
@@ -51,6 +53,10 @@ list_items -> value ',' list_items : ['$1'] ++ '$3'.
 tuple -> '{' tuple_items '}' : {tuple, '$2'}.
 tuple_items -> value : ['$1'].
 tuple_items -> value ',' tuple_items : ['$1'] ++ '$3'.
+
+pattern -> '<' pattern_items '>' : {pattern, '$2'}.
+pattern_items -> value : ['$1'].
+pattern_items -> value ',' pattern_items : ['$1'] ++ '$3'.
 
 struct -> '#' '{' '}' : {empty_map}.
 struct -> '#' '{' struct_items '}' : {map, '$3'}.

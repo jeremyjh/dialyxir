@@ -29,7 +29,7 @@ defmodule Dialyxir.Formatter do
     base_name = Path.relative_to_cwd(file)
     string = message_to_string(message)
 
-    "#{base_name}:#{line}\n#{string}\n"
+    "\n#{base_name}:#{line}\n#{string}\n"
   end
 
   # Warnings for general discrepancies
@@ -123,8 +123,13 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:pattern_match_cov, [pattern, type]}) do
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_contract(pattern)
     pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
-    "The #{pattern} can never match since previous clauses completely covered the type #{pretty_type}."
+    "The #{pretty_pattern} can never match since previous clauses completely covered the type #{pretty_type}."
+  end
+
+  defp message_to_string({:unknown_function, {module, function, arity}}) do
+    "Function #{module}.#{function}/#{arity} does not exist."
   end
 
   defp message_to_string({:unmatched_return, [type]}) do
