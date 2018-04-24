@@ -127,7 +127,7 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:guard_fail_pat, [pattern, type]}) do
-    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
     "Clause guard cannot succeed. The pattern #{pattern} was matched against the type #{pretty_type}."
   end
 
@@ -162,13 +162,13 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:pattern_match, [pattern, type]}) do
     pretty_pattern = Dialyxir.PrettyPrint.pretty_print(pattern)
-    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
     "The #{pretty_pattern} can never match the type #{pretty_type}."
   end
 
   defp message_to_string({:pattern_match_cov, [pattern, type]}) do
     pretty_pattern = Dialyxir.PrettyPrint.pretty_print(pattern)
-    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
     "The #{pretty_pattern} can never match since previous clauses completely covered the type #{pretty_type}."
   end
 
@@ -178,7 +178,7 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:unmatched_return, [type]}) do
-    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
     "Expression produces a value of type #{pretty_type}, but this value is unmatched."
   end
 
@@ -194,7 +194,7 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:contract_diff, [module, function, arity, contract, signature]}) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
-    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+    pretty_contract = Dialyxir.PrettyPrint.pretty_print_type(contract)
 
     """
     Type specification is not equal to the success typing.
