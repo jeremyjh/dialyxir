@@ -84,11 +84,13 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:guard_fail_pat, [pattern, type]}) do
-    "Clause guard cannot succeed. The pattern #{pattern} was matched against the type #{type}."
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    "Clause guard cannot succeed. The pattern #{pattern} was matched against the type #{pretty_type}."
   end
 
   defp message_to_string({:improper_list_constr, [tl_type]}) do
-    "Cons will produce an improper list since its 2nd argument is #{tl_type}."
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(tl_type)
+    "Cons will produce an improper list since its 2nd argument is #{pretty_type}."
   end
 
   defp message_to_string({:no_return, [type | name]}) do
@@ -116,15 +118,18 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:pattern_match, [pattern, type]}) do
-    "The #{pattern} can never match the type #{type}."
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    "The #{pattern} can never match the type #{pretty_type}."
   end
 
   defp message_to_string({:pattern_match_cov, [pattern, type]}) do
-    "The #{pattern} can never match since previous clauses completely covered the type #{type}."
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    "The #{pattern} can never match since previous clauses completely covered the type #{pretty_type}."
   end
 
   defp message_to_string({:unmatched_return, [type]}) do
-    "Expression produces a value of type #{type}, but this value is unmatched."
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    "Expression produces a value of type #{pretty_type}, but this value is unmatched."
   end
 
   defp message_to_string({:unused_fun, []}) do
