@@ -179,7 +179,13 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:unmatched_return, [type]}) do
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
-    "Expression produces a value of type #{pretty_type}, but this value is unmatched."
+    """
+    Expression produces a value of type:
+
+    #{pretty_type}
+
+    but this value is unmatched.
+    """
   end
 
   defp message_to_string({:unused_fun, []}) do
