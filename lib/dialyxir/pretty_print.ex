@@ -39,76 +39,8 @@ defmodule Dialyxir.PrettyPrint do
     |> String.replace("\n      ", "\n")
   end
 
-  defp do_pretty_print({:list, :paren, items}) do
-    "(#{Enum.map_join(items, ", ", &do_pretty_print/1)})"
-  end
-
-  defp do_pretty_print({:list, :square, items}) do
-    "[#{Enum.map_join(items, ", ", &do_pretty_print/1)}]"
-  end
-
-  defp do_pretty_print({:tuple, tuple_items}) do
-    "{#{Enum.map_join(tuple_items, ", ", &do_pretty_print/1)}}"
-  end
-
-  defp do_pretty_print({:pipe_list, head, tail}) do
-    "#{do_pretty_print(head)} | #{do_pretty_print(tail)}"
-  end
-
-  defp do_pretty_print({:type_list, type, types}) do
-    "#{type}#{do_pretty_print(types)}"
-  end
-
-  defp do_pretty_print({:contract, {:args, args}, {:return, return}}) do
-    "#{do_pretty_print(args)} :: #{do_pretty_print(return)}"
-  end
-
-  defp do_pretty_print({:function, {:args, args}, {:return, return}}) do
-    "(#{do_pretty_print(args)} -> #{do_pretty_print(return)})"
-  end
-
-  defp do_pretty_print({:map_entry, key, value}) do
-    "#{do_pretty_print(key)} => #{do_pretty_print(value)}"
-  end
-
-  defp do_pretty_print({:range, from, to}) do
-    "#{from}..#{to}"
-  end
-
-  defp do_pretty_print({:int, int}) do
-    "#{int}"
-  end
-
-  defp do_pretty_print({:empty_list, :square}) do
-    "[]"
-  end
-
-  defp do_pretty_print({:type, type}) do
-    "#{type}()"
-  end
-
-  defp do_pretty_print({:type, module, type}) do
-    "#{strip_elixir(module)}.#{type}()"
-  end
-
   defp do_pretty_print({:any}) do
     "_"
-  end
-
-  defp do_pretty_print({:rest}) do
-    "..."
-  end
-
-  defp do_pretty_print({:nil}) do
-    "nil"
-  end
-
-  defp do_pretty_print({:binary, value, size}) do
-    "<<#{do_pretty_print(value)} :: #{do_pretty_print(size)}>>"
-  end
-
-  defp do_pretty_print({:empty_map}) do
-    "%{}"
   end
 
   defp do_pretty_print({:atom, atom}) do
@@ -120,6 +52,42 @@ defmodule Dialyxir.PrettyPrint do
     end
   end
 
+  defp do_pretty_print({:binary, value, size}) do
+    "<<#{do_pretty_print(value)} :: #{do_pretty_print(size)}>>"
+  end
+
+  defp do_pretty_print({:contract, {:args, args}, {:return, return}}) do
+    "#{do_pretty_print(args)} :: #{do_pretty_print(return)}"
+  end
+
+  defp do_pretty_print({:empty_list, :square}) do
+    "[]"
+  end
+
+  defp do_pretty_print({:empty_map}) do
+    "%{}"
+  end
+
+  defp do_pretty_print({:function, {:args, args}, {:return, return}}) do
+    "(#{do_pretty_print(args)} -> #{do_pretty_print(return)})"
+  end
+
+  defp do_pretty_print({:int, int}) do
+    "#{int}"
+  end
+
+  defp do_pretty_print({:list, :paren, items}) do
+    "(#{Enum.map_join(items, ", ", &do_pretty_print/1)})"
+  end
+
+  defp do_pretty_print({:list, :square, items}) do
+    "[#{Enum.map_join(items, ", ", &do_pretty_print/1)}]"
+  end
+
+  defp do_pretty_print({:map_entry, key, value}) do
+    "#{do_pretty_print(key)} => #{do_pretty_print(value)}"
+  end
+
   defp do_pretty_print({:map, map_keys}) do
     struct_name = struct_name(map_keys)
     if struct_name do
@@ -129,6 +97,38 @@ defmodule Dialyxir.PrettyPrint do
     else
       "%{#{Enum.map_join(map_keys, ", ", &do_pretty_print/1)}}"
     end
+  end
+
+  defp do_pretty_print({:nil}) do
+    "nil"
+  end
+
+  defp do_pretty_print({:pipe_list, head, tail}) do
+    "#{do_pretty_print(head)} | #{do_pretty_print(tail)}"
+  end
+
+  defp do_pretty_print({:range, from, to}) do
+    "#{from}..#{to}"
+  end
+
+  defp do_pretty_print({:rest}) do
+    "..."
+  end
+
+  defp do_pretty_print({:tuple, tuple_items}) do
+    "{#{Enum.map_join(tuple_items, ", ", &do_pretty_print/1)}}"
+  end
+
+  defp do_pretty_print({:type, type}) do
+    "#{type}()"
+  end
+
+  defp do_pretty_print({:type, module, type}) do
+    "#{strip_elixir(module)}.#{type}()"
+  end
+
+  defp do_pretty_print({:type_list, type, types}) do
+    "#{type}#{do_pretty_print(types)}"
   end
 
   defp strip_elixir(string) do
