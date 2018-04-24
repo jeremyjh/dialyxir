@@ -13,8 +13,29 @@ defmodule Dialyxir.Formatter do
   end
 
   def format_and_filter(warnings, filterer, format) when format in [:dialyzer, :dialyxir] do
+    divider = String.duplicate("_", 80)
     warnings
-    |> Enum.map(&format_warning(&1, format))
+    |> Enum.map(fn warning ->
+      message =
+        try do
+          format_warning(warning, format)
+        catch
+          {:error, :parsing, failing_string} ->
+            """
+            Failed to parse part of warning:
+            #{inspect(warning)}
+
+            Failing part:
+            #{failing_string}
+
+            Please file a bug with this message.
+
+            Legacy warning:
+            #{format_warning(warning, :dialyzer)}
+            """
+        end
+      message <> divider
+    end)
     |> filterer.filter_warnings()
   end
 
@@ -29,14 +50,16 @@ defmodule Dialyxir.Formatter do
     base_name = Path.relative_to_cwd(file)
     string = message_to_string(message)
 
-    "\n#{base_name}:#{line}\n#{string}\n"
+    """
+    #{base_name}:#{line}
+    #{string}
+    """
   end
 
   # Warnings for general discrepancies
 
   defp message_to_string({:apply, [args, arg_positions, fail_reason, signature_args, signature_return, contract]}) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
-
     "Fun application with arguments #{pretty_args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
   end
 
@@ -59,6 +82,23 @@ defmodule Dialyxir.Formatter do
   defp message_to_string({:call_to_missing, [module, function, arity]}) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     "Call to missing or private function #{pretty_module}.#{function}/#{arity}."
+  end
+
+  defp message_to_string({:callback_type_mismatch, [module, function, arity, fail_type, success_type]}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    IO.inspect success_type
+    pretty_fail_type = Dialyxir.PrettyPrint.pretty_print(fail_type)
+    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_contract(success_type)
+
+    """
+    Callback mismatch for @callback #{pretty_module}.#{function}/#{arity}.
+
+    Expecred type:
+    #{pretty_success_type}
+
+    Actual type:
+    #{pretty_fail_type}
+    """
   end
 
   defp message_to_string({:exact_eq, [type1, op, type2]}) do
@@ -87,12 +127,12 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:guard_fail_pat, [pattern, type]}) do
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
     "Clause guard cannot succeed. The pattern #{pattern} was matched against the type #{pretty_type}."
   end
 
   defp message_to_string({:improper_list_constr, [tl_type]}) do
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(tl_type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print(tl_type)
     "Cons will produce an improper list since its 2nd argument is #{pretty_type}."
   end
 

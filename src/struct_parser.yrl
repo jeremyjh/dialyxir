@@ -42,6 +42,7 @@ value -> function : '$1'.
 value -> contract : '$1'.
 value -> range : '$1'.
 
+value -> '\'' value '|' value '\'' : {pipe_list, '$2', '$4'}.
 value -> value '|' value : {pipe_list, '$1', '$3'}.
 
 list -> '(' list_items ')' : {list, paren, '$2'}.

@@ -11,10 +11,15 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   def pretty_print(str) do
-    str
-    |> parse()
-    |> List.first()
-    |> do_pretty_print()
+    try do
+      str
+      |> parse()
+      |> List.first()
+      |> do_pretty_print()
+    rescue
+      _ ->
+        throw {:error, :parsing, str}
+    end
   end
 
   def pretty_print_contract(str) do
