@@ -12,9 +12,9 @@ defmodule Dialyxir.Formatter do
     "done in #{minutes}m#{seconds}s"
   end
 
-  def format_and_filter(warnings, filterer) do
+  def format_and_filter(warnings, filterer, format) when format in [:dialyzer, :dialyxir] do
     warnings
-    |> Enum.map(&format_warning(&1,:dialyxir))
+    |> Enum.map(&format_warning(&1, format))
     |> filterer.filter_warnings()
   end
 
@@ -42,7 +42,7 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:app_call, [module, function, args, culprit, expected_type, actual_type]}) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
-    "The call #{module}:#{function}#{pretty_args} requires that #{culprit} is of type #{expected_type} not #{actual_type}."
+    "The call #{module}.#{function}#{pretty_args} requires that #{culprit} is of type #{expected_type} not #{actual_type}."
   end
 
   defp message_to_string({:bin_construction, [culprit, size, segment, type]}) do
@@ -51,7 +51,7 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:call, [module, function, args, arg_positions, fail_reason, signature_args, signature_return, contract]}) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
-    "The call #{module}:#{function}#{pretty_args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
+    "The call #{module}.#{function}#{pretty_args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
   end
 
   defp message_to_string({:call_to_missing, [module, function, arity]}) do
