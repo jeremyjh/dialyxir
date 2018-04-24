@@ -1,11 +1,11 @@
 Definitions.
 
 WHITESPACE=[\s\t\r\n]+
-INT = [0-9]+
+INT = -?[0-9]+
 NUMBERED = _@[0-9]+::
 REST = \.\.\.
 RANGE = \.\.
-ATOM = [a-zA-Z_][a-zA-Z\._0-9\?@]*
+ATOM = [a-zA-Z_\.=][a-zA-Z\._0-9\?@=]*
 
 Rules.
 
