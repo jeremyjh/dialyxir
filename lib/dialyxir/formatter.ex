@@ -314,7 +314,7 @@ defmodule Dialyxir.Formatter do
 
   # We know which positions N are to blame;
   # the list of triples will never be empty.
-  defp form_expencted_without_opaque([{position, type, type_string}]) do
+  defp form_expected_without_opaque([{position, type, type_string}]) do
     form_position_string = form_position_string([position])
     message =
       if :erl_types.t_is_opaque(type) do
