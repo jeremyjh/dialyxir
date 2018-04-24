@@ -10,7 +10,7 @@ defmodule Dialyxir.PrettyPrint do
     list
   end
 
-  defp pretty_print(str) do
+  def pretty_print(str) do
     str
     |> parse()
     |> List.first()

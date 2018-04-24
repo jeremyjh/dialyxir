@@ -42,7 +42,8 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:app_call, [module, function, args, culprit, expected_type, actual_type]}) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
-    "The call #{module}.#{function}#{pretty_args} requires that #{culprit} is of type #{expected_type} not #{actual_type}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "The call #{pretty_module}.#{function}#{pretty_args} requires that #{culprit} is of type #{expected_type} not #{actual_type}."
   end
 
   defp message_to_string({:bin_construction, [culprit, size, segment, type]}) do
@@ -51,11 +52,13 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:call, [module, function, args, arg_positions, fail_reason, signature_args, signature_return, contract]}) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
-    "The call #{module}.#{function}#{pretty_args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "The call #{pretty_module}.#{function}#{pretty_args} #{call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, contract)}."
   end
 
   defp message_to_string({:call_to_missing, [module, function, arity]}) do
-    "Call to missing or unexported function #{module}:#{function}/#{arity}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "Call to missing or private function #{pretty_module}.#{function}/#{arity}."
   end
 
   defp message_to_string({:exact_eq, [type1, op, type2]}) do
@@ -118,23 +121,24 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:pattern_match, [pattern, type]}) do
-    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_contract(pattern)
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print(pattern)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
     "The #{pretty_pattern} can never match the type #{pretty_type}."
   end
 
   defp message_to_string({:pattern_match_cov, [pattern, type]}) do
-    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_contract(pattern)
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print(pattern)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
     "The #{pretty_pattern} can never match since previous clauses completely covered the type #{pretty_type}."
   end
 
   defp message_to_string({:unknown_function, {module, function, arity}}) do
-    "Function #{module}.#{function}/#{arity} does not exist."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "Function #{pretty_module}.#{function}/#{arity} does not exist."
   end
 
   defp message_to_string({:unmatched_return, [type]}) do
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_contract(type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print(type)
     "Expression produces a value of type #{pretty_type}, but this value is unmatched."
   end
 
@@ -148,14 +152,15 @@ defmodule Dialyxir.Formatter do
 
   # Warnings for specs and contracts
 
-  defp message_to_string({:contract_diff, [module, function, _args, contract, signature]}) do
+  defp message_to_string({:contract_diff, [module, function, arity, contract, signature]}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
 
     """
     Type specification is not equal to the success typing.
 
     Function:
-    #{module}:#{function}
+    #{pretty_module}.#{function}/#{arity}
 
     Type specification:
     #{pretty_contract}
@@ -168,14 +173,15 @@ defmodule Dialyxir.Formatter do
     """
   end
 
-  defp message_to_string({:contract_subtype, [module, function, _args, contract, signature]}) do
+  defp message_to_string({:contract_subtype, [module, function, arity, contract, signature]}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
 
     """
     Type specification is a subtype of the success typing.
 
     Function:
-    #{module}:#{function}
+    #{pretty_module}.#{function}/#{arity}
 
     Type specification:
     @spec #{function}#{pretty_contract}
@@ -185,14 +191,15 @@ defmodule Dialyxir.Formatter do
     """
   end
 
-  defp message_to_string({:contract_supertype, [module, function, _args, contract, signature]}) do
+  defp message_to_string({:contract_supertype, [module, function, arity, contract, signature]}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
 
     """
     Type specification is a supertype of the success typing.
 
     Function:
-    #{module}:#{function}
+    #{pretty_module}.#{function}/#{arity}
 
     Type specification:
     @spec #{function}#{pretty_contract}
@@ -203,11 +210,13 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:invalid_contract, [module, function, arity, signature]}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+
     """
     Invalid type specification for function.
 
     Function:
-    #{module}:#{function}/#{arity}
+    #{pretty_module}.#{function}/#{arity}
 
     Success typing:
     #{signature}
@@ -215,7 +224,8 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:extra_range, [module, function, arity, extra_ranges, signature_range]}) do
-    "The specification for #{module}:#{function}/#{arity} states that the function might also return #{extra_ranges} but the inferred return is #{signature_range}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "The specification for #{pretty_module}.#{function}/#{arity} states that the function might also return #{extra_ranges} but the inferred return is #{signature_range}."
   end
 
   defp message_to_string({:overlapping_contracts, []}) do
@@ -223,17 +233,20 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:spec_missing_fun, [module, function, arity]}) do
-    "Contract for function that does not exist: #{module}:#{function}/#{arity}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "Contract for function that does not exist: #{pretty_module}.#{function}/#{arity}."
   end
 
   # Warnings for opaque type violations
 
   defp message_to_string({:call_with_opaque, [module, function, args, arg_positions, expected_args]}) do
-    "The call #{module}:#{function}#{args} contains #{form_positions(arg_positions)} when #{form_expected(expected_args)}}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "The call #{pretty_module}.#{function}#{args} contains #{form_positions(arg_positions)} when #{form_expected(expected_args)}}."
   end
 
   defp message_to_string({:call_without_opaque, [module, function, args, expected_triples]}) do
-    "The call #{module}:#{function}#{args} does not have #{form_expected_without_opaque(expected_triples)}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "The call #{pretty_module}.#{function}#{args} does not have #{form_expected_without_opaque(expected_triples)}."
   end
 
   defp message_to_string({:opaque_eq, [type, _op, opaque_type]}) do
@@ -267,7 +280,9 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:race_condition, [module, function, args, reason]}) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
-    "The call #{module}:#{function}#{pretty_args} #{reason}."
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+
+    "The call #{pretty_module},#{function}#{pretty_args} #{reason}."
   end
 
   # Erlang patterns
