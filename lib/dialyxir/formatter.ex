@@ -143,7 +143,8 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:guard_fail_pat, [pattern, type]}) do
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
-    "Clause guard cannot succeed. The pattern #{pattern} was matched against the type #{pretty_type}."
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
+    "Clause guard cannot succeed. The pattern #{pretty_pattern} was matched against the type #{pretty_type}."
   end
 
   defp message_to_string({:improper_list_constr, [tl_type]}) do
@@ -176,13 +177,13 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:pattern_match, [pattern, type]}) do
-    pretty_pattern = Dialyxir.PrettyPrint.pretty_print(pattern)
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
     "The #{pretty_pattern} can never match the type #{pretty_type}."
   end
 
   defp message_to_string({:pattern_match_cov, [pattern, type]}) do
-    pretty_pattern = Dialyxir.PrettyPrint.pretty_print(pattern)
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
     "The #{pretty_pattern} can never match since previous clauses completely covered the type #{pretty_type}."
   end
@@ -325,8 +326,9 @@ defmodule Dialyxir.Formatter do
       else
         opaque_term
       end
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
 
-    "The attempt to match a term of type #{opaque_term} against the #{pattern} breaks the opaqueness of #{term}."
+    "The attempt to match a term of type #{opaque_term} against the #{pretty_pattern} breaks the opaqueness of #{term}."
   end
 
   defp message_to_string({:opaque_neq, [type, _op, opaque_type]}) do
