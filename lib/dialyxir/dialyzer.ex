@@ -7,10 +7,12 @@ defmodule Dialyxir.Dialyzer do
   defmodule Runner do
     def run(args, filterer) do
       try do
+        {raw?, args} = Keyword.split(args, [:raw])
+        formatter = if raw?[:raw], do: :raw, else: :dialyxir
         {duration_ms, result} = :timer.tc(&:dialyzer.run/1, [args])
 
         formatted_time_elapsed = Formatter.formatted_time(duration_ms)
-        formatted_warnings = Formatter.format_and_filter(result, filterer, :dialyxir)
+        formatted_warnings = Formatter.format_and_filter(result, filterer, formatter)
         {:ok, {formatted_time_elapsed, formatted_warnings}}
       catch
         {:dialyzer_error, msg} ->

@@ -13,6 +13,7 @@ defmodule Mix.Tasks.Dialyzer do
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
       useful for CI. do not use with `mix do`.
     * `--plt`              - only build the required plt(s) and exit.
+    * `--raw`              - Dump the raw erlang terms returned by dialyzer module.
 
   Warning flags passed to this task are passed on to `:dialyzer`.
 
@@ -123,7 +124,9 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options [ no_compile: :boolean,
                      no_check: :boolean,
                      halt_exit_status: :boolean,
-                     plt: :boolean ]
+                     plt: :boolean,
+                     raw: :boolean,
+                   ]
 
   def run(args) do
     check_dialyzer()
@@ -191,7 +194,9 @@ defmodule Mix.Tasks.Dialyzer do
     args = [ { :check_plt, false },
              { :init_plt, String.to_charlist(Project.plt_file()) },
              { :files_rec, Project.dialyzer_paths() },
-             { :warnings, dialyzer_warnings(dargs) } ]
+             { :warnings, dialyzer_warnings(dargs) } ,
+             { :raw, opts[:raw] },
+           ]
 
     IO.puts "Starting Dialyzer"
     IO.inspect args, label: "dialyzer args"

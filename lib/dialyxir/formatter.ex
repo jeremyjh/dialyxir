@@ -50,6 +50,10 @@ defmodule Dialyxir.Formatter do
     |> filterer.filter_warnings()
   end
 
+  def format_and_filter(warnings, _, :raw) do
+    Enum.map(warnings, &inspect/1)
+  end
+
   defp format_warning(warning, :dialyzer) do
     warning
     |> :dialyzer.format_warning(:fullpath)
