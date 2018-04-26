@@ -24,6 +24,7 @@ fun\( : {token, {'fun(',  TokenLine}}.
 _ : {token, {'_',  TokenLine}}.
 \# : {token, {'#',  TokenLine}}.
 \| : {token, {'|',  TokenLine}}.
+\:\: : {token, {'::',  TokenLine}}.
 \: : {token, {':',  TokenLine}}.
 \:\= : {token, {':=',  TokenLine}}.
 \=\> : {token, {'=>',  TokenLine}}.

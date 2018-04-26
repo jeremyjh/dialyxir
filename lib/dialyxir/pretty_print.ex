@@ -72,6 +72,11 @@ defmodule Dialyxir.PrettyPrint do
     "_"
   end
 
+  # TODO: Not sure what the middle value is here.
+  defp do_pretty_print({:atom, _, atom}) do
+    strip_elixir(atom)
+  end
+
   defp do_pretty_print({:atom, atom}) do
     module_name = strip_elixir(atom)
     if module_name == to_string(atom) do
@@ -128,6 +133,10 @@ defmodule Dialyxir.PrettyPrint do
     end
   end
 
+  defp do_pretty_print({:named_value, name, value}) do
+    "#{do_pretty_print(name)} :: #{do_pretty_print(value)}"
+  end
+
   defp do_pretty_print({:nil}) do
     "nil"
   end
@@ -149,7 +158,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:tuple, tuple_items}) do
-    "{#{Enum.map_join(tuple_items, ", ", &do_pretty_print/1)}}"
+    "{#{Enum.map_join(tuple_items, ", ", &do_pretty_print/1)}}"  |> IO.inspect
   end
 
   defp do_pretty_print({:type, type}) do
