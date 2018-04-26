@@ -22,7 +22,7 @@ defmodule Dialyxir.Formatter do
         catch
           {:error, :message, warning} ->
             """
-            Please file a bug with this message.
+            Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
 
             Failed to parse warning:
             #{inspect(warning)}
@@ -33,7 +33,7 @@ defmodule Dialyxir.Formatter do
 
           {:error, :parsing, failing_string} ->
             """
-            Please file a bug with this message.
+            Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
 
             Failed to parse part of warning:
             #{inspect(warning)}
