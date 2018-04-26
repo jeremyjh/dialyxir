@@ -94,6 +94,10 @@ defmodule Dialyxir.PrettyPrint do
     "#{do_pretty_print(args)} :: #{do_pretty_print(return)}"
   end
 
+  defp do_pretty_print({:empty_list, :paren}) do
+    "()"
+  end
+
   defp do_pretty_print({:empty_list, :square}) do
     "[]"
   end
