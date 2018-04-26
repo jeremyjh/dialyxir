@@ -22,7 +22,7 @@ defmodule Dialyxir.Formatter do
         catch
           {:error, :message, warning} ->
             """
-            Please file a bug with this message.
+            Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
 
             Failed to parse warning:
             #{inspect(warning)}
@@ -33,7 +33,7 @@ defmodule Dialyxir.Formatter do
 
           {:error, :parsing, failing_string} ->
             """
-            Please file a bug with this message.
+            Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
 
             Failed to parse part of warning:
             #{inspect(warning)}
@@ -138,7 +138,14 @@ defmodule Dialyxir.Formatter do
   end
 
   defp message_to_string({:guard_fail, [guard, args]}) do
-    "Guard test #{guard}#{args} can never succeed."
+    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+
+    """
+    Guard test:
+    #{guard}#{pretty_args}
+
+    can never succeed.
+    """
   end
 
   defp message_to_string({:guard_fail_pat, [pattern, type]}) do
@@ -375,18 +382,39 @@ defmodule Dialyxir.Formatter do
 	  "will never return since the success typing arguments are #{signature_args}"
         else
           position_string = form_position_string(arg_positions)
-	  "will never return since it differs in argument #{position_string} from the success typing arguments: #{signature_args}"
+	  """
+          will never return since it differs in argument:
+          #{position_string}
+
+          from the success typing arguments:
+          #{signature_args}
+          """
         end
       :only_contract ->
         if Enum.empty?(arg_positions) or overloaded? do
 	  # We do not know which arguments caused the failure
-	  "breaks the contract #{pretty_contract}"
+	  """
+          breaks the contract
+          #{pretty_contract}
+          """
         else
           position_string = form_position_string(arg_positions)
-	  "breaks the contract #{pretty_contract} in argument #{position_string}"
+	  """
+          breaks the contract
+          #{pretty_contract}
+
+          in argument
+          #{position_string}
+          """
         end
       :both ->
-        "will never return since the success typing is #{signature_args} -> #{signature_return} and the contract is #{pretty_contract}"
+        """
+        will never return since the success typing is:
+        #{signature_args} -> #{signature_return}
+
+        and the contract is
+        #{pretty_contract}
+        """
     end
   end
 
