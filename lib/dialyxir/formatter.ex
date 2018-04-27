@@ -159,6 +159,26 @@ defmodule Dialyxir.Formatter do
     "Cons will produce an improper list since its 2nd argument is #{pretty_type}."
   end
 
+  defp message_to_string({:neg_guard_fail, [arg1, infix, arg2]}) do
+    """
+    Guard test:
+    not #{arg1} #{infix} #{arg2}
+
+    can never succeed.
+    """
+  end
+
+  defp message_to_string({:neg_guard_fail, [guard, args]}) do
+    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+
+    """
+    Guard test:
+    not #{guard}#{pretty_args}
+
+    can never succeed.
+    """
+  end
+
   defp message_to_string({:no_return, [type | name]}) do
     name_string =
       case name do
@@ -195,9 +215,21 @@ defmodule Dialyxir.Formatter do
     "The #{pretty_pattern} can never match since previous clauses completely covered the type #{pretty_type}."
   end
 
+  defp message_to_string({:unknown_behaviour, behaviour}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(behaviour)
+
+    "Unknown behaviour: #{pretty_module}."
+  end
+
   defp message_to_string({:unknown_function, {module, function, arity}}) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     "Function #{pretty_module}.#{function}/#{arity} does not exist."
+  end
+
+  defp message_to_string({:unknown_type, {module, function, arity}}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+
+    "Unknown type: #{pretty_module}.#{function}/#{arity}."
   end
 
   defp message_to_string({:unmatched_return, [type]}) do
@@ -297,8 +329,12 @@ defmodule Dialyxir.Formatter do
     "The specification for #{pretty_module}.#{function}/#{arity} states that the function might also return #{extra_ranges} but the inferred return is #{signature_range}."
   end
 
-  defp message_to_string({:overlapping_contracts, []}) do
-    "Overloaded contract has overlapping domains; such contracts are currently unsupported and are simply ignored."
+  defp message_to_string({:overlapping_contract, [module, function, arity]}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    """
+    Overloaded contract for #{pretty_module}.#{function}/#{arity} has overlapping domains;
+    such contracts are currently unsupported and are simply ignored.
+    """
   end
 
   defp message_to_string({:spec_missing_fun, [module, function, arity]}) do
@@ -367,6 +403,70 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:record_matching, [string, name]}) do
     "The #{string} violates the declared type for ##{name}{}."
+  end
+
+  defp message_to_string({:callback_arg_type_mismatch, [behaviour, function, arity, success_type, callback_type]}) do
+    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_type(success_type)
+    pretty_callback_type = Dialyxir.PrettyPrint.pretty_print_type(callback_type)
+
+    """
+    The inferred return type of #{function}/#{arity}
+    (#{pretty_success_type}) has nothing in common
+    with #{pretty_callback_type}, which is the expected return type
+    for the callback of the #{pretty_behaviour} behaviour.
+    """
+  end
+
+  defp message_to_string({:callback_arg_type_mismatch, [behaviour, function, arity, position, success_type, callback_type]}) do
+    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_type(success_type)
+    pretty_callback_type = Dialyxir.PrettyPrint.pretty_print_type(callback_type)
+
+    """
+    The inferred type for the #{ordinal(position)} argument
+    of #{function}/#{arity} (#{pretty_success_type})) is not a supertype of
+    #{pretty_callback_type}, which is expected type for this argument
+    in the callback of the #{pretty_behaviour} behaviour.
+    """
+  end
+
+  defp message_to_string({:callback_spec_type_mismatch, [behaviour, function, arity, success_type, callback_type]}) do
+    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_type(success_type)
+    pretty_callback_type = Dialyxir.PrettyPrint.pretty_print_type(callback_type)
+
+    """
+    The return type #{pretty_success_type} in the specification
+    of #{function}/#{arity} is not subtype of #{pretty_callback_type},
+    which is the expected return type for the callback of
+    the #{pretty_behaviour} behaviour.
+    """
+  end
+
+  defp message_to_string({:callback_spec_arg_type_mismatch, [behaviour, function, arity, position, success_type, callback_type]}) do
+    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_type(success_type)
+    pretty_callback_type = Dialyxir.PrettyPrint.pretty_print_type(callback_type)
+
+    """
+    The specified type for the #{ordinal(position)} argument
+    of #{function}/#{arity} (#{pretty_success_type}) is not a supertype
+    of #{pretty_callback_type}, which is the expected type for this
+    argment in the callback of the #{pretty_behaviour} behaviour.
+    """
+  end
+
+  defp message_to_string({:callback_missing, [function, arity, behaviour]}) do
+    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+
+    "Undefined callback function #{function}/#{arity} (behaviour #{pretty_behaviour})."
+  end
+
+  defp message_to_string({:callback_info_missing, [behaviour]}) do
+    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+
+    "Callback info about the #{pretty_behaviour} behaviour is not available."
   end
 
   defp message_to_string(message) do
@@ -467,4 +567,9 @@ defmodule Dialyxir.Formatter do
     "positions #{arg_string}"
   end
 
+  @spec ordinal(non_neg_integer) :: String.t()
+  defp ordinal(1), do: "1st"
+  defp ordinal(2), do: "2nd"
+  defp ordinal(3), do: "3rd"
+  defp ordinal(n) when is_integer(n), do: "#{n}th"
 end
