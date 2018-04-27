@@ -7,8 +7,8 @@ list list_items
 struct struct_items
 tuple tuple_items
 pattern pattern_items
-ascii_list ascii_items
-ascii
+byte_list byte_items
+byte
 named_value
 range
 contract
@@ -47,7 +47,7 @@ value -> pattern : '$1'.
 value -> function : '$1'.
 value -> contract : '$1'.
 value -> range : '$1'.
-value -> ascii_list : '$1'.
+value -> byte_list : '$1'.
 
 value -> '\'' value '|' value '\'' : {pipe_list, '$2', '$4'}.
 value -> value '|' value : {pipe_list, '$1', '$3'}.
@@ -84,13 +84,13 @@ function -> 'fun(' list '->' value ')' : {function, {args, '$2'}, {return, '$4'}
 
 contract -> list '->' value : {contract, {args, '$1'}, {return, '$3'}}.
 
-ascii_list -> '#' '{' '}' '#' : {ascii, []}.
-ascii_list -> '#' '{' ascii_items '}' '#' : {ascii, '$3'}.
+byte_list -> '#' '{' '}' '#' : {byte_list, []}.
+byte_list -> '#' '{' byte_items '}' '#' : {byte_list, '$3'}.
 
-ascii_items -> ascii : ['$1'].
-ascii_items -> ascii ',' ascii_items : ['$1'] ++ '$3'.
+byte_items -> byte : ['$1'].
+byte_items -> byte ',' byte_items : ['$1'] ++ '$3'.
 
-ascii -> '#' '<' int '>' '(' int ',' int ',' '\'' atom '\'' ',' '[' '\'' atom '\'' ',' '\'' atom '\'' ']' ')' : unwrap('$3').
+byte -> '#' '<' int '>' '(' int ',' int ',' '\'' atom '\'' ',' '[' '\'' atom '\'' ',' '\'' atom '\'' ']' ')' : unwrap('$3').
 
 Erlang code.
 

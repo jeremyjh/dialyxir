@@ -72,8 +72,12 @@ defmodule Dialyxir.PrettyPrint do
     "_"
   end
 
-  defp do_pretty_print({:ascii, n}) do
-    "\"#{[n]}\""
+  defp do_pretty_print({:byte_list, byte_list}) do
+    byte_list
+    |> Enum.into(<<>>, fn byte ->
+      <<byte :: 8>>
+    end)
+    |> inspect()
   end
 
   # TODO: Not sure what the middle value is here.
