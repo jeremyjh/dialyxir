@@ -73,9 +73,11 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:byte_list, byte_list}) do
-    binary = for byte <- byte_list, into: <<>>, do: <<byte :: 8>>
-
-    inspect(binary)
+    byte_list
+    |> Enum.into(<<>>, fn byte ->
+      <<byte :: 8>>
+    end)
+    |> inspect()
   end
 
   # TODO: Not sure what the middle value is here.
