@@ -84,6 +84,7 @@ function -> 'fun(' list '->' value ')' : {function, {args, '$2'}, {return, '$4'}
 
 contract -> list '->' value : {contract, {args, '$1'}, {return, '$3'}}.
 
+ascii_list -> '#' '{' '}' '#' : {ascii, []}.
 ascii_list -> '#' '{' ascii_items '}' '#' : {ascii, '$3'}.
 
 ascii_items -> ascii : ['$1'].
