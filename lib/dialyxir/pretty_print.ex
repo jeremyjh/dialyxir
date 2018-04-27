@@ -72,6 +72,10 @@ defmodule Dialyxir.PrettyPrint do
     "_"
   end
 
+  defp do_pretty_print({:ascii, n}) do
+    "\"#{[n]}\""
+  end
+
   # TODO: Not sure what the middle value is here.
   defp do_pretty_print({:atom, _, atom}) do
     strip_elixir(atom)

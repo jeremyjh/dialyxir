@@ -22,6 +22,7 @@ document -> values : '$1'.
 values -> value : ['$1'].
 values -> value values : ['$1'] ++ '$2'.
 
+value -> '#' '{' '#' '<' int '>' '(' int ',' int ',' '\'' atom '\'' ',' '[' '\'' atom '\'' ',' '\'' atom '\'' ']' ')' '}' '#' : {ascii, unwrap('$5')}.
 value -> atom : {atom, unwrap('$1')}.
 value -> '<<' value ':' value '>>' : {binary, '$2', '$4'}.
 value -> struct : '$1'.
