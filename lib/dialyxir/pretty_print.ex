@@ -80,6 +80,14 @@ defmodule Dialyxir.PrettyPrint do
     |> inspect()
   end
 
+  defp do_pretty_print({:atom, 'false'}) do
+    "false"
+  end
+
+  defp do_pretty_print({:atom, 'true'}) do
+    "true"
+  end
+
   defp do_pretty_print({:atom, atom}) do
     module_name = strip_elixir(atom)
     if module_name == to_string(atom) do
@@ -171,7 +179,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:tuple, tuple_items}) do
-    "{#{Enum.map_join(tuple_items, ", ", &do_pretty_print/1)}}"  |> IO.inspect
+    "{#{Enum.map_join(tuple_items, ", ", &do_pretty_print/1)}}"
   end
 
   defp do_pretty_print({:type, type}) do
