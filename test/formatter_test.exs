@@ -34,6 +34,41 @@ defmodule Dialyxir.Test.FormatterTest do
     assert pretty_printed == expected_output
   end
 
+  test "module names are parsed appropriately" do
+    input = "Elixir.Plug.Conn"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "Plug.Conn"
+    assert pretty_printed == expected_output
+  end
+
+  test "maps are parsed appropriately" do
+    input = ~S"#{'halted':='true'}"
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "%{:halted => true}"
+    assert pretty_printed == expected_output
+  end
+
+  test "structs are parsed appropriately" do
+    input = ~S"#{'halted':='true', '__struct__':='Elixir.Plug.Conn'}"
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "%Plug.Conn{:halted => true}"
+    assert pretty_printed == expected_output
+  end
+
+  test "structs with any arrows are parsed appropriately" do
+    input = ~S"#{'halted':='true', '__struct__':='Elixir.Plug.Conn', _ => _}"
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "%Plug.Conn{:halted => true, _ => _}"
+    assert pretty_printed == expected_output
+  end
+
   test "one arg tuples are parsed appropriately" do
     input = "{'ok'}"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
