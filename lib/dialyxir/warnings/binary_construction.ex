@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.BinaryConstruction do
   def warning(), do: :bin_construction
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([culprit, size, segment, type]) do
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
 

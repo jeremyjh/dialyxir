@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.UnmatchedReturn do
   def warning(), do: :unmatched_return
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([type]) do
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
 

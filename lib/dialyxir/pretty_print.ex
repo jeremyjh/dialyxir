@@ -10,6 +10,7 @@ defmodule Dialyxir.PrettyPrint do
     list
   end
 
+  @spec pretty_print(String.t()) :: String.t()
   def pretty_print(str) do
     try do
       str
