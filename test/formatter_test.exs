@@ -74,6 +74,23 @@ defmodule Dialyxir.Test.FormatterTest do
     assert pretty_printed == expected_output
   end
 
+  test "or'd mixed types function signatures are pretty printed appropriately" do
+    input = "('Elixir.Plug.Conn':t(),binary() | atom(),'Elixir.Keyword':t() | map()) -> 'Elixir.Plug.Conn':t()"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(Plug.Conn.t(), binary() | atom(), Keyword.t() | map()) :: Plug.Conn.t()"
+    assert pretty_printed == expected_output
+  end
+
+  test "named values are pretty printed appropriately" do
+    input = "data::'Elixir.MyApp.Data':t()"
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "data :: MyApp.Data.t()"
+    assert pretty_printed == expected_output
+  end
+
   test "maps are pretty printed appropriately" do
     input = ~S"#{'halted':='true'}"
 
