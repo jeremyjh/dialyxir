@@ -80,11 +80,6 @@ defmodule Dialyxir.PrettyPrint do
     |> inspect()
   end
 
-  # TODO: Not sure what the middle value is here.
-  defp do_pretty_print({:atom, _, atom}) do
-    strip_elixir(atom)
-  end
-
   defp do_pretty_print({:atom, atom}) do
     module_name = strip_elixir(atom)
     if module_name == to_string(atom) do
@@ -149,6 +144,12 @@ defmodule Dialyxir.PrettyPrint do
     "#{do_pretty_print(name)} :: #{do_pretty_print(value)}"
   end
 
+  defp do_pretty_print({:name, name}) do
+    name
+    |> to_string()
+    |> strip_var_version()
+  end
+
   defp do_pretty_print({:nil}) do
     "nil"
   end
@@ -189,6 +190,10 @@ defmodule Dialyxir.PrettyPrint do
     string
     |> to_string()
     |> String.trim("Elixir.")
+  end
+
+  defp strip_var_version(var_name) do
+    String.replace(var_name, ~r/^V(.+)@\d+$/, "\\1")
   end
 
   defp struct_name(map_keys) do
