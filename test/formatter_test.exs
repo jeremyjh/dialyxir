@@ -134,6 +134,14 @@ defmodule Dialyxir.Test.FormatterTest do
     assert pretty_printed == expected_output
   end
 
+  test "zero arg functions in contract are pretty printed appropriately" do
+    input = "() -> atom()"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "() :: atom()"
+    assert pretty_printed == expected_output
+  end
+
   test "zero arg functions are pretty printed appropriately" do
     input = "fun(() -> 1)"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
