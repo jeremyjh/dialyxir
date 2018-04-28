@@ -83,6 +83,7 @@ range -> int '..' int : {range, unwrap('$1'), unwrap('$3')}.
 function -> 'fun(' empty_list_paren '->' value ')' : {function, {args, '$2'}, {return, '$4'}}.
 function -> 'fun(' list '->' value ')' : {function, {args, '$2'}, {return, '$4'}}.
 
+contract -> empty_list_paren '->' value : {contract, {args, {empty_list, paren}}, {return, '$3'}}.
 contract -> list '->' value : {contract, {args, '$1'}, {return, '$3'}}.
 
 byte_list -> '#' '{' '}' '#' : {byte_list, []}.
