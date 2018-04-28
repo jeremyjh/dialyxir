@@ -1,0 +1,14 @@
+defmodule Dialyxir.Warnings.UnknownFunction do
+  @behaviour Dialyxir.Warning
+
+  @impl Dialyxir.Warning
+  @spec warning() :: :unknown_function
+  def warning(), do: :unknown_function
+
+  @impl Dialyxir.Warning
+  @spec format_long(any) :: String.t()
+  def format_long({module, function, arity}) do
+    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    "Function #{pretty_module}.#{function}/#{arity} does not exist."
+  end
+end

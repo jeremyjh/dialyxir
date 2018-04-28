@@ -32,6 +32,7 @@ defmodule Dialyxir.PrettyPrint do
     pretty_print(str)
   end
 
+  @spec pretty_print_type(String.t()) :: String.t()
   def pretty_print_type(str) do
     prefix = "@spec a("
     suffix = ") :: :ok\ndef a() do\n  :ok\nend"
@@ -50,6 +51,7 @@ defmodule Dialyxir.PrettyPrint do
     |> String.replace("\n      ", "\n")
   end
 
+  @spec pretty_print_args(String.t()) :: String.t()
   def pretty_print_args(str) do
     prefix = "@spec a"
     suffix = " :: :ok\ndef a() do\n  :ok\nend"
