@@ -101,7 +101,6 @@ defmodule Dialyxir.Formatter do
 
   defp message_to_string({:callback_type_mismatch, [module, function, arity, fail_type, success_type]}) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
-    IO.inspect success_type
     pretty_fail_type = Dialyxir.PrettyPrint.pretty_print(fail_type)
     pretty_success_type = Dialyxir.PrettyPrint.pretty_print_contract(success_type)
 
