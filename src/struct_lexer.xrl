@@ -37,6 +37,7 @@ _ : {token, {'_',  TokenLine}}.
 \> : {token, {'>', TokenLine}}.
 \' : {token, {'\'',  TokenLine}}.
 , : {token, {',',  TokenLine}}.
+\= : {token, {'=',  TokenLine}}.
 {RANGE} : {token, {'..', TokenLine}}.
 {INT} : {token, {int,  TokenLine, list_to_integer(TokenChars)}}.
 {ATOM} : {token, {atom, TokenLine, TokenChars}}.
