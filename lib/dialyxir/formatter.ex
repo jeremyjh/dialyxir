@@ -66,14 +66,23 @@ defmodule Dialyxir.Formatter do
     Enum.map(warnings, &inspect/1)
   end
 
-  def format_and_filter(warnings, filterer, format) when format in [:dialyzer, :dialyxir] do
+  def format_and_filter(warnings, filterer, :dialyxir) do
     divider = String.duplicate("_", 80)
 
     formatted_warnings =
-      Enum.map(warnings, fn warning ->
+      warnings
+      |> Enum.reject(fn warning ->
+        formatted_warnings =
+          warning
+          |> format_warning(:dialyzer)
+          |> List.wrap()
+
+        Enum.empty?(filterer.filter_warnings(formatted_warnings))
+      end)
+      |> Enum.map(fn warning ->
         message =
           try do
-            format_warning(warning, format)
+            format_warning(warning, :dialyxir)
           catch
             {:error, :message, warning} ->
               """
@@ -104,11 +113,18 @@ defmodule Dialyxir.Formatter do
         message <> divider
       end)
 
+    show_count_skipped(warnings, formatted_warnings)
+
+    formatted_warnings
+  end
+
+
+  def format_and_filter(warnings, filterer, :dialyzer) do
+    formatted_warnings = Enum.map(warnings, &format_warning(&1, :dialyzer))
+
     filtered_warnings = filterer.filter_warnings(formatted_warnings)
-    formatted_warnings_count = Enum.count(formatted_warnings)
-    filtered_warnings_count = Enum.count(filtered_warnings)
-    skipped_count = formatted_warnings_count - filtered_warnings_count
-    IO.puts("Total errors: #{formatted_warnings_count}, Skipped: #{skipped_count}")
+    show_count_skipped(warnings, filtered_warnings)
+
     filtered_warnings
   end
 
@@ -135,5 +151,14 @@ defmodule Dialyxir.Formatter do
     #{base_name}:#{line}
     #{string}
     """
+  end
+
+  defp show_count_skipped(warnings, filtered_warnings) do
+    warnings_count = Enum.count(warnings)
+    filtered_warnings_count = Enum.count(filtered_warnings)
+    skipped_count = warnings_count - filtered_warnings_count
+    IO.puts("Total errors: #{warnings_count}, Skipped: #{skipped_count}")
+
+    :ok
   end
 end

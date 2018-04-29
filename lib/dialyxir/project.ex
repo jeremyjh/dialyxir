@@ -64,23 +64,24 @@ defmodule Dialyxir.Project do
     end
   end
 
+  def filter_warnings(output, nil), do: output
+  def filter_warnings(output, ""), do: output
   def filter_warnings(output, pattern) do
-    case pattern do
-      "" -> output
-      nil -> output
-      pattern ->
-        lines = Enum.map(output, &String.trim_trailing/1)
+    lines = Enum.map(output, &String.trim_trailing/1)
 
-        patterns = pattern
-        |> String.trim_trailing("\n")
-        |> String.split("\n")
-        |> Enum.reject(&(&1 == ""))
-        try do
-          cp = :binary.compile_pattern(patterns)
-          Enum.filter(lines, &(not String.contains?(&1, cp)))
-        rescue
-          _ -> output
-        end
+    patterns =
+      pattern
+      |> String.trim_trailing("\n")
+      |> String.split("\n")
+      |> Enum.reject(&(&1 == ""))
+
+    try do
+      Enum.reject(lines, fn line ->
+        Enum.any?(patterns, &String.contains?(line, &1))
+      end)
+    rescue
+      _ ->
+        output
     end
   end
 
