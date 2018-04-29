@@ -91,7 +91,10 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:atom, atom}) do
-    module_name = strip_elixir(atom)
+    module_name =
+      atom
+      |> strip_elixir()
+      |> strip_var_version()
 
     if module_name == to_string(atom) do
       ":#{atom}"
