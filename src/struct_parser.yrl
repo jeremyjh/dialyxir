@@ -4,9 +4,9 @@ empty_list_paren
 document
 values value
 list list_items
-struct struct_items
+map map_items map_entry
 tuple tuple_items
-binary binary_items
+binary binary_items binary_part
 pattern pattern_items
 byte_list byte_items
 byte
@@ -26,7 +26,7 @@ values -> value : ['$1'].
 values -> value values : ['$1'] ++ '$2'.
 
 value -> atom : {atom, unwrap('$1')}.
-value -> struct : '$1'.
+value -> map : '$1'.
 value -> atom ':' ':' atom '(' ')' : {type, unwrap('$1'), unwrap('$4')}.
 value -> '\'' atom '\'' ':' atom '(' ')' : {type, unwrap('$2'), unwrap('$5')}.
 value -> atom ':' atom '(' ')' : {type, unwrap('$1'), unwrap('$3')}.
@@ -57,10 +57,12 @@ named_value -> name '::' value : {named_value, '$1', '$3'}.
 name -> atom : {name, unwrap('$1')}.
 
 binary -> '<<' binary_items '>>' : {binary, '$2'}.
-binary_items -> value ':' value : [{binary_part, '$1', '$3'}].
-binary_items -> value ':' value ',' binary_items : [{binary_part, '$1', '$3'}] ++ '$5'.
-binary_items -> value ':' value '*' value : [{binary_part, '$1', '$3', {size, '$5'}}].
-binary_items -> value ':' value '*' value  ',' binary_items : [{binary_part, '$1', '$3', {size, '$5'}}] ++ '$7'.
+
+binary_items -> binary_part : ['$1'].
+binary_items -> binary_part  ',' binary_items : ['$1'] ++ '$3'.
+
+binary_part -> value ':' value : {binary_part, '$1', '$3'}.
+binary_part -> value ':' value '*' value : {binary_part, '$1', '$3', {size, '$5'}}.
 
 list -> '(' list_items ')' : {list, paren, '$2'}.
 list -> '[' ']' : {empty_list, square}.
@@ -78,12 +80,14 @@ pattern -> '<' pattern_items '>' : {pattern, '$2'}.
 pattern_items -> value : ['$1'].
 pattern_items -> value ',' pattern_items : ['$1'] ++ '$3'.
 
-struct -> '#' '{' '}' : {empty_map}.
-struct -> '#' '{' struct_items '}' : {map, '$3'}.
-struct_items -> value ':=' value : [{map_entry, '$1', '$3'}].
-struct_items -> value ':=' value ',' struct_items : [{map_entry, '$1', '$3'}] ++ '$5'.
-struct_items -> value '=>' value : [{map_entry, '$1', '$3'}].
-struct_items -> value '=>' value ',' struct_items : [{map_entry, '$1', '$3'}] ++ '$5'.
+map -> '#' '{' '}' : {empty_map}.
+map -> '#' '{' map_items '}' : {map, '$3'}.
+
+map_items -> map_entry : ['$1'].
+map_items -> map_entry ',' map_items : ['$1'] ++ '$3'.
+
+map_entry -> value ':=' value : {map_entry, '$1', '$3'}.
+map_entry -> value '=>' value : {map_entry, '$1', '$3'}.
 
 range -> int '..' int : {range, unwrap('$1'), unwrap('$3')}.
 
