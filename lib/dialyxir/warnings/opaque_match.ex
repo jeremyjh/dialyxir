@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.OpaqueMatch do
   def warning(), do: :opaque_match
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([pattern, opaque_type, opaque_term]) do
     term =
       if opaque_type == opaque_term do

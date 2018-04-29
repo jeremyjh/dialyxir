@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.UnknownType do
   def warning(), do: :unknown_type
 
   @impl Dialyxir.Warning
-  @spec format_long({String.t(), String.t(), non_neg_integer}) :: String.t()
+  @spec format_long({String.t(), String.t(), String.t()}) :: String.t()
   def format_long({module, function, arity}) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
 

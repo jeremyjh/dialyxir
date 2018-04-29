@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.InvalidContract do
   def warning(), do: :invalid_contract
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, signature]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     pretty_signature = Dialyxir.PrettyPrint.pretty_print_contract(signature)

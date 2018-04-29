@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.UnknownBehaviour do
   def warning(), do: :unknown_behaviour
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long(String.t()) :: String.t()
   def format_long(behaviour) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(behaviour)
 

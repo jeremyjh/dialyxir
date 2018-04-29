@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.Apply do
   def warning(), do: :apply
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([args, arg_positions, fail_reason, signature_args, signature_return, contract]) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
 

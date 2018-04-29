@@ -1,21 +1,28 @@
 defmodule Dialyxir.WarningHelpers do
-
   @spec ordinal(non_neg_integer) :: String.t()
   def ordinal(1), do: "1st"
   def ordinal(2), do: "2nd"
   def ordinal(3), do: "3rd"
   def ordinal(n) when is_integer(n), do: "#{n}th"
 
-  def call_or_apply_to_string(arg_positions, fail_reason, signature_args, signature_return, {overloaded?, contract}) do
+  def call_or_apply_to_string(
+        arg_positions,
+        fail_reason,
+        signature_args,
+        signature_return,
+        {overloaded?, contract}
+      ) do
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+
     case fail_reason do
       :only_sig ->
         if Enum.empty?(arg_positions) do
-	  # We do not know which argument(s) caused the failure
-	  "will never return since the success typing arguments are #{signature_args}"
+          # We do not know which argument(s) caused the failure
+          "will never return since the success typing arguments are #{signature_args}"
         else
           position_string = form_position_string(arg_positions)
-	  """
+
+          """
           will never return since it differs in argument:
           #{position_string}
 
@@ -23,16 +30,18 @@ defmodule Dialyxir.WarningHelpers do
           #{signature_args}
           """
         end
+
       :only_contract ->
         if Enum.empty?(arg_positions) or overloaded? do
-	  # We do not know which arguments caused the failure
-	  """
+          # We do not know which arguments caused the failure
+          """
           breaks the contract
           #{pretty_contract}
           """
         else
           position_string = form_position_string(arg_positions)
-	  """
+
+          """
           breaks the contract
           #{pretty_contract}
 
@@ -42,7 +51,9 @@ defmodule Dialyxir.WarningHelpers do
         end
 
       :both ->
-        pretty_print_signature = Dialyxir.PrettyPrint.pretty_print_contract("#{signature_args} -> #{signature_return}")
+        pretty_print_signature =
+          Dialyxir.PrettyPrint.pretty_print_contract("#{signature_args} -> #{signature_return}")
+
         """
         will never return since the success typing is:
         #{pretty_print_signature}
@@ -54,6 +65,7 @@ defmodule Dialyxir.WarningHelpers do
   end
 
   def form_position_string([]), do: ""
+
   def form_position_string(arg_positions) do
     arg_string = Enum.join(arg_positions, " and ")
     "positions #{arg_string}"

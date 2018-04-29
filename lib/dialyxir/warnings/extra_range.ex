@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.ExtraRange do
   def warning(), do: :extra_range
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, extra_ranges, signature_range]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
 

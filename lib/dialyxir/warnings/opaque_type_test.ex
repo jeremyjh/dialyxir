@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.OpaqueTypeTest do
   def warning(), do: :opaque_type_test
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([function, opaque]) do
     "The type test #{function}(#{opaque}) breaks the opaqueness of the term #{opaque}."
   end

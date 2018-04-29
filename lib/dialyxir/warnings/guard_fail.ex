@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.GuardFail do
   def warning(), do: :guard_fail
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([]) do
     "Clause guard cannot succeed."
   end

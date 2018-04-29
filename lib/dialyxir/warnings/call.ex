@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.Call do
   def warning(), do: :call
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([
         module,
         function,
