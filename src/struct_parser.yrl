@@ -76,7 +76,7 @@ tuple_items -> value ',' tuple_items : ['$1'] ++ '$3'.
 
 pattern -> '<' pattern_items '>' : {pattern, '$2'}.
 pattern_items -> value : ['$1'].
-pattern_items -> pattern_items ',' pattern_items : ['$1'] ++ '$3'.
+pattern_items -> value ',' pattern_items : ['$1'] ++ '$3'.
 
 struct -> '#' '{' '}' : {empty_map}.
 struct -> '#' '{' struct_items '}' : {map, '$3'}.
