@@ -1,5 +1,4 @@
 defmodule Dialyxir.PrettyPrint do
-
   defp parse(str) do
     {:ok, tokens, _} =
       str
@@ -19,7 +18,7 @@ defmodule Dialyxir.PrettyPrint do
       |> do_pretty_print()
     rescue
       _ ->
-        throw {:error, :parsing, str}
+        throw({:error, :parsing, str})
     end
   end
 
@@ -78,7 +77,7 @@ defmodule Dialyxir.PrettyPrint do
   defp do_pretty_print({:byte_list, byte_list}) do
     byte_list
     |> Enum.into(<<>>, fn byte ->
-      <<byte :: 8>>
+      <<byte::8>>
     end)
     |> inspect()
   end
@@ -93,11 +92,33 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:atom, atom}) do
     module_name = strip_elixir(atom)
+
     if module_name == to_string(atom) do
       ":#{atom}"
     else
       "#{module_name}"
     end
+  end
+
+  defp do_pretty_print({:binary_part, value, _, size}) do
+    "#{do_pretty_print(value)} :: #{do_pretty_print(size)}"
+  end
+
+  defp do_pretty_print({:binary_part, value, size}) do
+    "#{do_pretty_print(value)} :: #{do_pretty_print(size)}"
+  end
+
+  # TODO: Not sure if this is completely correct. But this seems to line up with actual code.
+  defp do_pretty_print(
+         {:binary,
+          [{:binary_part, {:any}, {:int, 64}}, {:binary_part, {:any}, {:any}, {:size, {:int, 8}}}]}
+       ) do
+    "String.t()"
+  end
+
+  defp do_pretty_print({:binary, binary_parts}) do
+    binary_parts = Enum.map_join(binary_parts, ", ", &do_pretty_print/1)
+    "<<#{binary_parts}>>"
   end
 
   defp do_pretty_print({:binary, value, size}) do
@@ -142,6 +163,7 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:map, map_keys}) do
     struct_name = struct_name(map_keys)
+
     if struct_name do
       keys = Enum.reject(map_keys, &struct_name_entry?/1)
 
@@ -161,7 +183,7 @@ defmodule Dialyxir.PrettyPrint do
     |> strip_var_version()
   end
 
-  defp do_pretty_print({:nil}) do
+  defp do_pretty_print({nil}) do
     "nil"
   end
 
@@ -179,6 +201,10 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:rest}) do
     "..."
+  end
+
+  defp do_pretty_print({:size, size}) do
+    "size(#{do_pretty_print(size)})"
   end
 
   defp do_pretty_print({:tuple, tuple_items}) do
