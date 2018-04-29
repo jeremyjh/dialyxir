@@ -6,6 +6,7 @@ values value
 list list_items
 struct struct_items
 tuple tuple_items
+binary binary_items
 pattern pattern_items
 byte_list byte_items
 byte
@@ -15,7 +16,7 @@ contract
 function.
 
 Terminals
-nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' '::' ':' '...' '<<' '>>' '<' '>'.
+nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' '::' ':' '...' '<<' '>>' '<' '>' '*'.
 
 Rootsymbol document.
 
@@ -25,7 +26,6 @@ values -> value : ['$1'].
 values -> value values : ['$1'] ++ '$2'.
 
 value -> atom : {atom, unwrap('$1')}.
-value -> '<<' value ':' value '>>' : {binary, '$2', '$4'}.
 value -> struct : '$1'.
 value -> atom ':' ':' atom '(' ')' : {type, unwrap('$1'), unwrap('$4')}.
 value -> '\'' atom '\'' ':' atom '(' ')' : {type, unwrap('$2'), unwrap('$5')}.
@@ -44,6 +44,7 @@ value -> named_value : '$1'.
 value -> list : '$1'.
 value -> tuple : '$1'.
 value -> pattern : '$1'.
+value -> binary : '$1'.
 value -> function : '$1'.
 value -> contract : '$1'.
 value -> range : '$1'.
@@ -54,6 +55,12 @@ value -> value '|' value : {pipe_list, '$1', '$3'}.
 
 named_value -> name '::' value : {named_value, '$1', '$3'}.
 name -> atom : {name, unwrap('$1')}.
+
+binary -> '<<' binary_items '>>' : {binary, '$2'}.
+binary_items -> value ':' value : [{binary_part, '$1', '$3'}].
+binary_items -> value ':' value ',' binary_items : [{binary_part, '$1', '$3'}] ++ '$5'.
+binary_items -> value ':' value '*' value : [{binary_part, '$1', '$3', {size, '$5'}}].
+binary_items -> value ':' value '*' value  ',' binary_items : [{binary_part, '$1', '$3', {size, '$5'}}] ++ '$7'.
 
 list -> '(' list_items ')' : {list, paren, '$2'}.
 list -> '[' ']' : {empty_list, square}.
@@ -69,7 +76,7 @@ tuple_items -> value ',' tuple_items : ['$1'] ++ '$3'.
 
 pattern -> '<' pattern_items '>' : {pattern, '$2'}.
 pattern_items -> value : ['$1'].
-pattern_items -> value ',' pattern_items : ['$1'] ++ '$3'.
+pattern_items -> pattern_items ',' pattern_items : ['$1'] ++ '$3'.
 
 struct -> '#' '{' '}' : {empty_map}.
 struct -> '#' '{' struct_items '}' : {map, '$3'}.

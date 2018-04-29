@@ -15,6 +15,7 @@ Rules.
 {REST} : {token, {'...', TokenLine}}.
 nil : {token, {'nil', TokenLine}}.
 fun\( : {token, {'fun(',  TokenLine}}.
+\* : {token, {'*',  TokenLine}}.
 \[ : {token, {'[',  TokenLine}}.
 \] : {token, {']',  TokenLine}}.
 \( : {token, {'(',  TokenLine}}.

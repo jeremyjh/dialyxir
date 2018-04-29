@@ -126,6 +126,14 @@ defmodule Dialyxir.Test.FormatterTest do
     assert pretty_printed == expected_output
   end
 
+  test "three arg tuples are parsed appropriately" do
+    input = "{'ok', 'error', 'ok'}"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "{:ok, :error, :ok}"
+    assert pretty_printed == expected_output
+  end
+
   test "ranges are pretty printed appropriately" do
     input = "1..5"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
@@ -139,6 +147,14 @@ defmodule Dialyxir.Test.FormatterTest do
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "() :: atom()"
+    assert pretty_printed == expected_output
+  end
+
+  test "binary is parsed appropriately" do
+    input = "<<_:64,_:_*8>>"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "String.t()"
     assert pretty_printed == expected_output
   end
 
