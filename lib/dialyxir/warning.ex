@@ -15,5 +15,6 @@ defmodule Dialyxir.Warning do
   The default documentation when seeing an error wihout the user
   otherwise overriding the format.
   """
-  @callback format_long([String.t()] | {String.t(), String.t(), String.t()} | String.t()) :: String.t()
+  @callback format_long([String.t()] | {String.t(), String.t(), String.t()} | String.t()) ::
+              String.t()
 end
