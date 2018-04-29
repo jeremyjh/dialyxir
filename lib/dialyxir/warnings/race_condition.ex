@@ -7,7 +7,7 @@ defmodule Dialyxir.Warnings.RaceCondition do
 
   @impl Dialyxir.Warning
   @spec format_long(any) :: String.t()
-  def format_long([[module, function, args, reason]]) do
+  def format_long([module, function, args, reason]) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
 

@@ -6,8 +6,8 @@ defmodule Dialyxir.Warnings.PatternMatch do
   def warning(), do: :pattern_match
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
-  def format_long([[pattern, type]]) do
+  @spec format_long([String.t()]) :: String.t()
+  def format_long([pattern, type]) do
     pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
     "The #{pretty_pattern} can never match the type #{pretty_type}."

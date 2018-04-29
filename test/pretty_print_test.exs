@@ -1,4 +1,4 @@
-defmodule Dialyxir.Test.FormatterTest do
+defmodule Dialyxir.Test.PretyPrintTest do
 
   use ExUnit.Case
 
@@ -150,11 +150,19 @@ defmodule Dialyxir.Test.FormatterTest do
     assert pretty_printed == expected_output
   end
 
-  test "binary is parsed appropriately" do
+  test "binary is pretty printed appropriately" do
     input = "<<_:64,_:_*8>>"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "String.t()"
+    assert pretty_printed == expected_output
+  end
+
+  test "Patterns get pretty printed appropriately" do
+    input = 'pattern {\'ok\', Vuser@1}'
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print_pattern(input)
+
+    expected_output = "pattern {:ok, :Vuser@1}"
     assert pretty_printed == expected_output
   end
 

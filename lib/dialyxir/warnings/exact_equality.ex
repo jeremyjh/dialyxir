@@ -7,7 +7,7 @@ defmodule Dialyxir.Warnings.ExactEquality do
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
-  def format_long([[type1, op, type2]]) do
+  def format_long([type1, op, type2]) do
     "The test #{type1} #{op} #{type2} can never evaluate to 'true'."
   end
 end
