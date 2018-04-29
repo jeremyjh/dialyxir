@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.ContractSubtype do
   def warning(), do: :contract_subtype
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, contract, signature]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)

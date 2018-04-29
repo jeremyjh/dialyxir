@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.SpecMissingFunction do
   def warning(), do: :spec_missing_fun
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
     "Contract for function that does not exist: #{pretty_module}.#{function}/#{arity}."

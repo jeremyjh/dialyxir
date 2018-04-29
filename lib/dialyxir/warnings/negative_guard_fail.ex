@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.NegativeGuardFail do
   def warning(), do: :neg_guard_fail
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([guard, args]) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
 

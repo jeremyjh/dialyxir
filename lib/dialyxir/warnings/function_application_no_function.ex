@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
   def warning(), do: :fun_app_no_fun
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([op, type, arity]) do
     "Function application will fail since #{op} :: #{type} is not a function of arity #{arity}."
   end

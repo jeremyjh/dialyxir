@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.CallbackInfoMissing do
   def warning(), do: :callback_info_missing
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([behaviour]) do
     pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
 

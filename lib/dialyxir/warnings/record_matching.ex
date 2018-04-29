@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.RecordMatching do
   def warning(), do: :record_matching
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([string, name]) do
     "The #{string} violates the declared type for ##{name}{}."
   end

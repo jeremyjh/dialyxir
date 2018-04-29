@@ -6,7 +6,7 @@ defmodule Dialyxir.Warnings.CallbackArgumentTypeMismatch do
   def warning(), do: :callback_arg_type_mismatch
 
   @impl Dialyxir.Warning
-  @spec format_long(any) :: String.t()
+  @spec format_long([String.t()]) :: String.t()
   def format_long([behaviour, function, arity, success_type, callback_type]) do
     pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
     pretty_success_type = Dialyxir.PrettyPrint.pretty_print_type(success_type)
