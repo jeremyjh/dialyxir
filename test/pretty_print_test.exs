@@ -158,11 +158,32 @@ defmodule Dialyxir.Test.PretyPrintTest do
     assert pretty_printed == expected_output
   end
 
-  test "Patterns get pretty printed appropriately" do
+  test "patterns get pretty printed appropriately" do
     input = 'pattern {\'ok\', Vuser@1}'
     pretty_printed = Dialyxir.PrettyPrint.pretty_print_pattern(input)
 
     expected_output = "pattern {:ok, user}"
+    assert pretty_printed == expected_output
+  end
+
+  test "an assignment gets pretty printed appropriately" do
+    input = ~S"""
+    Vconn@1 = #{
+      'params':=#{#{
+        #<105>(8, 1, 'integer', ['unsigned', 'big']),
+        #<110>(8, 1, 'integer', ['unsigned', 'big']),
+        #<99>(8, 1, 'integer', ['unsigned', 'big']),
+        #<108>(8, 1, 'integer', ['unsigned', 'big']),
+        #<117>(8, 1, 'integer', ['unsigned', 'big']),
+        #<100>(8, 1, 'integer', ['unsigned', 'big']),
+        #<101>(8, 1, 'integer', ['unsigned', 'big'])}# :='nil'}}
+    """
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print_pattern(input)
+
+    expected_output = String.trim("""
+    conn = %{:params => %{"include" => nil}}
+    """)
+
     assert pretty_printed == expected_output
   end
 

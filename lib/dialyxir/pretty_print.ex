@@ -1,4 +1,5 @@
 defmodule Dialyxir.PrettyPrint do
+
   defp parse(str) do
     {:ok, tokens, _} =
       str
@@ -72,6 +73,10 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:any}) do
     "_"
+  end
+
+  defp do_pretty_print({:assignment, name, value}) do
+    "#{do_pretty_print(name)} = #{do_pretty_print(value)}"
   end
 
   defp do_pretty_print({:byte_list, byte_list}) do

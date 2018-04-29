@@ -16,7 +16,7 @@ contract
 function.
 
 Terminals
-nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' '::' ':' '...' '<<' '>>' '<' '>' '*'.
+nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' '::' ':' '...' '<<' '>>' '<' '>' '*' '='.
 
 Rootsymbol document.
 
@@ -35,6 +35,7 @@ value -> '...' : {rest}.
 value -> atom empty_list_paren : {type, unwrap('$1')}.
 value -> atom '(' value ')' : {type, unwrap('$1'), '$3'}.
 value -> atom list : {type_list, unwrap('$1'), '$2'}.
+value -> value '=' value : {assignment, '$1', '$3'}.
 value -> '\'' int '..' int '\'' : {range, unwrap('$2'), unwrap('$4')}.
 value -> int : {int, unwrap('$1')}.
 value -> '\'' int '\'' : {int, unwrap('$2')}.
