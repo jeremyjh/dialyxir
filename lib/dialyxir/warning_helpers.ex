@@ -13,12 +13,16 @@ defmodule Dialyxir.WarningHelpers do
         {overloaded?, contract}
       ) do
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+    pretty_signature_args = Dialyxir.PrettyPrint.pretty_print_args(signature_args)
 
     case fail_reason do
       :only_sig ->
         if Enum.empty?(arg_positions) do
           # We do not know which argument(s) caused the failure
-          "will never return since the success typing arguments are #{signature_args}"
+          """
+          will never return since the success typing arguments are
+          #{pretty_signature_args}
+          """
         else
           position_string = form_position_string(arg_positions)
 
@@ -27,7 +31,7 @@ defmodule Dialyxir.WarningHelpers do
           #{position_string}
 
           from the success typing arguments:
-          #{signature_args}
+          #{pretty_signature_args}
           """
         end
 

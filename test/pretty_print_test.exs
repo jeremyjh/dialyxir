@@ -150,6 +150,14 @@ defmodule Dialyxir.Test.PretyPrintTest do
     assert pretty_printed == expected_output
   end
 
+  test "erlang function calls are pretty printed appropriately" do
+    input = "([supervisor:child_spec() | {module(),term()} | module()],[init_option()]) -> {'ok',tuple()}"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "([:supervisor.child_spec() | {module(), term()} | module()], [init_option()]) :: {:ok, tuple()}"
+    assert pretty_printed == expected_output
+  end
+
   test "binary is pretty printed appropriately" do
     input = "<<_:64,_:_*8>>"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
