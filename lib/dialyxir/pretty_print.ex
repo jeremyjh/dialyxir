@@ -96,16 +96,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:atom, atom}) do
-    module_name =
-      atom
-      |> strip_elixir()
-      |> strip_var_version()
-
-    if module_name == to_string(atom) do
-      ":#{atom}"
-    else
-      "#{module_name}"
-    end
+    atomize(atom)
   end
 
   defp do_pretty_print({:binary_part, value, _, size}) do
@@ -224,11 +215,24 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:type, module, type}) do
-    "#{strip_elixir(module)}.#{type}()"
+    "#{atomize(module)}.#{type}()"
   end
 
   defp do_pretty_print({:type_list, type, types}) do
     "#{type}#{do_pretty_print(types)}"
+  end
+
+  defp atomize(atom) do
+    module_name =
+      atom
+      |> strip_elixir()
+      |> strip_var_version()
+
+    if module_name == to_string(atom) do
+      ":#{atom}"
+    else
+      "#{module_name}"
+    end
   end
 
   defp strip_elixir(string) do
