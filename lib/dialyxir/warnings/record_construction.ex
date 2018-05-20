@@ -6,6 +6,18 @@ defmodule Dialyxir.Warnings.RecordConstruction do
   def warning(), do: :record_constr
 
   @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    Dialyxir.Warning.default_explain()
+  end
+
+  @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Record construction violates the declared type."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([types, name]) do
     "Record construction #{types} violates the declared type for ##{name}{}."

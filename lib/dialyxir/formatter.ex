@@ -163,7 +163,7 @@ defmodule Dialyxir.Formatter do
         throw({:error, :message, message})
       end
 
-    "#{base_name}:#{line}:#{warning_name} #{string}"
+    "#{base_name}:#{line}:#{inspect(warning_name)} #{string}"
   end
 
   defp format_warning({_tag, {file, line}, message}, :dialyxir) do

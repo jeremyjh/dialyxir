@@ -13,7 +13,7 @@ defmodule Dialyxir.WarningHelpers do
         {overloaded?, contract}
       ) do
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
-    pretty_signature_args = Dialyxir.PrettyPrint.pretty_print_args(signature_args)
+    pretty_signature_args = Dialyxir.PrettyPrint.pretty_print_type(signature_args)
 
     case fail_reason do
       :only_sig ->
@@ -24,13 +24,12 @@ defmodule Dialyxir.WarningHelpers do
           #{pretty_signature_args}
           """
         else
-          position_string = form_position_string(arg_positions)
+          positions = form_position_string(arg_positions)
 
           """
-          will never return since it differs in argument:
-          #{position_string}
+          will never return since it differs in arguments with
+          positions #{positions} from the success typing arguments:
 
-          from the success typing arguments:
           #{pretty_signature_args}
           """
         end
@@ -68,10 +67,7 @@ defmodule Dialyxir.WarningHelpers do
     end
   end
 
-  def form_position_string([]), do: ""
-
   def form_position_string(arg_positions) do
-    arg_string = Enum.join(arg_positions, " and ")
-    "positions #{arg_string}"
+    Enum.join(arg_positions, " and ")
   end
 end

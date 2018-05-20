@@ -40,7 +40,7 @@ defmodule Dialyxir.Warnings.NoReturn do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(args), do: args
+  def format_short(args), do: format_long(args)
 
   @impl Dialyxir.Warning
   @spec format_long([String.t() | atom]) :: String.t()

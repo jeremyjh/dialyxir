@@ -14,7 +14,7 @@ defmodule Dialyxir.Warnings.ImproperListConstruction do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([tl_type]) do
-    pretty_type = Dialyxir.PrettyPrint.pretty_print(tl_type)
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(tl_type)
     "Cons will produce an improper list since its 2nd argument is #{pretty_type}."
   end
 
