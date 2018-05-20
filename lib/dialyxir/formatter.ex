@@ -127,11 +127,44 @@ defmodule Dialyxir.Formatter do
     filtered_warnings
   end
 
+  def format_and_filter(warnings, filterer, :short) do
+    warnings
+    |> Enum.reject(fn warning ->
+      formatted_warnings =
+        warning
+        |> format_warning(:dialyzer)
+        |> List.wrap()
+
+      Enum.empty?(filterer.filter_warnings(formatted_warnings))
+    end)
+    |> Enum.map(&format_warning(&1, :short))
+  end
+
+  def format_and_filter(_, _, warning_name) do
+    warning = Map.get(@warnings, warning_name)
+    [warning.explain()]
+  end
+
   defp format_warning(warning, :dialyzer) do
     warning
     |> :dialyzer.format_warning(:fullpath)
     |> String.Chars.to_string()
     |> String.replace_trailing("\n", "")
+  end
+
+  defp format_warning({_tag, {file, line}, message}, :short) do
+    {warning_name, arguments} = message
+    base_name = Path.relative_to_cwd(file)
+
+    string =
+      if Map.has_key?(@warnings, warning_name) do
+        warning = Map.get(@warnings, warning_name)
+        warning.format_short(arguments)
+      else
+        throw({:error, :message, message})
+      end
+
+    "#{base_name}:#{line}:#{warning_name} #{string}"
   end
 
   defp format_warning({_tag, {file, line}, message}, :dialyxir) do
@@ -147,7 +180,7 @@ defmodule Dialyxir.Formatter do
       end
 
     """
-    #{base_name}:#{line}
+    #{base_name}:#{line}:#{warning_name}
     #{string}
     """
   end

@@ -6,6 +6,12 @@ defmodule Dialyxir.Warnings.ContractSupertype do
   def warning(), do: :contract_supertype
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Type specification is a supertype of the success typing."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, contract, signature]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
@@ -23,6 +29,24 @@ defmodule Dialyxir.Warnings.ContractSupertype do
 
     Success typing:
     @spec #{function}#{pretty_signature}
+    """
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    """
+    The @spec, while not incorrect, is more general than the type
+    returned by the function.
+
+    Example:
+
+    defmodule Example do
+      @spec ok() :: any
+      def ok() do
+        :ok
+      end
+    end
     """
   end
 end
