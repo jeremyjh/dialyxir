@@ -6,15 +6,52 @@ defmodule Dialyxir.Warnings.NoReturn do
   def warning(), do: :no_return
 
   @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    """
+    The function has no return. This is usually due to an issue later
+    on in the call stack causing it to not be recognized as returning
+    for some reason. It is often helpful to cross reference the
+    complete list of warnings with the call stack in the function and
+    fix the deepest part of the call stack, which will usually fix
+    many of the other no_return errors.
+
+    defmodule Example do
+      def ok() do
+        Enum.each([1, 2, 3], fn _ -> raise "error" end)
+      end
+    end
+
+    or
+
+    defmodule Example do
+      def ok() do
+        raise "error"
+
+        :ok
+      end
+
+      def ok(:ok) do
+        ok()
+      end
+    end
+    """
+  end
+
+  @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(args), do: args
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t() | atom]) :: String.t()
   def format_long([type | name]) do
     name_string =
       case name do
         [] ->
-          "The created fun "
+          "The created fun"
 
         [function, arity] ->
-          "Function #{function}/#{arity} "
+          "Function #{function}/#{arity}"
       end
 
     type_string =
@@ -32,6 +69,6 @@ defmodule Dialyxir.Warnings.NoReturn do
           "has no local return."
       end
 
-    name_string <> type_string
+    name_string <> " " <> type_string
   end
 end

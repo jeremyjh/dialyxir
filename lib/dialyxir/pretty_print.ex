@@ -23,7 +23,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   def pretty_print_pattern('pattern ' ++ rest) do
-    "pattern " <> pretty_print(rest)
+    pretty_print(rest)
   end
 
   def pretty_print_pattern(pattern), do: pretty_print(pattern)
