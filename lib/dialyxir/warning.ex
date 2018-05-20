@@ -28,4 +28,13 @@ defmodule Dialyxir.Warning do
   Explanation for a warning of this type. Should include a simple example of how to trigger it.
   """
   @callback explain() :: String.t()
+
+  @spec default_explain() :: String.t()
+  def default_explain() do
+    """
+    This warning type does not have an explanation yet. If you have
+    code that causes it, please file an issue or pull request in
+    https://github.com/jeremyjh/dialyxir/pull/118
+    """
+  end
 end

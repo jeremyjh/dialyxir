@@ -6,6 +6,12 @@ defmodule Dialyxir.Warnings.NegativeGuardFail do
   def warning(), do: :neg_guard_fail
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Guard test can never succeed."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([guard, args]) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
@@ -25,5 +31,11 @@ defmodule Dialyxir.Warnings.NegativeGuardFail do
 
     can never succeed.
     """
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    Dialyxir.Warning.default_explain()
   end
 end

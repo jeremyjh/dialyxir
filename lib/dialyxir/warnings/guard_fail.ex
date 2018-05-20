@@ -6,6 +6,12 @@ defmodule Dialyxir.Warnings.GuardFail do
   def warning(), do: :guard_fail
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Guard test can never succeed."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([]) do
     "Clause guard cannot succeed."
@@ -23,6 +29,38 @@ defmodule Dialyxir.Warnings.GuardFail do
   end
 
   def format_long([arg1, infix, arg2]) do
-    "Guard test #{arg1} #{infix} #{arg2} can never succeed."
+    pretty_arg1 = Dialyxir.PrettyPrint.pretty_print(arg1)
+    pretty_arg2 = Dialyxir.PrettyPrint.pretty_print(arg2)
+
+    "Guard test #{pretty_arg1} #{infix} #{pretty_arg2} can never succeed."
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    """
+    The function guard either presents an impossible guard or the only
+    calls will never succeed against the guards.
+
+    Example:
+
+    defmodule Example do
+      def ok() do
+        ok(0)
+      end
+
+      defp ok(n) when n > 1 do
+        :ok
+      end
+    end
+
+    or
+
+    defmodule Example do
+      def ok() when 0 > 1 do
+        :ok
+      end
+    end
+    """
   end
 end
