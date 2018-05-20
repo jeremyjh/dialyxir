@@ -24,6 +24,7 @@ defmodule Dialyxir.Formatter do
                 Dialyxir.Warnings.ContractDiff,
                 Dialyxir.Warnings.ContractSubtype,
                 Dialyxir.Warnings.ContractSupertype,
+                Dialyxir.Warnings.ContractWithOpaque,
                 Dialyxir.Warnings.ExactEquality,
                 Dialyxir.Warnings.ExtraRange,
                 Dialyxir.Warnings.FuncionApplicationArguments,
