@@ -7,7 +7,7 @@ defmodule Dialyxir.Warnings.OpaqueMatch do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([pattern, opaque_type, opaque_term]) do
+  def format_short(_) do
     "Attempted to match against opaque term."
   end
 
