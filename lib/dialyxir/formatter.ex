@@ -118,7 +118,6 @@ defmodule Dialyxir.Formatter do
     formatted_warnings
   end
 
-
   def format_and_filter(warnings, filterer, :dialyzer) do
     formatted_warnings = Enum.map(warnings, &format_warning(&1, :dialyzer))
 

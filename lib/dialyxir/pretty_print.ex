@@ -1,5 +1,4 @@
 defmodule Dialyxir.PrettyPrint do
-
   defp parse(str) do
     {:ok, tokens, _} =
       str
