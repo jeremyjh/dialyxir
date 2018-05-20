@@ -6,6 +6,32 @@ defmodule Dialyxir.Warnings.Call do
   def warning(), do: :call
 
   @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    """
+    The function call will fail.
+
+    Example:
+
+    defmodule Example do
+      def ok() do
+        ok(:error)
+      end
+
+      def ok(:ok) do
+        :ok
+      end
+    end
+    """
+  end
+
+  @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "The function call will fail."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([
         module,
@@ -29,6 +55,6 @@ defmodule Dialyxir.Warnings.Call do
         contract
       )
 
-    "The call #{pretty_module}.#{function}#{pretty_args} #{call_string}."
+    "The call #{pretty_module}.#{function}#{pretty_args} #{call_string}"
   end
 end

@@ -6,6 +6,12 @@ defmodule Dialyxir.Warnings.CallWithOpaque do
   def warning(), do: :call_with_opaque
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Call with opaqueness type mismatch."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, args, arg_positions, expected_args]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
@@ -36,5 +42,11 @@ defmodule Dialyxir.Warnings.CallWithOpaque do
 
   defp form_expected(_expected_args) do
     "terms of different types are expected in these positions"
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    Dialyxir.Warning.default_explain()
   end
 end

@@ -7,8 +7,30 @@ defmodule Dialyxir.Dialyzer do
   defmodule Runner do
     def run(args, filterer) do
       try do
-        {raw?, args} = Keyword.split(args, [:raw])
-        formatter = if raw?[:raw], do: :raw, else: :dialyxir
+        {split, args} = Keyword.split(args, [:raw, :format, :explain])
+        formatter =
+          cond do
+            split[:format] == "dialyzer" ->
+              :dialyzer
+
+            split[:format] == "dialyxir" ->
+              :dialyxir
+
+            split[:format] == "raw" ->
+              :raw
+
+            split[:format] == "short" ->
+              :short
+
+            split[:explain] ->
+              String.to_existing_atom(split[:explain])
+
+            split[:raw] ->
+              :raw
+
+            true ->
+              :dialyxir
+        end
         {duration_ms, result} = :timer.tc(&:dialyzer.run/1, [args])
 
         formatted_time_elapsed = Formatter.formatted_time(duration_ms)

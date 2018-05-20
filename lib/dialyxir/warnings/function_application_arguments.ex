@@ -6,6 +6,12 @@ defmodule Dialyxir.Warnings.FuncionApplicationArguments do
   def warning(), do: :fun_app_args
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Function application will fail."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([args, type]) do
     pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
@@ -13,5 +19,11 @@ defmodule Dialyxir.Warnings.FuncionApplicationArguments do
 
     "Function application with arguments #{pretty_args} will fail " <>
       "since the function has type #{pretty_type}."
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    Dialyxir.Warning.default_explain()
   end
 end

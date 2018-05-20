@@ -170,7 +170,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
     input = 'pattern {\'ok\', Vuser@1}'
     pretty_printed = Dialyxir.PrettyPrint.pretty_print_pattern(input)
 
-    expected_output = "pattern {:ok, user}"
+    expected_output = "{:ok, user}"
     assert pretty_printed == expected_output
   end
 

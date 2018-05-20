@@ -6,6 +6,12 @@ defmodule Dialyxir.Warnings.ContractDiff do
   def warning(), do: :contract_diff
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Type specification is not equal to the success typing."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, contract, signature]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
@@ -24,5 +30,11 @@ defmodule Dialyxir.Warnings.ContractDiff do
     Success typing:
     #{pretty_signature}
     """
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    Dialyxir.Warning.default_explain()
   end
 end
