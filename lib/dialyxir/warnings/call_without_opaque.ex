@@ -6,6 +6,12 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
   def warning(), do: :call_without_opaque
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short([module, function, args, expected_triples]) do
+    "Call without opaqueness type mismatch."
+  end
+
+  @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, args, expected_triples]) do
     pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
@@ -35,5 +41,11 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
     {arg_positions, _typess, _type_strings} = :lists.unzip3(expected_triples)
     form_position_string = Dialyxir.WarningHelpers.form_position_string(arg_positions)
     "opaque terms in #{form_position_string}"
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    Dialyxir.Warning.default_explain()
   end
 end
