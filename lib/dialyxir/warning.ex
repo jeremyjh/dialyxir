@@ -17,4 +17,15 @@ defmodule Dialyxir.Warning do
   """
   @callback format_long([String.t()] | {String.t(), String.t(), String.t()} | String.t()) ::
               String.t()
+
+  @doc """
+  A short message, often missing things like success types and expected types for space.
+  """
+  @callback format_short([String.t()] | {String.t(), String.t(), String.t()} | String.t()) ::
+              String.t()
+
+  @doc """
+  Explanation for a warning of this type. Should include a simple example of how to trigger it.
+  """
+  @callback explain() :: String.t()
 end
