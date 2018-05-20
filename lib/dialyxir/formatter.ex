@@ -45,7 +45,6 @@ defmodule Dialyxir.Formatter do
                 Dialyxir.Warnings.RaceCondition,
                 Dialyxir.Warnings.RecordConstruction,
                 Dialyxir.Warnings.RecordMatching,
-                Dialyxir.Warnings.SpecMissingFunction,
                 Dialyxir.Warnings.UnknownBehaviour,
                 Dialyxir.Warnings.UnknownFunction,
                 Dialyxir.Warnings.UnknownType,

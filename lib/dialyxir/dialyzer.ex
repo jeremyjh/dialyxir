@@ -8,7 +8,6 @@ defmodule Dialyxir.Dialyzer do
     def run(args, filterer) do
       try do
         {split, args} = Keyword.split(args, [:raw, :format, :explain])
-        IO.inspect split
         formatter =
           cond do
             split[:format] == "dialyzer" ->
