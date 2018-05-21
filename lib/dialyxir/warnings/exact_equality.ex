@@ -6,6 +6,21 @@ defmodule Dialyxir.Warnings.ExactEquality do
   def warning(), do: :exact_eq
 
   @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Expression can never evaluate to true."
+  end
+
+  @impl Dialyxir.Warning
+  @spec format_long([String.t()]) :: String.t()
+  def format_long([type1, op, type2]) do
+    pretty_type1 = Dialyxir.PrettyPrint.pretty_print_type(type1)
+    pretty_type2 = Dialyxir.PrettyPrint.pretty_print_type(type2)
+
+    "The test #{pretty_type1} #{op} #{pretty_type2} can never evaluate to 'true'."
+  end
+
+  @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
     """
@@ -19,20 +34,5 @@ defmodule Dialyxir.Warnings.ExactEquality do
       end
     end
     """
-  end
-
-  @impl Dialyxir.Warning
-  @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Expression can never evaluate to true."
-  end
-
-  @impl Dialyxir.Warning
-  @spec format_long([String.t()]) :: String.t()
-  def format_long([type1, op, type2]) do
-    pretty_type1 = Dialyxir.PrettyPrint.pretty_print_type(type1)
-    pretty_type2 = Dialyxir.PrettyPrint.pretty_print_type(type2)
-
-    "The test #{pretty_type1} #{op} #{pretty_type2} can never evaluate to 'true'."
   end
 end
