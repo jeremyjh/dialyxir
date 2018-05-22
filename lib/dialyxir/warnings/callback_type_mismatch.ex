@@ -17,7 +17,7 @@ defmodule Dialyxir.Warnings.CallbackTypeMismatch do
   def format_long([behaviour, function, arity, fail_type, success_type]) do
     pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
     pretty_fail_type = Dialyxir.PrettyPrint.pretty_print_type(fail_type)
-    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_contract(success_type)
+    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_type(success_type)
 
     """
     Callback mismatch for @callback #{function}/#{arity} in #{pretty_behaviour} behaviour.
