@@ -29,7 +29,21 @@ defmodule Dialyxir.PrettyPrint do
   def pretty_print_pattern(pattern), do: pretty_print(pattern)
 
   def pretty_print_contract(str) do
-    pretty_print(str)
+    prefix = "@spec a"
+    suffix = "\ndef a() do\n  :ok\nend"
+    pretty = pretty_print(str)
+
+    """
+    @spec a#{pretty}
+    def a() do
+      :ok
+    end
+    """
+    |> Code.format_string!()
+    |> Enum.join("")
+    |> String.trim_leading(prefix)
+    |> String.trim_trailing(suffix)
+    |> String.replace("\n      ", "\n")
   end
 
   @spec pretty_print_type(String.t()) :: String.t()
