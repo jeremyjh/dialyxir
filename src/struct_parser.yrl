@@ -35,7 +35,6 @@ value -> atom '(' value ')' : {type, '$1', '$3'}.
 value -> atom list : {type_list, '$1', '$2'}.
 value -> value '=' value : {assignment, '$1', '$3'}.
 value -> '\'' int '..' int '\'' : {range, unwrap('$2'), unwrap('$4')}.
-value -> int : {int, unwrap('$1')}.
 value -> '\'' int '\'' : {int, unwrap('$2')}.
 value -> '\'' atom '\'' : {atom, '$2'}.
 value -> '\'' nil '\''  : {nil}.
@@ -58,6 +57,7 @@ atom -> sub_atom : ['$1'].
 atom -> sub_atom atom : ['$1'] ++ '$2'.
 
 sub_atom -> atom_part : unwrap('$1').
+sub_atom -> int : unwrap('$1').
 sub_atom -> '_' : '_'.
 
 named_value -> name '::' value : {named_value, '$1', '$3'}.
