@@ -203,7 +203,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
     assert pretty_printed == expected_output
   end
 
- test "mixed number/atom atoms are parsed" do
+  test "mixed number/atom atoms are parsed" do
     input = ~S"(#{'is_over_13?':=_}) -> 'ok'"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
