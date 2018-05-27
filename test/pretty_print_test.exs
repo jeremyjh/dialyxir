@@ -162,7 +162,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
     input = "<<_:64,_:_*8>>"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
-    expected_output = "String.t()"
+    expected_output = "<<_ :: 64, _ :: size(8)>>"
     assert pretty_printed == expected_output
   end
 
@@ -200,6 +200,14 @@ defmodule Dialyxir.Test.PretyPrintTest do
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "(() -> 1)"
+    assert pretty_printed == expected_output
+  end
+
+ test "mixed number/atom atoms are parsed" do
+    input = ~S"(#{'is_over_13?':=_}) -> 'ok'"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(%{is_over_13? => _}) :: :ok"
     assert pretty_printed == expected_output
   end
 end

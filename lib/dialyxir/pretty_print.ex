@@ -6,6 +6,7 @@ defmodule Dialyxir.PrettyPrint do
       |> :struct_lexer.string()
 
     {:ok, list} = :struct_parser.parse(tokens)
+
     list
   end
 
@@ -245,6 +246,8 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp atomize(atom) do
+    atom = remove_underscores(atom)
+
     module_name =
       atom
       |> Enum.map_join("", &to_string/1)
@@ -252,7 +255,7 @@ defmodule Dialyxir.PrettyPrint do
       |> strip_var_version()
 
     if module_name == to_string(atom) do
-      inspect(:"#{atom}")
+      inspect(:"#{module_name}")
     else
       "#{module_name}"
     end
@@ -273,10 +276,11 @@ defmodule Dialyxir.PrettyPrint do
     entry = Enum.find(map_keys, &struct_name_entry?/1)
 
     if entry do
-      {:map_entry, _, {:atom, struct_name}} = entry
+      {:map_entry, {:atom, struct_name}, _} = entry
 
       struct_name
       |> remove_underscores()
+      |> Enum.map_join("", &to_string/1)
       |> strip_elixir()
     end
   end
@@ -293,8 +297,9 @@ defmodule Dialyxir.PrettyPrint do
 
   defp struct_name_entry?(
          {:map_entry, {:atom, [:_, :_, 's', 't', 'r', 'u', 'c', 't', :_, :_]}, _value}
-       ),
-       do: true
+       ) do
+    true
+  end
 
   defp struct_name_entry?(_), do: false
 end
