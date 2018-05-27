@@ -253,7 +253,6 @@ defmodule Dialyxir.PrettyPrint do
 
     if module_name == to_string(atom) do
       inspect(:"#{atom}")
-
     else
       "#{module_name}"
     end
@@ -275,6 +274,7 @@ defmodule Dialyxir.PrettyPrint do
 
     if entry do
       {:map_entry, _, {:atom, struct_name}} = entry
+
       struct_name
       |> remove_underscores()
       |> strip_elixir()
@@ -291,6 +291,10 @@ defmodule Dialyxir.PrettyPrint do
     end)
   end
 
-  defp struct_name_entry?({:map_entry, {:atom, [:_, :_, 's', 't', 'r', 'u', 'c', 't', :_, :_]}, _value}), do: true
+  defp struct_name_entry?(
+         {:map_entry, {:atom, [:_, :_, 's', 't', 'r', 'u', 'c', 't', :_, :_]}, _value}
+       ),
+       do: true
+
   defp struct_name_entry?(_), do: false
 end

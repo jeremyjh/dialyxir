@@ -17,7 +17,9 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
     pretty_op = Dialyxir.PrettyPrint.pretty_print(op)
     pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
 
-    "Function application will fail since #{pretty_op} :: #{pretty_type} is not a function of arity #{arity}."
+    "Function application will fail since #{pretty_op} :: #{pretty_type} is not a function of arity #{
+      arity
+    }."
   end
 
   @impl Dialyxir.Warning
