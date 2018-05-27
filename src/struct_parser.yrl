@@ -12,11 +12,12 @@ byte_list byte_items
 byte
 named_value name
 range
+atom sub_atom
 contract
 function.
 
 Terminals
-nil int atom '(' ')' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '_' '::' ':' '...' '<<' '>>' '<' '>' '*' '='.
+atom_part nil int '(' ')' '_' '\'' ',' '#' '{' '}' '[' ']' 'fun(' '->' ':=' '=>' '|' '..' '::' ':' '...' '<<' '>>' '<' '>' '*' '='.
 
 Rootsymbol document.
 
@@ -25,22 +26,20 @@ document -> values : '$1'.
 values -> value : ['$1'].
 values -> value values : ['$1'] ++ '$2'.
 
-value -> atom : {atom, unwrap('$1')}.
-value -> map : '$1'.
-value -> atom ':' ':' atom '(' ')' : {type, unwrap('$1'), unwrap('$4')}.
-value -> '\'' atom '\'' ':' atom '(' ')' : {type, unwrap('$2'), unwrap('$5')}.
-value -> atom ':' atom '(' ')' : {type, unwrap('$1'), unwrap('$3')}.
-value -> '_' : {any}.
+value -> atom ':' ':' atom '(' ')' : {type, '$1', '$4'}.
+value -> '\'' atom '\'' ':' atom '(' ')' : {type, '$2', '$5'}.
+value -> atom ':' atom empty_list_paren : {type, '$1', '$3'}.
 value -> '...' : {rest}.
-value -> atom empty_list_paren : {type, unwrap('$1')}.
-value -> atom '(' value ')' : {type, unwrap('$1'), '$3'}.
-value -> atom list : {type_list, unwrap('$1'), '$2'}.
+value -> atom empty_list_paren : {type, '$1'}.
+value -> atom '(' value ')' : {type, '$1', '$3'}.
+value -> atom list : {type_list, '$1', '$2'}.
 value -> value '=' value : {assignment, '$1', '$3'}.
 value -> '\'' int '..' int '\'' : {range, unwrap('$2'), unwrap('$4')}.
 value -> int : {int, unwrap('$1')}.
 value -> '\'' int '\'' : {int, unwrap('$2')}.
-value -> '\'' atom '\'' : {atom, unwrap('$2')}.
+value -> '\'' atom '\'' : {atom, '$2'}.
 value -> '\'' nil '\''  : {nil}.
+value -> atom : {atom, '$1'}.
 value -> named_value : '$1'.
 value -> list : '$1'.
 value -> tuple : '$1'.
@@ -50,20 +49,27 @@ value -> function : '$1'.
 value -> contract : '$1'.
 value -> range : '$1'.
 value -> byte_list : '$1'.
+value -> map : '$1'.
 
 value -> '\'' value '|' value '\'' : {pipe_list, '$2', '$4'}.
 value -> value '|' value : {pipe_list, '$1', '$3'}.
 
+atom -> sub_atom : ['$1'].
+atom -> sub_atom atom : ['$1'] ++ '$2'.
+
+sub_atom -> atom_part : unwrap('$1').
+sub_atom -> '_' : '_'.
+
 named_value -> name '::' value : {named_value, '$1', '$3'}.
-name -> atom : {name, unwrap('$1')}.
+name -> atom : {name, '$1'}.
 
 binary -> '<<' binary_items '>>' : {binary, '$2'}.
 
 binary_items -> binary_part : ['$1'].
 binary_items -> binary_part  ',' binary_items : ['$1'] ++ '$3'.
 
-binary_part -> value ':' value : {binary_part, '$1', '$3'}.
-binary_part -> value ':' value '*' value : {binary_part, '$1', '$3', {size, '$5'}}.
+binary_part -> '_' ':' value : {binary_part, {any}, '$3'}.
+binary_part -> '_' ':' '_' '*' value : {binary_part, {any}, {any}, {size, '$5'}}.
 
 list -> '(' list_items ')' : {list, paren, '$2'}.
 list -> '[' ']' : {empty_list, square}.

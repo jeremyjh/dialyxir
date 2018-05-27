@@ -100,11 +100,19 @@ defmodule Dialyxir.PrettyPrint do
     |> inspect()
   end
 
-  defp do_pretty_print({:atom, 'false'}) do
+  defp do_pretty_print({:atom, [:_]}) do
+    "_"
+  end
+
+  defp do_pretty_print({:atom, ['_']}) do
+    "_"
+  end
+
+  defp do_pretty_print({:atom, ['f', 'a', 'l', 's', 'e']}) do
     "false"
   end
 
-  defp do_pretty_print({:atom, 'true'}) do
+  defp do_pretty_print({:atom, ['t', 'r', 'u', 'e']}) do
     "true"
   end
 
@@ -191,6 +199,7 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:name, name}) do
     name
+    |> remove_underscores()
     |> to_string()
     |> strip_var_version()
   end
@@ -224,25 +233,27 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:type, type}) do
-    "#{type}()"
+    "#{remove_underscores(type)}()"
   end
 
   defp do_pretty_print({:type, module, type}) do
-    "#{atomize(module)}.#{type}()"
+    "#{atomize(module)}.#{remove_underscores(type)}()"
   end
 
   defp do_pretty_print({:type_list, type, types}) do
-    "#{type}#{do_pretty_print(types)}"
+    "#{remove_underscores(type)}#{do_pretty_print(types)}"
   end
 
   defp atomize(atom) do
     module_name =
       atom
+      |> Enum.map_join("", &to_string/1)
       |> strip_elixir()
       |> strip_var_version()
 
     if module_name == to_string(atom) do
-      ":#{atom}"
+      inspect(:"#{atom}")
+
     else
       "#{module_name}"
     end
@@ -251,6 +262,7 @@ defmodule Dialyxir.PrettyPrint do
   defp strip_elixir(string) do
     string
     |> to_string()
+    # |> Enum.map_join("", &to_string/1)
     |> String.trim("Elixir.")
   end
 
@@ -263,10 +275,22 @@ defmodule Dialyxir.PrettyPrint do
 
     if entry do
       {:map_entry, _, {:atom, struct_name}} = entry
-      strip_elixir(struct_name)
+      struct_name
+      |> remove_underscores()
+      |> strip_elixir()
     end
   end
 
-  defp struct_name_entry?({:map_entry, {:atom, '__struct__'}, _value}), do: true
+  defp remove_underscores(chars) do
+    Enum.map(chars, fn char ->
+      if char == :_ do
+        '_'
+      else
+        char
+      end
+    end)
+  end
+
+  defp struct_name_entry?({:map_entry, {:atom, [:_, :_, 's', 't', 'r', 'u', 'c', 't', :_, :_]}, _value}), do: true
   defp struct_name_entry?(_), do: false
 end
