@@ -35,7 +35,12 @@ defmodule Dialyxir.Warnings.Call do
         contract
       )
 
-    "The call #{pretty_module}.#{function}#{pretty_args} #{call_string}"
+    """
+    The call:
+    #{pretty_module}.#{function}#{pretty_args}
+
+    #{String.trim_trailing(call_string)}
+    """
   end
 
   @impl Dialyxir.Warning

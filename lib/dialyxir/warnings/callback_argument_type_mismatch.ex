@@ -36,7 +36,6 @@ defmodule Dialyxir.Warnings.CallbackArgumentTypeMismatch do
     """
   end
 
-
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
