@@ -264,7 +264,6 @@ defmodule Dialyxir.PrettyPrint do
   defp strip_elixir(string) do
     string
     |> to_string()
-    # |> Enum.map_join("", &to_string/1)
     |> String.trim("Elixir.")
   end
 
@@ -276,8 +275,7 @@ defmodule Dialyxir.PrettyPrint do
     entry = Enum.find(map_keys, &struct_name_entry?/1)
 
     if entry do
-      {:map_entry, {:atom, struct_name}, _} = entry
-
+      {:map_entry, _, {:atom, struct_name}} = entry
       struct_name
       |> remove_underscores()
       |> Enum.map_join("", &to_string/1)
@@ -287,8 +285,8 @@ defmodule Dialyxir.PrettyPrint do
 
   defp remove_underscores(chars) do
     Enum.map(chars, fn char ->
-      if char == :_ do
-        '_'
+      if is_atom(char) do
+        Atom.to_string(char)
       else
         char
       end
@@ -296,7 +294,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp struct_name_entry?(
-         {:map_entry, {:atom, [:_, :_, 's', 't', 'r', 'u', 'c', 't', :_, :_]}, _value}
+         {:map_entry, {:atom, [:_, :_, 's', 't', 'r', 'u', 'c', 't', :_, :_]}, {:atom, _}}
        ) do
     true
   end
