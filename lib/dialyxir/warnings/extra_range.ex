@@ -30,7 +30,7 @@ defmodule Dialyxir.Warnings.ExtraRange do
     Extra type:
     #{pretty_extra}
 
-    Inferred return type:
+    Success typing:
     #{pretty_signature}
     """
   end
