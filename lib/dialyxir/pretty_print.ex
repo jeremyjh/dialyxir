@@ -51,6 +51,7 @@ defmodule Dialyxir.PrettyPrint do
   def pretty_print_type(str) do
     prefix = "@spec a("
     suffix = ") :: :ok\ndef a() do\n  :ok\nend"
+    indented_suffix = ") ::\n        :ok\ndef a() do\n  :ok\nend"
     pretty = pretty_print(str)
 
     """
@@ -63,6 +64,7 @@ defmodule Dialyxir.PrettyPrint do
     |> Enum.join("")
     |> String.trim_leading(prefix)
     |> String.trim_trailing(suffix)
+    |> String.trim_trailing(indented_suffix)
     |> String.replace("\n      ", "\n")
   end
 
