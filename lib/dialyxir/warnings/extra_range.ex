@@ -21,8 +21,18 @@ defmodule Dialyxir.Warnings.ExtraRange do
     pretty_extra = Dialyxir.PrettyPrint.pretty_print_type(extra_ranges)
     pretty_signature = Dialyxir.PrettyPrint.pretty_print_type(signature_range)
 
-    "The specification for #{pretty_module}.#{function}/#{arity} states that the function " <>
-      "might also return #{pretty_extra} but the inferred return is #{pretty_signature}."
+    """
+    Type specification has too many types.
+
+    Function:
+    #{pretty_module}.#{function}/#{arity}
+
+    Extra type:
+    #{pretty_extra}
+
+    Inferred return type:
+    #{pretty_signature}
+    """
   end
 
   @impl Dialyxir.Warning
