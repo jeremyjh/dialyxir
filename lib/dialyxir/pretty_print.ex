@@ -4,9 +4,8 @@ defmodule Dialyxir.PrettyPrint do
       str
       |> to_charlist()
       |> :struct_lexer.string()
-      |> IO.inspect
 
-    {:ok, list} = :struct_parser.parse(tokens)       |> IO.inspect
+    {:ok, list} = :struct_parser.parse(tokens)
 
     list
   end
@@ -19,8 +18,7 @@ defmodule Dialyxir.PrettyPrint do
       |> List.first()
       |> do_pretty_print()
     rescue
-      e ->
-        IO.inspect(e)
+      _ ->
         throw({:error, :parsing, str})
     end
   end
