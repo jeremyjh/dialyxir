@@ -71,46 +71,14 @@ defmodule Dialyxir.Formatter do
 
     formatted_warnings =
       warnings
-      |> Enum.reject(fn warning ->
-        formatted_warnings =
-          warning
-          |> format_warning(:dialyzer)
-          |> List.wrap()
-
-        Enum.empty?(filterer.filter_warnings(formatted_warnings))
-      end)
+      |> filter_legacy_warnings(filterer)
       |> Enum.map(fn warning ->
         message =
-          try do
-            format_warning(warning, :dialyxir)
-          catch
-            {:error, :message, warning} ->
-              """
-              Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
+          warning
+          |> format_warning(:dialyxir)
+          |> String.replace_trailing("\n", "")
 
-              Failed to parse warning:
-              #{inspect(warning)}
-
-              Legacy warning:
-              #{format_warning(warning, :dialyzer)}
-              """
-
-            {:error, :parsing, failing_string} ->
-              """
-              Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
-
-              Failed to parse part of warning:
-              #{inspect(warning)}
-
-              Failing part:
-              #{failing_string}
-
-              Legacy warning:
-              #{format_warning(warning, :dialyzer)}
-              """
-          end
-
-        message <> divider
+        message <> "\n" <> divider
       end)
 
     show_count_skipped(warnings, formatted_warnings)
@@ -119,9 +87,15 @@ defmodule Dialyxir.Formatter do
   end
 
   def format_and_filter(warnings, filterer, :dialyzer) do
-    formatted_warnings = Enum.map(warnings, &format_warning(&1, :dialyzer))
+    filtered_warnings =
+      warnings
+      |> filter_legacy_warnings(filterer)
+      |> Enum.map(fn warning ->
+        warning
+        |> format_warning(:dialyzer)
+        |> String.replace_trailing("\n", "")
+      end)
 
-    filtered_warnings = filterer.filter_warnings(formatted_warnings)
     show_count_skipped(warnings, filtered_warnings)
 
     filtered_warnings
@@ -129,14 +103,7 @@ defmodule Dialyxir.Formatter do
 
   def format_and_filter(warnings, filterer, :short) do
     warnings
-    |> Enum.reject(fn warning ->
-      formatted_warnings =
-        warning
-        |> format_warning(:dialyzer)
-        |> List.wrap()
-
-      Enum.empty?(filterer.filter_warnings(formatted_warnings))
-    end)
+    |> filter_legacy_warnings(filterer)
     |> Enum.map(&format_warning(&1, :short))
   end
 
@@ -150,38 +117,74 @@ defmodule Dialyxir.Formatter do
     |> :dialyzer.format_warning(:fullpath)
     |> String.Chars.to_string()
     |> String.replace_trailing("\n", "")
+    |> String.replace_suffix("", "\n")
   end
 
   defp format_warning({_tag, {file, line}, message}, :short) do
     {warning_name, arguments} = message
     base_name = Path.relative_to_cwd(file)
 
-    string =
-      if Map.has_key?(@warnings, warning_name) do
-        warning = Map.get(@warnings, warning_name)
-        warning.format_short(arguments)
-      else
-        throw({:error, :message, message})
-      end
+    warning = warning(warning_name)
+    string = warning.format_short(arguments)
 
-    "#{base_name}:#{line}:#{inspect(warning_name)} #{string}"
+    "#{base_name}:#{line}:#{warning_name} #{string}"
   end
 
-  defp format_warning({_tag, {file, line}, message}, :dialyxir) do
+  defp format_warning(dialyzer_warning = {_tag, {file, line}, message}, :dialyxir) do
     {warning_name, arguments} = message
     base_name = Path.relative_to_cwd(file)
 
-    string =
-      if Map.has_key?(@warnings, warning_name) do
-        warning = Map.get(@warnings, warning_name)
-        warning.format_long(arguments)
-      else
-        throw({:error, :message, message})
-      end
+    try do
+      warning = warning(warning_name)
+      string = warning.format_long(arguments)
 
+      """
+      #{base_name}:#{line}:#{warning_name}
+      #{string}
+      """
+    catch
+      {:error, :unknown_warning, warning_name} ->
+        message = """
+        Unknown warning:
+        #{inspect(warning_name)}
+        """
+
+        wrap_error_message(message, dialyzer_warning)
+
+      {:error, :lexing, warning} ->
+        message = """
+        Failed to lex warning:
+        #{inspect(warning)}
+        """
+
+        wrap_error_message(message, dialyzer_warning)
+
+      {:error, :parsing, failing_string} ->
+        message = """
+        Failed to parse warning:
+        #{inspect(failing_string)}
+        """
+
+        wrap_error_message(message, dialyzer_warning)
+
+      {:error, :pretty_printing, failing_string} ->
+        message = """
+        Failed to pretty print warning:
+        #{inspect(failing_string)}
+        """
+
+        wrap_error_message(message, dialyzer_warning)
+    end
+  end
+
+  defp wrap_error_message(message, warning) do
     """
-    #{base_name}:#{line}:#{warning_name}
-    #{string}
+    Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
+
+    #{message}
+
+    Legacy warning:
+    #{format_warning(warning, :dialyzer)}
     """
   end
 
@@ -192,5 +195,24 @@ defmodule Dialyxir.Formatter do
     IO.puts("Total errors: #{warnings_count}, Skipped: #{skipped_count}")
 
     :ok
+  end
+
+  defp warning(warning_name) do
+    if Map.has_key?(@warnings, warning_name) do
+      Map.get(@warnings, warning_name)
+    else
+      throw({:error, :unknown_warning, warning_name})
+    end
+  end
+
+  defp filter_legacy_warnings(warnings, filterer) do
+    Enum.reject(warnings, fn warning ->
+      formatted_warnings =
+        warning
+        |> format_warning(:dialyzer)
+        |> List.wrap()
+
+      Enum.empty?(filterer.filter_warnings(formatted_warnings))
+    end)
   end
 end
