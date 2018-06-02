@@ -256,4 +256,13 @@ defmodule Dialyxir.Test.PretyPrintTest do
     expected_output = "MapSet.t(MapSet.t(_))"
     assert pretty_printed == expected_output
   end
+
+  test "modules with numbers are pretty printed appropriately" do
+    input = 'Elixir.Project.Resources.Components.V1.Actions'
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "Project.Resources.Components.V1.Actions"
+    assert pretty_printed == expected_output
+  end
 end

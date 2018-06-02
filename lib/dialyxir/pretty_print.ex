@@ -113,14 +113,6 @@ defmodule Dialyxir.PrettyPrint do
     "#{do_pretty_print(name)} = #{do_pretty_print(value)}"
   end
 
-  defp do_pretty_print({:byte_list, byte_list}) do
-    byte_list
-    |> Enum.into(<<>>, fn byte ->
-      <<byte::8>>
-    end)
-    |> inspect()
-  end
-
   defp do_pretty_print({:atom, [:_]}) do
     "_"
   end
@@ -148,6 +140,14 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:binary, value, size}) do
     "<<#{do_pretty_print(value)} :: #{do_pretty_print(size)}>>"
+  end
+
+  defp do_pretty_print({:byte_list, byte_list}) do
+    byte_list
+    |> Enum.into(<<>>, fn byte ->
+      <<byte::8>>
+    end)
+    |> inspect()
   end
 
   defp do_pretty_print({:contract, {:args, args}, {:return, return}}) do
@@ -268,7 +268,8 @@ defmodule Dialyxir.PrettyPrint do
 
   defp atomize(atom) when is_list(atom) do
     atom
-    |> remove_underscores
+    |> remove_underscores()
+    |> Enum.map(&atom_part_to_string/1)
     |> to_string()
     |> atomize()
   end
@@ -285,6 +286,9 @@ defmodule Dialyxir.PrettyPrint do
 
     inspect(:"#{atom}")
   end
+
+  defp atom_part_to_string({:int, atom_part}), do: Integer.to_charlist(atom_part)
+  defp atom_part_to_string(atom_part), do: atom_part
 
   defp strip_var_version(var_name) do
     String.replace(var_name, ~r/^V(.+)@\d+$/, "\\1")
