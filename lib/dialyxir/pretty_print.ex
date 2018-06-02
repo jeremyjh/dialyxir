@@ -19,6 +19,7 @@ defmodule Dialyxir.PrettyPrint do
     end
   end
 
+  @spec pretty_print(String.t()) :: String.t()
   def pretty_print(str) do
     parsed =
       str
