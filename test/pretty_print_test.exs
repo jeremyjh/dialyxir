@@ -239,11 +239,11 @@ defmodule Dialyxir.Test.PretyPrintTest do
 
   test "any functions are pretty printed appropriately" do
     input = ~S"""
-    (_,'nil' | [{fun(),[any()] | non_neg_integer(),[{_,_}]} | {atom(),atom(),[any()] | non_neg_integer(),[{_,_}]}] | {'Elixir.GenServer','call',[any(),...]}) -> binary()
+    fun()
     """
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
-    expected_output = "(_, nil | [{(... -> any), [any()] | non_neg_integer(), [{_, _}]} | {atom(), atom(), [any()] | non_neg_integer(), [{_, _}]}] | {GenServer, :call, [any(), ...]}) :: binary()"
+    expected_output = "(... -> any)"
     assert pretty_printed == expected_output
   end
 
