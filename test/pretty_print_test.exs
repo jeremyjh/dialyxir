@@ -265,4 +265,19 @@ defmodule Dialyxir.Test.PretyPrintTest do
     expected_output = "Project.Resources.Components.V1.Actions"
     assert pretty_printed == expected_output
   end
+
+  test "semicolons are pretty printed appropriately" do
+    input = ~S"""
+    'Elixir.Module.V1.Ac(tion.Hel(pers':foo_bar(any(),'nil') -> 'nil'
+    ; ('Elixir.Ecto.Queryable':t(),'Elixir.String':t()) -> 'Elixir.String':t()
+    """
+
+    pretty_printed =
+      input
+      |> to_charlist()
+      |> Dialyxir.PrettyPrint.pretty_print_contract("'Elixir.Module.V1.Ac(tion.Hel(pers'", "foo_bar")
+
+    expected_output = "Contract head: (any(), nil) :: nilContract head: (Ecto.Queryable.t(), String.t()) :: String.t()"
+    assert pretty_printed == expected_output
+  end
 end
