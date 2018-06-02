@@ -91,6 +91,10 @@ defmodule Dialyxir.PrettyPrint do
     "_"
   end
 
+  defp do_pretty_print({:any_function}) do
+    "(... -> any)"
+  end
+
   defp do_pretty_print({:assignment, name, value}) do
     "#{do_pretty_print(name)} = #{do_pretty_print(value)}"
   end
@@ -111,14 +115,6 @@ defmodule Dialyxir.PrettyPrint do
     "_"
   end
 
-  defp do_pretty_print({:atom, ['f', 'a', 'l', 's', 'e']}) do
-    "false"
-  end
-
-  defp do_pretty_print({:atom, ['t', 'r', 'u', 'e']}) do
-    "true"
-  end
-
   defp do_pretty_print({:atom, atom}) do
     atomize(atom)
   end
@@ -129,14 +125,6 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:binary_part, value, size}) do
     "#{do_pretty_print(value)} :: #{do_pretty_print(size)}"
-  end
-
-  # TODO: Not sure if this is completely correct. But this seems to line up with actual code.
-  defp do_pretty_print(
-         {:binary,
-          [{:binary_part, {:any}, {:int, 64}}, {:binary_part, {:any}, {:any}, {:size, {:int, 8}}}]}
-       ) do
-    "String.t()"
   end
 
   defp do_pretty_print({:binary, binary_parts}) do
@@ -169,7 +157,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:int, int}) do
-    "#{int}"
+    "#{to_string(int)}"
   end
 
   defp do_pretty_print({:list, :paren, items}) do
@@ -204,7 +192,6 @@ defmodule Dialyxir.PrettyPrint do
     name
     |> remove_underscores()
     |> to_string()
-    |> strip_var_version()
   end
 
   defp do_pretty_print({nil}) do
@@ -243,30 +230,46 @@ defmodule Dialyxir.PrettyPrint do
     "#{atomize(module)}.#{remove_underscores(type)}()"
   end
 
+  defp do_pretty_print({:type, module, type, inner_type}) do
+    "#{atomize(module)}.#{remove_underscores(type)}(#{do_pretty_print(inner_type)})"
+  end
+
   defp do_pretty_print({:type_list, type, types}) do
     "#{remove_underscores(type)}#{do_pretty_print(types)}"
   end
 
-  defp atomize(atom) do
-    atom = remove_underscores(atom)
-
-    module_name =
-      atom
-      |> Enum.map_join("", &to_string/1)
-      |> strip_elixir()
-      |> strip_var_version()
-
-    if module_name == to_string(atom) do
-      inspect(:"#{module_name}")
-    else
-      "#{module_name}"
-    end
+  defp do_pretty_print({:variable_alias, variable_alias}) do
+    variable_alias
+    |> to_string()
+    |> strip_var_version()
   end
 
-  defp strip_elixir(string) do
-    string
+  defp atomize('\'Elixir.\'' ++ module_name) do
+    to_string(module_name)
+  end
+
+  defp atomize("Elixir." <> module_name) do
+    "#{String.trim(module_name, "'")}"
+  end
+
+  defp atomize(atom) when is_list(atom) do
+    atom
+    |> remove_underscores
     |> to_string()
-    |> String.trim("Elixir.")
+    |> atomize()
+  end
+
+  defp atomize(<< atom >>) when is_number(atom) do
+    "#{atom}"
+  end
+
+  defp atomize(atom) do
+    atom =
+      atom
+      |> to_string()
+      |> String.trim("'")
+
+    inspect(:"#{atom}")
   end
 
   defp strip_var_version(var_name) do
@@ -278,10 +281,10 @@ defmodule Dialyxir.PrettyPrint do
 
     if entry do
       {:map_entry, _, {:atom, struct_name}} = entry
+
       struct_name
-      |> remove_underscores()
-      |> Enum.map_join("", &to_string/1)
-      |> strip_elixir()
+      |> atomize()
+      |> String.trim("\"")
     end
   end
 
@@ -295,9 +298,7 @@ defmodule Dialyxir.PrettyPrint do
     end)
   end
 
-  defp struct_name_entry?(
-         {:map_entry, {:atom, [:_, :_, 's', 't', 'r', 'u', 'c', 't', :_, :_]}, {:atom, _}}
-       ) do
+  defp struct_name_entry?({:map_entry, {:atom, '\'__struct__\''}, {:atom, _}}) do
     true
   end
 
