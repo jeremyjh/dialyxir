@@ -203,11 +203,69 @@ defmodule Dialyxir.Test.PretyPrintTest do
     assert pretty_printed == expected_output
   end
 
-  test "mixed number/atom atoms are parsed" do
+  test "mixed number/atom atoms are pretty printed appropriately" do
     input = ~S"(#{'is_over_13?':=_}) -> 'ok'"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
-    expected_output = "(%{is_over_13? => _}) :: :ok"
+    expected_output = "(%{:is_over_13? => _}) :: :ok"
+    assert pretty_printed == expected_output
+  end
+
+  test "tokenized characters are pretty printed appropriately" do
+    input = ~S"'<' | '<=' | '>' | '>=' | 'fun('"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = ":< | :<= | :> | :>= | :\"fun(\""
+    assert pretty_printed == expected_output
+  end
+
+  test "V# names are pretty printed appropriately" do
+    input = ~S"'Elixir.Module.V1.Foo'"
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "Module.V1.Foo"
+    assert pretty_printed == expected_output
+    end
+
+  test "integers in maps are pretty printed appropriately" do
+    input = ~S"""
+    #{'source':={[any()] | 98971880 | map()}}
+    """
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "%{:source => {[any()] | 98971880 | map()}}"
+    assert pretty_printed == expected_output
+  end
+
+  test "something" do
+    input = ~S"""
+        (_,
+    'nil' | [{fun(),
+    [any()] | non_neg_integer(),
+    [{_,
+    _}]} | {atom(),
+    atom(),
+    [any()] | non_neg_integer(),
+    [{_,
+    _}]}] | {'Elixir.GenServer',
+    'call',
+    [any(),
+    ...]}) -> binary()
+
+    """
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(_,'nil' | [{fun(),[any()] | non_neg_integer(),[{_,_}]} | {atom(),atom(),[any()] | non_neg_integer(),[{_,_}]}] | {'Elixir.GenServer','call',[any(),...]}) -> binary()"
+    assert pretty_printed == expected_output
+  end
+
+  test "inner types are printed appropriately" do
+    input = ~S"""
+    'Elixir.MapSet':t('Elixir.MapSet':t(_))
+    """
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "MapSet.t(MapSet.t(_))"
     assert pretty_printed == expected_output
   end
 end
