@@ -58,8 +58,7 @@ value -> value '|' value : {pipe_list, '$1', '$3'}.
 
 atom -> atom_full : unwrap('$1').
 atom -> sub_atom : ['$1'].
-atom -> sub_atom int : ['$1'] ++ [unwrap('$2')].
-atom -> sub_atom atom : ['$1'] ++ '$2'.
+atom -> sub_atom int : ['$1'] ++ [{int, unwrap('$2')}].
 atom -> atom atom : '$1' ++ '$2'.
 
 alias -> variable_alias : {variable_alias, unwrap('$1')}.

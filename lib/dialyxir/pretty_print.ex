@@ -286,7 +286,7 @@ defmodule Dialyxir.PrettyPrint do
     inspect(:"#{atom}")
   end
 
-  defp atom_part_to_string({:int, atom_part}), do: atom_part
+  defp atom_part_to_string({:int, atom_part}), do: Integer.to_charlist(atom_part)
   defp atom_part_to_string(atom_part), do: atom_part
 
   defp strip_var_version(var_name) do

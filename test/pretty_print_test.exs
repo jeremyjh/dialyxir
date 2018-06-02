@@ -262,7 +262,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
 
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
-    expected_output = "Project.Resources.Components.V1"
+    expected_output = "Project.Resources.Components.V1.Actions"
     assert pretty_printed == expected_output
   end
 end
