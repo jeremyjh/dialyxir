@@ -58,6 +58,11 @@ mix dialyzer
   * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
     useful for CI. do not use with `mix do`.
   * `--plt`              - only build the required plt(s) and exit.
+  *  `--format short`      - format the warnings in a compact format.
+  *  `--format raw`        - format the warnings in format returned before Dialyzer formatting
+  *  `--format dialyxir`   - format the warnings in a pretty printed format
+  *  `--format dialyzer`   - format the warnings in the original Dialyzer format
+  *  `--explain warning`   - explain the class of warnings, e.g. no_return
 
 Warning flags passed to this task are passed on to `:dialyzer`.
 
@@ -107,6 +112,17 @@ def project do
  ]
 end
 ```
+
+#### Explanations
+Explanations are available for classes of warnings by passing the `--explain warning_name` flag. It will include a description about the type of warning, as well as a small example that would also cause that warning. Poor explanations and examples should be considered issues in this library, and pull requests are very welcome! The warning name is returned from the `--format short` and `--format dialyzer` flags.
+
+
+#### Formats
+Dialyxir supports formatting the errors in several different ways:
+  * Short - By passing `--format short`, the structs and other spec/type information will be dropped from the error message, with a minimal message. This is useful for CI environments. Includes `warning_name ` for use in explanations.
+  * Dialyzer - By passing `--format dialyzer`, the messages will be printed in the default Dialyzer format.
+  * Raw - By passing `--format raw`, messages will be printed in their form before being pretty printed by Dialyzer or Dialyxir.
+  * Dialyxir (default) -- By passing `--format dizlyxir`, messages will be converted to Elixir style messages then pretty printed and formatted. Includes `warning_name ` for use in explanations.
 
 ### Flags
 

@@ -1,25 +1,37 @@
 defmodule Dialyxir.PrettyPrint do
-  defp parse(str) do
-    {:ok, tokens, _} =
-      str
-      |> to_charlist()
-      |> :struct_lexer.string()
+  defp lex(str) do
+    try do
+      {:ok, tokens, _} = :struct_lexer.string(str)
+      tokens
+    rescue
+      _ ->
+        throw({:error, :lexing, str})
+    end
+  end
 
-    {:ok, list} = :struct_parser.parse(tokens)
-
-    list
+  defp parse(tokens) do
+    try do
+      {:ok, list} = :struct_parser.parse(tokens)
+      List.first(list)
+    rescue
+      _ ->
+        throw({:error, :parsing, tokens})
+    end
   end
 
   @spec pretty_print(String.t()) :: String.t()
   def pretty_print(str) do
-    try do
+    parsed =
       str
+      |> to_charlist()
+      |> lex()
       |> parse()
-      |> List.first()
-      |> do_pretty_print()
+
+    try do
+      do_pretty_print(parsed)
     rescue
       _ ->
-        throw({:error, :parsing, str})
+        throw({:error, :pretty_printing, parsed})
     end
   end
 
@@ -27,7 +39,9 @@ defmodule Dialyxir.PrettyPrint do
     pretty_print(rest)
   end
 
-  def pretty_print_pattern(pattern), do: pretty_print(pattern)
+  def pretty_print_pattern(pattern) do
+    pretty_print(pattern)
+  end
 
   def pretty_print_contract(str) do
     prefix = "@spec a"
@@ -259,7 +273,7 @@ defmodule Dialyxir.PrettyPrint do
     |> atomize()
   end
 
-  defp atomize(<< atom >>) when is_number(atom) do
+  defp atomize(<<atom>>) when is_number(atom) do
     "#{atom}"
   end
 
