@@ -199,6 +199,24 @@ And then run `mix dialyzer` would output:
 config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination withthe ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
  done in 0m1.32s
 done (warnings were emitted)
+
+Dialyzer also recognizes an Elixir format of the ignore file. If your ignore file is a `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following:
+
+```elixir
+[
+  # {short_description}
+  {":0:unknown_function Function :erl_types.t_is_opaque/1/1 does not exist."},
+  # {short_description, warning_type}
+  {":0:unknown_function Function :erl_types.t_to_string/1 does not exist.", :unknown_function},
+  # {short_description, warning_type, line}
+  {":0:unknown_function Function :erl_types.t_to_string/1 does not exist.", :unknown_function, 0},
+  # {file, warning_type, line}
+  {"lib/dialyxir/pretty_print.ex", :no_return, 100},
+  # {file, warning_type}
+  {"lib/dialyxir/warning_helpers.ex", :no_return},
+  # {file}
+  {"lib/dialyxir/warnings/app_call.ex"},
+]```
 ```
 
 `:ignore_warnings` works as you may expect with `--halt-exit-status` - by resetting the exit status to 0 if all warnings are filtered.

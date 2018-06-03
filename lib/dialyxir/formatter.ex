@@ -71,6 +71,7 @@ defmodule Dialyxir.Formatter do
 
     formatted_warnings =
       warnings
+      |> filter_warnings(filterer)
       |> filter_legacy_warnings(filterer)
       |> Enum.map(fn warning ->
         message =
@@ -89,6 +90,7 @@ defmodule Dialyxir.Formatter do
   def format_and_filter(warnings, filterer, :dialyzer) do
     filtered_warnings =
       warnings
+      |> filter_warnings(filterer)
       |> filter_legacy_warnings(filterer)
       |> Enum.map(fn warning ->
         warning
@@ -103,6 +105,7 @@ defmodule Dialyxir.Formatter do
 
   def format_and_filter(warnings, filterer, :short) do
     warnings
+    |> filter_warnings(filterer)
     |> filter_legacy_warnings(filterer)
     |> Enum.map(&format_warning(&1, :short))
   end
@@ -203,6 +206,14 @@ defmodule Dialyxir.Formatter do
     else
       throw({:error, :unknown_warning, warning_name})
     end
+  end
+
+  defp filter_warnings(warnings, filterer) do
+    Enum.reject(warnings, fn warning = {_, {file, line}, {warning_type, _}} ->
+      filterer.filter_warning?(
+        {to_string(file), warning_type, line, format_warning(warning, :short)}
+      )
+    end)
   end
 
   defp filter_legacy_warnings(warnings, filterer) do
