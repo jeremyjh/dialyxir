@@ -1,5 +1,5 @@
 [
-  {"/home/travis/otp/19.2/lib/parsetools-2.1.4/include/leexinc.hrl", :unknown_fun, 276},
+  {"/home/travis/otp/19.2/lib/parsetools-2.1.4/include/leexinc.hrl", :unused_fun, 276},
   {":0:unknown_function Function :erl_types.t_is_opaque/1 does not exist."},
   {":0:unknown_function Function :erl_types.t_to_string/1 does not exist."},
   {":0:unknown_type Unknown type: :cerl.c_fun/0."},
@@ -18,6 +18,7 @@
   {":0:unknown_type Unknown type: :wxDC.wxDC/0."},
   {":0:unknown_type Unknown type: :wxFont.wxFont/0."},
   {":0:unknown_type Unknown type: :wxMenu.wxMenu/0."},
+  {":0:unknown_type Unknown type: :wxWindow.wxWindow/0."},
   {"lib/dialyxir/pretty_print.ex", :no_return, 100},
   {"lib/dialyxir/pretty_print.ex", :no_return, 121},
   {"lib/dialyxir/pretty_print.ex", :no_return, 69},
