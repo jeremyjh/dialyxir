@@ -11,8 +11,8 @@ defmodule Dialyxir.PrettyPrint do
 
   defp parse(tokens) do
     try do
-      {:ok, list} = :struct_parser.parse(tokens)
-      List.first(list)
+      {:ok, [first | _]} = :struct_parser.parse(tokens)
+      first
     rescue
       _ ->
         throw({:error, :parsing, tokens})
@@ -49,15 +49,16 @@ defmodule Dialyxir.PrettyPrint do
       |> to_string()
       |> String.contains?(";")
 
-    # TODO: This is kind of janky but I've only seen this once.
+    # TODO: This is kind of janky but I've only seen this once and am
+    # not sure how to make it happen generally.
     if multiple_heads? do
-      [left, right] =
+      [head | tail] =
         str
         |> to_string()
         |> String.split(";")
 
-      left =
-        left
+      head =
+        head
         |> String.trim_leading(to_string(module))
         |> String.trim_leading(":")
         |> String.trim_leading(to_string(function))
@@ -65,9 +66,11 @@ defmodule Dialyxir.PrettyPrint do
       joiner = "Contract head: "
 
       pretty =
-        [left, right]
-        |> Enum.map(&to_charlist/1)
-        |> Enum.map_join(joiner, &pretty_print_contract/1)
+        Enum.map_join([head | tail], joiner, fn str ->
+          str
+          |> to_charlist()
+          |> pretty_print_contract()
+        end)
 
       joiner <> pretty
     else
@@ -219,14 +222,12 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:map, map_keys}) do
-    struct_name = struct_name(map_keys)
+    %{struct_name: struct_name, entries: entries} = struct_parts(map_keys)
 
     if struct_name do
-      keys = Enum.reject(map_keys, &struct_name_entry?/1)
-
-      "%#{struct_name}{#{Enum.map_join(keys, ", ", &do_pretty_print/1)}}"
+      "%#{struct_name}{#{Enum.map_join(entries, ", ", &do_pretty_print/1)}}"
     else
-      "%{#{Enum.map_join(map_keys, ", ", &do_pretty_print/1)}}"
+      "%{#{Enum.map_join(entries, ", ", &do_pretty_print/1)}}"
     end
   end
 
@@ -236,7 +237,7 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:name, name}) do
     name
-    |> remove_underscores()
+    |> deatomize()
     |> to_string()
   end
 
@@ -269,19 +270,19 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:type, type}) do
-    "#{remove_underscores(type)}()"
+    "#{deatomize(type)}()"
   end
 
   defp do_pretty_print({:type, module, type}) do
-    "#{atomize(module)}.#{remove_underscores(type)}()"
+    "#{atomize(module)}.#{deatomize(type)}()"
   end
 
   defp do_pretty_print({:type, module, type, inner_type}) do
-    "#{atomize(module)}.#{remove_underscores(type)}(#{do_pretty_print(inner_type)})"
+    "#{atomize(module)}.#{deatomize(type)}(#{do_pretty_print(inner_type)})"
   end
 
   defp do_pretty_print({:type_list, type, types}) do
-    "#{remove_underscores(type)}#{do_pretty_print(types)}"
+    "#{deatomize(type)}#{do_pretty_print(types)}"
   end
 
   defp do_pretty_print({:variable_alias, variable_alias}) do
@@ -290,18 +291,13 @@ defmodule Dialyxir.PrettyPrint do
     |> strip_var_version()
   end
 
-  defp atomize('\'Elixir.\'' ++ module_name) do
-    to_string(module_name)
-  end
-
   defp atomize("Elixir." <> module_name) do
     "#{String.trim(module_name, "'")}"
   end
 
   defp atomize(atom) when is_list(atom) do
     atom
-    |> remove_underscores()
-    |> Enum.map(&atom_part_to_string/1)
+    |> deatomize()
     |> to_string()
     |> atomize()
   end
@@ -326,31 +322,37 @@ defmodule Dialyxir.PrettyPrint do
     String.replace(var_name, ~r/^V(.+)@\d+$/, "\\1")
   end
 
-  defp struct_name(map_keys) do
-    entry = Enum.find(map_keys, &struct_name_entry?/1)
+  defp struct_parts(map_keys) do
+    %{struct_name: struct_name, entries: entries} =
+      Enum.reduce(map_keys, %{struct_name: nil, entries: []}, &struct_part/2)
 
-    if entry do
-      {:map_entry, _, {:atom, struct_name}} = entry
+    %{struct_name: struct_name, entries: Enum.reverse(entries)}
+  end
 
+  defp struct_part({:map_entry, {:atom, '\'__struct__\''}, {:atom, struct_name}}, struct_parts) do
+    struct_name =
       struct_name
       |> atomize()
       |> String.trim("\"")
-    end
+
+    Map.put(struct_parts, :struct_name, struct_name)
   end
 
-  defp remove_underscores(chars) do
+  defp struct_part(entry, struct_parts = %{entries: entries}) do
+    Map.put(struct_parts, :entries, [entry | entries])
+  end
+
+  defp deatomize(chars) when is_list(chars) do
     Enum.map(chars, fn char ->
-      if is_atom(char) do
-        Atom.to_string(char)
-      else
-        char
-      end
+      char
+      |> deatomize_char()
+      |> atom_part_to_string()
     end)
   end
 
-  defp struct_name_entry?({:map_entry, {:atom, '\'__struct__\''}, {:atom, _}}) do
-    true
+  defp deatomize_char(char) when is_atom(char) do
+    Atom.to_string(char)
   end
 
-  defp struct_name_entry?(_), do: false
+  defp deatomize_char(char), do: char
 end
