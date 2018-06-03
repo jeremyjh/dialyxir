@@ -65,7 +65,6 @@ defmodule Dialyxir.Project do
   defp skip?({file, warning, line}, {file, warning, line, _}), do: true
   defp skip?({file, warning}, {file, warning, _, _}), do: true
   defp skip?({file}, {file, _, _, _}), do: true
-  defp skip?({file}, {_, _, _, short_description}), do: true
   defp skip?({short_description, warning, line}, {_, warning, line, short_description}), do: true
   defp skip?({short_description, warning}, {_, warning, _, short_description}), do: true
   defp skip?({short_description}, {_, _, _, short_description}), do: true
@@ -82,8 +81,6 @@ defmodule Dialyxir.Project do
             ignore_file
             |> File.read!()
             |> Code.eval_string()
-
-          ignore
 
           Enum.any?(ignore, &skip?(&1, {file, warning, line, short_description}))
         else
