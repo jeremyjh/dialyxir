@@ -61,7 +61,7 @@ defmodule Mix.Tasks.Dialyzer do
     [ app: :my_app,
     version: "0.0.1",
     deps: deps,
-    dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: :wx]
+    dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
     ]
   end
   ```
