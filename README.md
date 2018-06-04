@@ -122,7 +122,7 @@ Dialyxir supports formatting the errors in several different ways:
   * Short - By passing `--format short`, the structs and other spec/type information will be dropped from the error message, with a minimal message. This is useful for CI environments. Includes `warning_name ` for use in explanations.
   * Dialyzer - By passing `--format dialyzer`, the messages will be printed in the default Dialyzer format.
   * Raw - By passing `--format raw`, messages will be printed in their form before being pretty printed by Dialyzer or Dialyxir.
-  * Dialyxir (default) -- By passing `--format dizlyxir`, messages will be converted to Elixir style messages then pretty printed and formatted. Includes `warning_name ` for use in explanations.
+  * Dialyxir (default) -- By passing `--format dialyxir`, messages will be converted to Elixir style messages then pretty printed and formatted. Includes `warning_name ` for use in explanations.
 
 ### Flags
 
@@ -216,7 +216,7 @@ Dialyzer also recognizes an Elixir format of the ignore file. If your ignore fil
   {"lib/dialyxir/warning_helpers.ex", :no_return},
   # {file}
   {"lib/dialyxir/warnings/app_call.ex"},
-]```
+]
 ```
 
 `:ignore_warnings` works as you may expect with `--halt-exit-status` - by resetting the exit status to 0 if all warnings are filtered.
