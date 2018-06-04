@@ -13,6 +13,12 @@ defmodule Mix.Tasks.Dialyzer do
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
       useful for CI. do not use with `mix do`.
     * `--plt`              - only build the required plt(s) and exit.
+    * `--raw`              - Dump the raw erlang terms returned by dialyzer module (deprecated, use `--format rsw`).
+    *  --format short      - format the warnings in a compact format.
+    *  --format raw        - format the warnings in format returned before Dialyzer formatting
+    *  --format dialyxir   - format the warnings in a pretty printed format
+    *  --format dialyzer   - format the warnings in the original Dialyzer format
+    *  --explain warning   - explain the class of warnings, e.g. no_return
 
   Warning flags passed to this task are passed on to `:dialyzer`.
 
@@ -123,7 +129,11 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options [ no_compile: :boolean,
                      no_check: :boolean,
                      halt_exit_status: :boolean,
-                     plt: :boolean ]
+                     plt: :boolean,
+                     raw: :boolean,
+                     format: :string,
+                     explain: :string
+                   ]
 
   def run(args) do
     check_dialyzer()
@@ -191,7 +201,11 @@ defmodule Mix.Tasks.Dialyzer do
     args = [ { :check_plt, false },
              { :init_plt, String.to_charlist(Project.plt_file()) },
              { :files_rec, Project.dialyzer_paths() },
-             { :warnings, dialyzer_warnings(dargs) } ]
+             { :warnings, dialyzer_warnings(dargs) } ,
+             { :explain, opts[:explain]},
+             { :format, opts[:format]},
+             { :raw, opts[:raw] },
+           ]
 
     IO.puts "Starting Dialyzer"
     IO.inspect args, label: "dialyzer args"
@@ -232,7 +246,7 @@ defmodule Mix.Tasks.Dialyzer do
     # However part of the app.tree resolution includes loading all sub apps, and we will
     # hit an exception when we try to do that for *this* child, which is already loaded.
     {out, rc} = System.cmd("mix", ["dialyzer", "--plt"], opts)
-    if rc != 0 do
+    unless rc == 0 do
       IO.puts("Error building parent PLT, process returned code: #{rc}\n#{out}")
     end
   end

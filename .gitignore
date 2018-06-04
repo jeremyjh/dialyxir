@@ -4,3 +4,5 @@ doc
 .depsolver.plt
 erl_crash.dump
 *.ez
+src/struct_parser.erl
+src/struct_lexer.erl

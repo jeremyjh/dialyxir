@@ -1,0 +1,40 @@
+defmodule Dialyxir.Warnings.GuardFailPattern do
+  @behaviour Dialyxir.Warning
+
+  @impl Dialyxir.Warning
+  @spec warning() :: :guard_fail_pat
+  def warning(), do: :guard_fail_pat
+
+  @impl Dialyxir.Warning
+  @spec format_short([String.t()]) :: String.t()
+  def format_short(_) do
+    "Clause guard cannot succeed."
+  end
+
+  @impl Dialyxir.Warning
+  @spec format_long([String.t()]) :: String.t()
+  def format_long([pattern, type]) do
+    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
+
+    "Clause guard cannot succeed. The pattern #{pretty_pattern} " <>
+      "was matched against the type #{pretty_type}."
+  end
+
+  @impl Dialyxir.Warning
+  @spec explain() :: String.t()
+  def explain() do
+    """
+    The guard describes a condition of literals that fails the pattern
+    given in function head.
+
+    Example:
+
+    defmodule Example do
+      def ok(n = 0) when not n < 1 do
+        :ok
+      end
+    end
+    """
+  end
+end

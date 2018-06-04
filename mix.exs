@@ -5,14 +5,15 @@ defmodule Dialyxir.Mixfile do
     [
       app: :dialyxir,
       version: "0.5.1",
-      elixir: "> 1.3.2",
+      elixir: ">= 1.6.0",
       description: description(),
       package: package(),
       deps: [ {:ex_doc, ">= 0.0.0", only: :dev} ],
-      dialyzer: [ plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib],
-                  ignore_warnings: ".dialyzer_ignore",
-                  flags: [:unmatched_returns, :error_handling, :underspecs]
-                ],
+      dialyzer: [
+        plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib],
+        ignore_warnings: ".dialyzer_ignore.exs",
+        flags: [:unmatched_returns, :error_handling, :underspecs]
+      ],
 
       # Docs
       name: "Dialyxir",
