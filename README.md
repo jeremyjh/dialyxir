@@ -199,6 +199,7 @@ And then run `mix dialyzer` would output:
 config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination withthe ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
  done in 0m1.32s
 done (warnings were emitted)
+```
 
 Dialyzer also recognizes an Elixir format of the ignore file. If your ignore file is a `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following:
 
