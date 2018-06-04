@@ -239,7 +239,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp build_parent_plt() do
     parent = Mix.Project.config[:lockfile] |> Path.expand |> Path.dirname
-    opts = [ into: IO.stream(:stdio, :line),
+    opts = [ into: "",
              stderr_to_stdout: true,
              cd: parent ]
     # It would seem more natural to use Mix.in_project here to start in our parent project.
