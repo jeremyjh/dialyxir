@@ -6,7 +6,7 @@ defmodule Dialyxir.Warning do
   """
 
   @doc """
-  By expressiing the warning that is to be matched on, error handlong
+  By expressing the warning that is to be matched on, error handlong
   and dispatching can be avoided in format functions.
   """
   @callback warning() :: atom
@@ -34,7 +34,7 @@ defmodule Dialyxir.Warning do
     """
     This warning type does not have an explanation yet. If you have
     code that causes it, please file an issue or pull request in
-    https://github.com/jeremyjh/dialyxir/pull/118
+    https://github.com/jeremyjh/dialyxir/issues
     """
   end
 end

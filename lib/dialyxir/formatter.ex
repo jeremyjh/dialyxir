@@ -182,7 +182,7 @@ defmodule Dialyxir.Formatter do
 
   defp wrap_error_message(message, warning) do
     """
-    Please file a bug in https://github.com/jeremyjh/dialyxir/pull/118 with this message.
+    Please file a bug in https://github.com/jeremyjh/dialyxir/issues with this message.
 
     #{message}
 
