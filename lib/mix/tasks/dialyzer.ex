@@ -131,6 +131,7 @@ defmodule Mix.Tasks.Dialyzer do
                      no_check: :boolean,
                      halt_exit_status: :boolean,
                      plt: :boolean,
+                     quiet: :boolean,
                      raw: :boolean,
                      format: :string,
                      explain: :string
@@ -149,12 +150,12 @@ defmodule Mix.Tasks.Dialyzer do
 
       unless opts[:no_compile], do: Mix.Project.compile([])
       _ = unless no_check?(opts) do
-        IO.puts "Finding suitable PLTs"
+        info("Finding suitable PLTs")
         check_plt()
       end
       unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
-      info "No mix project found - checking core PLTs..."
+      info("No mix project found - checking core PLTs...")
       Project.plts_list([], false) |> Plt.check()
     end
     Mix.shell(original_shell)
@@ -166,36 +167,36 @@ defmodule Mix.Tasks.Dialyzer do
     if opts[:all], do: Project.plts_list([], false) |> Plt.check(fun)
     if Mix.Project.get() do
       {apps, _hash} = dependency_hash()
-      IO.puts "Deleting PLTs"
+      info("Deleting PLTs")
       Project.plts_list(apps, true, true) |> Plt.check(fun)
-      IO.puts "About to delete PLT hash file: #{plt_hash_file()}"
+      info("About to delete PLT hash file: #{plt_hash_file()}")
       File.rm(plt_hash_file())
     end
   end
 
   def delete_plt(plt, _, _, _) do
-    IO.puts("About to delete PLT file: #{plt}")
+    info("About to delete PLT file: #{plt}")
     File.rm(plt)
   end
 
   defp no_check?(opts) do
     case {in_child?(), no_plt?()} do
       {true, true} ->
-        info "In an Umbrella child and no PLT found - building that first."
+        info("In an Umbrella child and no PLT found - building that first.")
         build_parent_plt()
         true
       {true, false} ->
-        info "In an Umbrella child, not checking PLT..."
+        info("In an Umbrella child, not checking PLT...")
         true
       _ -> opts[:no_check]
     end
   end
 
   defp check_plt() do
-    info "Checking PLT..."
+    info("Checking PLT...")
     {apps, hash} = dependency_hash()
     if check_hash?(hash) do
-      info "PLT is up to date!"
+      info("PLT is up to date!")
     else
       Project.plts_list(apps) |> Plt.check()
       File.write(plt_hash_file(), hash)
@@ -255,13 +256,13 @@ defmodule Mix.Tasks.Dialyzer do
     # hit an exception when we try to do that for *this* child, which is already loaded.
     {out, rc} = System.cmd("mix", ["dialyzer", "--plt"], opts)
     unless rc == 0 do
-      IO.puts("Error building parent PLT, process returned code: #{rc}\n#{out}")
+      info("Error building parent PLT, process returned code: #{rc}\n#{out}")
     end
   end
 
   defp check_dialyzer do
     if not Code.ensure_loaded?(:dialyzer) do
-       error """
+       error("""
        DEPENDENCY MISSING
        ------------------------
        If you are reading this message, then Elixir and Erlang are installed but the
@@ -278,7 +279,7 @@ defmodule Mix.Tasks.Dialyzer do
 
        Arch and Homebrew include Dialyzer in their base erlang packages. Please report a Github
        issue to add or correct distribution-specific information.
-       """
+       """)
        :erlang.halt(3)
     end
 
@@ -288,7 +289,7 @@ defmodule Mix.Tasks.Dialyzer do
     old_plt = "#{user_home!()}/.dialyxir_core_*.plt"
     if File.exists?(old_plt) && (!File.exists?(Project.erlang_plt()) || !File.exists?(Project.elixir_plt())) do
 
-      info """
+      info("""
       COMPATIBILITY NOTICE
       ------------------------
       Previous usage of a pre-0.4 version of Dialyxir detected. Please be aware that the 0.4 release
@@ -299,7 +300,7 @@ defmodule Mix.Tasks.Dialyzer do
       (see `mix help dialyzer`).
 
       If you no longer use the older Dialyxir in any projects and do not want to see this notice each time you upgrade your Erlang/Elixir distribution, you can delete your old pre-0.4 PLT files. ( rm ~/.dialyxir_core_*.plt )
-      """
+      """)
     end
   end
 
