@@ -1,5 +1,4 @@
 defmodule Dialyxir.Test.PretyPrintTest do
-
   use ExUnit.Case
 
   test "simple atoms are pretty printed appropriately" do
@@ -75,7 +74,9 @@ defmodule Dialyxir.Test.PretyPrintTest do
   end
 
   test "or'd mixed types function signatures are pretty printed appropriately" do
-    input = "('Elixir.Plug.Conn':t(),binary() | atom(),'Elixir.Keyword':t() | map()) -> 'Elixir.Plug.Conn':t()"
+    input =
+      "('Elixir.Plug.Conn':t(),binary() | atom(),'Elixir.Keyword':t() | map()) -> 'Elixir.Plug.Conn':t()"
+
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "(Plug.Conn.t(), binary() | atom(), Keyword.t() | map()) :: Plug.Conn.t()"
@@ -151,10 +152,14 @@ defmodule Dialyxir.Test.PretyPrintTest do
   end
 
   test "erlang function calls are pretty printed appropriately" do
-    input = "([supervisor:child_spec() | {module(),term()} | module()],[init_option()]) -> {'ok',tuple()}"
+    input =
+      "([supervisor:child_spec() | {module(),term()} | module()],[init_option()]) -> {'ok',tuple()}"
+
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
-    expected_output = "([:supervisor.child_spec() | {module(), term()} | module()], [init_option()]) :: {:ok, tuple()}"
+    expected_output =
+      "([:supervisor.child_spec() | {module(), term()} | module()], [init_option()]) :: {:ok, tuple()}"
+
     assert pretty_printed == expected_output
   end
 
@@ -186,11 +191,13 @@ defmodule Dialyxir.Test.PretyPrintTest do
         #<100>(8, 1, 'integer', ['unsigned', 'big']),
         #<101>(8, 1, 'integer', ['unsigned', 'big'])}# :='nil'}}
     """
+
     pretty_printed = Dialyxir.PrettyPrint.pretty_print_pattern(input)
 
-    expected_output = String.trim("""
-    conn = %{:params => %{"include" => nil}}
-    """)
+    expected_output =
+      String.trim("""
+      conn = %{:params => %{"include" => nil}}
+      """)
 
     assert pretty_printed == expected_output
   end
@@ -225,12 +232,13 @@ defmodule Dialyxir.Test.PretyPrintTest do
 
     expected_output = "Module.V1.Foo"
     assert pretty_printed == expected_output
-    end
+  end
 
   test "integers in maps are pretty printed appropriately" do
     input = ~S"""
     #{'source':={[any()] | 98971880 | map()}}
     """
+
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "%{:source => {[any()] | 98971880 | map()}}"
@@ -241,6 +249,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
     input = ~S"""
     fun()
     """
+
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "(... -> any)"
@@ -251,6 +260,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
     input = ~S"""
     'Elixir.MapSet':t('Elixir.MapSet':t(_))
     """
+
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "MapSet.t(MapSet.t(_))"
@@ -275,9 +285,14 @@ defmodule Dialyxir.Test.PretyPrintTest do
     pretty_printed =
       input
       |> to_charlist()
-      |> Dialyxir.PrettyPrint.pretty_print_contract("'Elixir.Module.V1.Ac(tion.Hel(pers'", "foo_bar")
+      |> Dialyxir.PrettyPrint.pretty_print_contract(
+        "'Elixir.Module.V1.Ac(tion.Hel(pers'",
+        "foo_bar"
+      )
 
-    expected_output = "Contract head: (any(), nil) :: nilContract head: (Ecto.Queryable.t(), String.t()) :: String.t()"
+    expected_output =
+      "Contract head: (any(), nil) :: nilContract head: (Ecto.Queryable.t(), String.t()) :: String.t()"
+
     assert pretty_printed == expected_output
   end
 end

@@ -102,6 +102,7 @@ defmodule Mix.Tasks.Dialyzer do
     * `--no-compile`       - do not compile even if needed.
     """
     use Mix.Task
+
     def run(args) do
       Mix.Tasks.Dialyzer.run(["--plt" | args])
     end
@@ -119,23 +120,24 @@ defmodule Mix.Tasks.Dialyzer do
     """
     use Mix.Task
 
-    @command_options [ all: :boolean, ]
+    @command_options [all: :boolean]
     def run(args) do
       {opts, _, _dargs} = OptionParser.parse(args, strict: @command_options)
       Mix.Tasks.Dialyzer.clean(opts)
     end
   end
 
-  @default_warnings [ :unknown ]
-  @command_options [ no_compile: :boolean,
-                     no_check: :boolean,
-                     halt_exit_status: :boolean,
-                     plt: :boolean,
-                     quiet: :boolean,
-                     raw: :boolean,
-                     format: :string,
-                     explain: :string
-                   ]
+  @default_warnings [:unknown]
+  @command_options [
+    no_compile: :boolean,
+    no_check: :boolean,
+    halt_exit_status: :boolean,
+    plt: :boolean,
+    quiet: :boolean,
+    raw: :boolean,
+    format: :string,
+    explain: :string
+  ]
 
   def run(args) do
     {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
@@ -144,19 +146,24 @@ defmodule Mix.Tasks.Dialyzer do
     opts = Keyword.delete(opts, :quiet)
     check_dialyzer()
     compatibility_notice()
+
     if Mix.Project.get() do
       Project.check_config()
 
       unless opts[:no_compile], do: Mix.Project.compile([])
-      _ = unless no_check?(opts) do
-        info("Finding suitable PLTs")
-        check_plt()
-      end
+
+      _ =
+        unless no_check?(opts) do
+          info("Finding suitable PLTs")
+          check_plt()
+        end
+
       unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
       info("No mix project found - checking core PLTs...")
       Project.plts_list([], false) |> Plt.check()
     end
+
     Mix.shell(original_shell)
   end
 
@@ -164,6 +171,7 @@ defmodule Mix.Tasks.Dialyzer do
     check_dialyzer()
     compatibility_notice()
     if opts[:all], do: Project.plts_list([], false) |> Plt.check(fun)
+
     if Mix.Project.get() do
       {apps, _hash} = dependency_hash()
       info("Deleting PLTs")
@@ -184,16 +192,20 @@ defmodule Mix.Tasks.Dialyzer do
         info("In an Umbrella child and no PLT found - building that first.")
         build_parent_plt()
         true
+
       {true, false} ->
         info("In an Umbrella child, not checking PLT...")
         true
-      _ -> opts[:no_check]
+
+      _ ->
+        opts[:no_check]
     end
   end
 
   defp check_plt() do
     info("Checking PLT...")
     {apps, hash} = dependency_hash()
+
     if check_hash?(hash) do
       info("PLT is up to date!")
     else
@@ -203,20 +215,23 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp run_dialyzer(opts, dargs) do
-    args = [ { :check_plt, false },
-             { :init_plt, String.to_charlist(Project.plt_file()) },
-             { :files_rec, Project.dialyzer_paths() },
-             { :warnings, dialyzer_warnings(dargs) } ,
-             { :explain, opts[:explain]},
-             { :format, opts[:format]},
-             { :raw, opts[:raw] },
-           ]
+    args = [
+      {:check_plt, false},
+      {:init_plt, String.to_charlist(Project.plt_file())},
+      {:files_rec, Project.dialyzer_paths()},
+      {:warnings, dialyzer_warnings(dargs)},
+      {:explain, opts[:explain]},
+      {:format, opts[:format]},
+      {:raw, opts[:raw]}
+    ]
 
-    info "Starting Dialyzer"
+    info("Starting Dialyzer")
+
     args
     |> inspect(label: "dialyzer args", pretty: true)
     |> info
-    { status , exit_status, [time | result]} = Dialyzer.dialyze(args)
+
+    {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
     report = if status == :ok, do: &info/1, else: &error/1
     Enum.each(result, report)
@@ -224,12 +239,13 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp dialyzer_warnings(dargs) do
-    raw_opts = Project.dialyzer_flags() ++ Enum.map(dargs, &elem(&1,0))
-    transform(raw_opts) ++ @default_warnings -- Project.dialyzer_removed_defaults()
+    raw_opts = Project.dialyzer_flags() ++ Enum.map(dargs, &elem(&1, 0))
+    transform(raw_opts) ++ (@default_warnings -- Project.dialyzer_removed_defaults())
   end
 
   defp transform(options) when is_list(options), do: Enum.map(options, &transform/1)
   defp transform(option) when is_atom(option), do: option
+
   defp transform(option) when is_binary(option) do
     option
     |> String.replace_leading("-W", "")
@@ -238,7 +254,7 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp in_child? do
-    String.contains?(Mix.Project.config[:lockfile], "..")
+    String.contains?(Mix.Project.config()[:lockfile], "..")
   end
 
   defp no_plt? do
@@ -246,14 +262,13 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp build_parent_plt() do
-    parent = Mix.Project.config[:lockfile] |> Path.expand |> Path.dirname
-    opts = [ into: IO.stream(:stdio, :line),
-             stderr_to_stdout: true,
-             cd: parent ]
+    parent = Mix.Project.config()[:lockfile] |> Path.expand() |> Path.dirname()
+    opts = [into: IO.stream(:stdio, :line), stderr_to_stdout: true, cd: parent]
     # It would seem more natural to use Mix.in_project here to start in our parent project.
     # However part of the app.tree resolution includes loading all sub apps, and we will
     # hit an exception when we try to do that for *this* child, which is already loaded.
     {out, rc} = System.cmd("mix", ["dialyzer", "--plt"], opts)
+
     unless rc == 0 do
       info("Error building parent PLT, process returned code: #{rc}\n#{out}")
     end
@@ -261,33 +276,34 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp check_dialyzer do
     if not Code.ensure_loaded?(:dialyzer) do
-       error("""
-       DEPENDENCY MISSING
-       ------------------------
-       If you are reading this message, then Elixir and Erlang are installed but the
-       Erlang Dialyzer is not available. Probably this is because you installed Erlang
-       with your OS package manager and the Dialyzer package is separate.
+      error("""
+      DEPENDENCY MISSING
+      ------------------------
+      If you are reading this message, then Elixir and Erlang are installed but the
+      Erlang Dialyzer is not available. Probably this is because you installed Erlang
+      with your OS package manager and the Dialyzer package is separate.
 
-       On Debian/Ubuntu:
+      On Debian/Ubuntu:
 
-         `apt-get install erlang-dialyzer`
+        `apt-get install erlang-dialyzer`
 
-       Fedora:
+      Fedora:
 
-          `yum install erlang-dialyzer`
+         `yum install erlang-dialyzer`
 
-       Arch and Homebrew include Dialyzer in their base erlang packages. Please report a Github
-       issue to add or correct distribution-specific information.
-       """)
-       :erlang.halt(3)
+      Arch and Homebrew include Dialyzer in their base erlang packages. Please report a Github
+      issue to add or correct distribution-specific information.
+      """)
+
+      :erlang.halt(3)
     end
-
   end
 
   defp compatibility_notice do
     old_plt = "#{user_home!()}/.dialyxir_core_*.plt"
-    if File.exists?(old_plt) && (!File.exists?(Project.erlang_plt()) || !File.exists?(Project.elixir_plt())) do
 
+    if File.exists?(old_plt) &&
+         (!File.exists?(Project.erlang_plt()) || !File.exists?(Project.elixir_plt())) do
       info("""
       COMPATIBILITY NOTICE
       ------------------------
@@ -305,7 +321,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   @spec check_hash?(binary()) :: boolean()
   defp check_hash?(hash) do
-	  case File.read(plt_hash_file()) do
+    case File.read(plt_hash_file()) do
       {:ok, stored_hash} -> hash == stored_hash
       _ -> false
     end
@@ -315,11 +331,10 @@ defmodule Mix.Tasks.Dialyzer do
 
   @spec dependency_hash :: {[atom()], binary()}
   def dependency_hash do
-    lock_file = Mix.Dep.Lock.read |> :erlang.term_to_binary
-    apps = Project.cons_apps
+    lock_file = Mix.Dep.Lock.read() |> :erlang.term_to_binary()
+    apps = Project.cons_apps()
     apps |> inspect() |> info()
     hash = :crypto.hash(:sha, lock_file <> :erlang.term_to_binary(apps))
     {apps, hash}
   end
-
 end

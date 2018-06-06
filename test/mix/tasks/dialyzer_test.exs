@@ -25,9 +25,9 @@ defmodule Mix.Tasks.DialyzerTest do
       fun = fn -> Mix.Tasks.Dialyzer.clean([], &no_delete_plt/4) end
 
       assert not Regex.match?(
-        ~r/About to delete PLT file: .*dialyxir_erlang/,
-        capture_io(fun)
-      )
+               ~r/About to delete PLT file: .*dialyxir_erlang/,
+               capture_io(fun)
+             )
     end)
   end
 
@@ -36,9 +36,9 @@ defmodule Mix.Tasks.DialyzerTest do
       fun = fn -> Mix.Tasks.Dialyzer.clean([{:all, true}], &no_delete_plt/4) end
 
       assert Regex.match?(
-        ~r/About to delete PLT file: .*dialyxir_erlang/,
-        capture_io(fun)
-      )
+               ~r/About to delete PLT file: .*dialyxir_erlang/,
+               capture_io(fun)
+             )
     end)
   end
 
@@ -49,5 +49,4 @@ defmodule Mix.Tasks.DialyzerTest do
     {result, 0} = System.cmd("mix", args, env: env)
     assert result == ""
   end
-
 end

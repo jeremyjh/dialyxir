@@ -9,7 +9,7 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 Elixir 1.6 is required, to support the new pretty printing feature. If your
 project is not yet on 1.6, continue to specify 0.5 in your mix deps.
 
-Warning messages have been greatly improved, but are probably incompatible with your existing ignore files; minor changes to your ignores can address the issue, or you can use the new Elixir [term format](#elixir-term-format). You may want to use the `--format short` argument in your CI pipelines. There are several formats, also there is a new `explain` feature - for details see CLI [options](#command-line-options).
+Warning messages have been greatly improved, but are filtered through the legacy formatter to support your existing ignore files. You can optionally use the new Elixir [term format](#elixir-term-format) for ignore files. You may want to use the `--format short` argument in your CI pipelines. There are several formats, also there is a new `explain` feature - for details see CLI [options](#command-line-options).
 
 ## Changes in 0.4 and 0.5
 
