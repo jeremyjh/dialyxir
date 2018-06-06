@@ -8,7 +8,7 @@ defmodule Dialyxir.Mixfile do
       elixir: ">= 1.6.0",
       description: description(),
       package: package(),
-      deps: [ {:ex_doc, ">= 0.0.0", only: :dev} ],
+      deps: [{:ex_doc, ">= 0.0.0", only: :dev}],
       dialyzer: [
         plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib],
         ignore_warnings: ".dialyzer_ignore.exs",
@@ -19,13 +19,13 @@ defmodule Dialyxir.Mixfile do
       name: "Dialyxir",
       source_url: "https://github.com/jeremyjh/dialyxir",
       homepage_url: "https://github.com/jeremyjh/dialyxir",
-      docs: [main: "readme", # The main page in the docs
-             extras: ["README.md"]]
+      # The main page in the docs
+      docs: [main: "readme", extras: ["README.md"]]
     ]
   end
 
   def application do
-    [applications: [:dialyzer, :crypto, :mix]]
+    [mod: {Dialyxir, []}, applications: [:dialyzer, :crypto, :mix]]
   end
 
   defp description do
@@ -35,9 +35,11 @@ defmodule Dialyxir.Mixfile do
   end
 
   defp package do
-    [files: ["lib", "mix.exs", "README.md", "LICENSE"],
-     maintainers: ["Jeremy Huffman"],
-     licenses: ["Apache 2.0"],
-     links: %{"GitHub" => "https://github.com/jeremyjh/dialyxir"}]
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      maintainers: ["Jeremy Huffman"],
+      licenses: ["Apache 2.0"],
+      links: %{"GitHub" => "https://github.com/jeremyjh/dialyxir"}
+    ]
   end
 end

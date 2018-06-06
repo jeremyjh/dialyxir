@@ -4,6 +4,13 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 [![Build Status](https://travis-ci.org/jeremyjh/dialyxir.svg?branch=master)](https://travis-ci.org/jeremyjh/dialyxir)
 
+## Changes in 1.0
+
+Elixir 1.6 is required, to support the new pretty printing feature. If your
+project is not yet on 1.6, continue to specify 0.5 in your mix deps.
+
+Warning messages have been greatly improved, but are filtered through the legacy formatter to support your existing ignore files. You can optionally use the new Elixir [term format](#elixir-term-format) for ignore files. You may want to use the `--format short` argument in your CI pipelines. There are several formats, also there is a new `explain` feature - for details see CLI [options](#command-line-options).
+
 ## Changes in 0.4 and 0.5
 
 If you've been using earlier versions of Dialyxir there are some changes you may need to make in the configuration of your existing projects. A summary of the most common issues and changes are found in the Wiki pages for [0.4](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.4) and [0.5](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.5).
@@ -53,16 +60,17 @@ mix dialyzer
 
 ### Command line options
 
-  * `--no-compile`       - do not compile even if needed.
-  * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
-  * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
+  * `--no-compile`         - do not compile even if needed.
+  * `--no-check`           - do not perform (quick) check to see if PLT needs updated.
+  * `--halt-exit-status`   - exit immediately with same exit status as dialyzer.
     useful for CI. do not use with `mix do`.
-  * `--plt`              - only build the required plt(s) and exit.
+  * `--plt`                - only build the required plt(s) and exit.
   *  `--format short`      - format the warnings in a compact format.
   *  `--format raw`        - format the warnings in format returned before Dialyzer formatting
   *  `--format dialyxir`   - format the warnings in a pretty printed format
   *  `--format dialyzer`   - format the warnings in the original Dialyzer format
   *  `--explain warning`   - explain the class of warnings, e.g. no_return
+  *  `--quiet`             - suppress all informational messages
 
 Warning flags passed to this task are passed on to `:dialyzer`.
 
@@ -201,7 +209,9 @@ config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_
 done (warnings were emitted)
 ```
 
-Dialyzer also recognizes an Elixir format of the ignore file. If your ignore file is a `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following:
+### Elixir Term Format
+
+Dialyzer also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following:
 
 ```elixir
 [

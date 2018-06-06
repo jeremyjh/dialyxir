@@ -5,6 +5,7 @@ defmodule Dialyxir.Formatter do
   Wrapper around normal Dialyzer warning messages that provides
   example output for error messages.
   """
+  import Dialyxir.Output, only: [info: 1]
 
   @warnings Enum.into(
               [
@@ -195,7 +196,7 @@ defmodule Dialyxir.Formatter do
     warnings_count = Enum.count(warnings)
     filtered_warnings_count = Enum.count(filtered_warnings)
     skipped_count = warnings_count - filtered_warnings_count
-    IO.puts("Total errors: #{warnings_count}, Skipped: #{skipped_count}")
+    info("Total errors: #{warnings_count}, Skipped: #{skipped_count}")
 
     :ok
   end

@@ -2,14 +2,17 @@ defmodule Dialyxir.Output do
   alias IO.ANSI
 
   def color(text, color) when is_binary(text) do
-    if ANSI.enabled? do
+    if ANSI.enabled?() do
       case color do
         :red ->
           ANSI.red() <> text <> ANSI.reset()
+
         :yellow ->
           ANSI.yellow() <> text <> ANSI.reset()
+
         :green ->
           ANSI.green() <> text <> ANSI.reset()
+
         _ ->
           text
       end
@@ -17,4 +20,8 @@ defmodule Dialyxir.Output do
       text
     end
   end
+
+  def info(text), do: Mix.shell().info(text)
+
+  def error(text), do: Mix.shell().error(text)
 end

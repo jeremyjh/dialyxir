@@ -8,6 +8,7 @@ defmodule Dialyxir.Dialyzer do
     def run(args, filterer) do
       try do
         {split, args} = Keyword.split(args, [:raw, :format, :explain])
+
         formatter =
           cond do
             split[:format] == "dialyzer" ->
@@ -30,7 +31,8 @@ defmodule Dialyxir.Dialyzer do
 
             true ->
               :dialyxir
-        end
+          end
+
         {duration_ms, result} = :timer.tc(&:dialyzer.run/1, [args])
 
         formatted_time_elapsed = Formatter.formatted_time(duration_ms)
