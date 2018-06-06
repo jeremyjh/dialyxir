@@ -42,4 +42,12 @@ defmodule Mix.Tasks.DialyzerTest do
     end)
   end
 
+  @tag :output_tests
+  test "Informational output is suppressed with --quiet" do
+    args = ["dialyzer", "--quiet"]
+    env = [{"MIX_ENV", "prod"}]
+    {result, 0} = System.cmd("mix", args, env: env)
+    assert result == ""
+  end
+
 end

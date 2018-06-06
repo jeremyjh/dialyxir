@@ -8,6 +8,7 @@ script:
   - mix test --trace
   - MIX_ENV=prod mix do compile --warnings-as-errors, archive.build, archive.install --force
   - MIX_ENV=prod mix dialyzer --halt-exit-status
+  - OUTPUT_TESTS=true mix test
 branches:
   except:
     - /^[0-9]\.[0-9]/
