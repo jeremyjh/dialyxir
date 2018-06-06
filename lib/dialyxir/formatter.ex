@@ -178,6 +178,14 @@ defmodule Dialyxir.Formatter do
         """
 
         wrap_error_message(message, dialyzer_warning)
+
+      {:error, :formatting, code} ->
+        message = """
+        Failed to format warning:
+        #{inspect(code)}
+        """
+
+        wrap_error_message(message, dialyzer_warning)
     end
   end
 

@@ -89,7 +89,7 @@ defmodule Dialyxir.PrettyPrint do
       :ok
     end
     """
-    |> Code.format_string!()
+    |> format()
     |> Enum.join("")
     |> String.trim_leading(prefix)
     |> String.trim_trailing(suffix)
@@ -109,7 +109,7 @@ defmodule Dialyxir.PrettyPrint do
       :ok
     end
     """
-    |> Code.format_string!()
+    |> format()
     |> Enum.join("")
     |> String.trim_leading(prefix)
     |> String.trim_trailing(suffix)
@@ -129,7 +129,7 @@ defmodule Dialyxir.PrettyPrint do
       :ok
     end
     """
-    |> Code.format_string!()
+    |> format()
     |> Enum.join("")
     |> String.trim_leading(prefix)
     |> String.trim_trailing(suffix)
@@ -355,4 +355,13 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp deatomize_char(char), do: char
+
+  defp format(code) do
+    try do
+      Code.format_string!(code)
+    rescue
+      _ ->
+        throw({:error, :formatting, code})
+    end
+  end
 end
