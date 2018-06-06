@@ -22,7 +22,7 @@ defmodule Dialyxir.Warnings.CallbackTypeMismatch do
     """
     Callback mismatch for @callback #{function}/#{arity} in #{pretty_behaviour} behaviour.
 
-    Expecred type:
+    Expected type:
     #{pretty_success_type}
 
     Actual type:
