@@ -71,6 +71,7 @@ mix dialyzer
   *  `--format dialyzer`   - format the warnings in the original Dialyzer format
   *  `--explain warning`   - explain the class of warnings, e.g. no_return
   *  `--quiet`             - suppress all informational messages
+  *  `--list`              - list the known warnings
 
 Warning flags passed to this task are passed on to `:dialyzer`.
 
@@ -122,7 +123,7 @@ end
 ```
 
 #### Explanations
-Explanations are available for classes of warnings by passing the `--explain warning_name` flag. It will include a description about the type of warning, as well as a small example that would also cause that warning. Poor explanations and examples should be considered issues in this library, and pull requests are very welcome! The warning name is returned from the `--format short` and `--format dialyzer` flags.
+Explanations are available for classes of warnings by passing the `--explain warning_name` flag. It will include a description about the type of warning, as well as a small example that would also cause that warning. Poor explanations and examples should be considered issues in this library, and pull requests are very welcome! The warning name is returned from the `--format short` and `--format dialyzer` flags. List available warnings with `--list`.
 
 
 #### Formats

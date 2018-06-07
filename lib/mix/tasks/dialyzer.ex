@@ -19,6 +19,7 @@ defmodule Mix.Tasks.Dialyzer do
     *  --format dialyzer   - format the warnings in the original Dialyzer format
     *  --explain warning   - explain the class of warnings, e.g. no_return
     *  --quiet             - suppress all informational messages
+    *  --list              - suppress all informational messages
 
   Warning flags passed to this task are passed on to `:dialyzer`.
 
@@ -135,6 +136,7 @@ defmodule Mix.Tasks.Dialyzer do
     plt: :boolean,
     quiet: :boolean,
     raw: :boolean,
+    list: :boolean,
     format: :string,
     explain: :string
   ]
@@ -222,7 +224,8 @@ defmodule Mix.Tasks.Dialyzer do
       {:warnings, dialyzer_warnings(dargs)},
       {:explain, opts[:explain]},
       {:format, opts[:format]},
-      {:raw, opts[:raw]}
+      {:raw, opts[:raw]},
+      {:list, opts[:list]}
     ]
 
     info("Starting Dialyzer")
