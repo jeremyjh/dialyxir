@@ -299,6 +299,7 @@ defmodule Dialyxir.PrettyPrint do
     atom
     |> deatomize()
     |> to_string()
+    |> strip_var_version()
     |> atomize()
   end
 
@@ -307,19 +308,22 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp atomize(atom) do
-    atom =
-      atom
-      |> to_string()
-      |> String.trim("'")
+    atom = to_string(atom)
 
-    inspect(:"#{atom}")
+    if String.starts_with?(atom, "_") do
+      atom
+    else
+      inspect(:"#{String.trim(atom, "'")}")
+    end
   end
 
   defp atom_part_to_string({:int, atom_part}), do: Integer.to_charlist(atom_part)
   defp atom_part_to_string(atom_part), do: atom_part
 
   defp strip_var_version(var_name) do
-    String.replace(var_name, ~r/^V(.+)@\d+$/, "\\1")
+    var_name
+    |> String.replace(~r/^V(.+)@\d+$/, "\\1")
+    |> String.replace(~r/^(.+)@\d+$/, "\\1")
   end
 
   defp struct_parts(map_keys) do

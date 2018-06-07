@@ -295,4 +295,13 @@ defmodule Dialyxir.Test.PretyPrintTest do
 
     assert pretty_printed == expected_output
   end
+
+  test "elixir SSA numbered variables get pretty printed appropriately" do
+    input = '_money@1'
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "_money"
+    assert pretty_printed == expected_output
+  end
 end
