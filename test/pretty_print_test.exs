@@ -158,7 +158,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output =
-      "([:supervisor.child_spec() | {module(), term()} | module()], [init_option()]) :: {:ok, tuple()}"
+      "([supervisor.child_spec() | {module(), term()} | module()], [init_option()]) :: {:ok, tuple()}"
 
     assert pretty_printed == expected_output
   end
@@ -293,6 +293,15 @@ defmodule Dialyxir.Test.PretyPrintTest do
     expected_output =
       "Contract head: (any(), nil) :: nilContract head: (Ecto.Queryable.t(), String.t()) :: String.t()"
 
+    assert pretty_printed == expected_output
+  end
+
+  test "elixir SSA numbered variables get pretty printed appropriately" do
+    input = '_money@1'
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "_money"
     assert pretty_printed == expected_output
   end
 end
