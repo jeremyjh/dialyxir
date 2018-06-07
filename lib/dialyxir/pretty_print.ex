@@ -309,6 +309,7 @@ defmodule Dialyxir.PrettyPrint do
 
   defp atomize(atom) do
     atom = to_string(atom)
+
     if String.ends_with?(atom, "'") do
       inspect(:"#{String.trim(atom, "'")}")
     else
