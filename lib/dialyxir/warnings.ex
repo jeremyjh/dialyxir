@@ -52,6 +52,5 @@ defmodule Dialyxir.Warnings do
   @doc """
   Returns a mapping of the warning to the warning module.
   """
-  @spec warnings() :: %{required(atom) => module}
   def warnings(), do: @warnings
 end
