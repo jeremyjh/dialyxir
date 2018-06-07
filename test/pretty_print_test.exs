@@ -158,7 +158,7 @@ defmodule Dialyxir.Test.PretyPrintTest do
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output =
-      "([supervisor.child_spec() | {module(), term()} | module()], [init_option()]) :: {:ok, tuple()}"
+      "([:supervisor.child_spec() | {module(), term()} | module()], [init_option()]) :: {:ok, tuple()}"
 
     assert pretty_printed == expected_output
   end
