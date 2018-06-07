@@ -304,4 +304,12 @@ defmodule Dialyxir.Test.PretyPrintTest do
     expected_output = "_money"
     assert pretty_printed == expected_output
   end
+
+  test "that patterns do not error when calling pretty_print_type/1 " do
+    input = ~S"""
+    <'few' | 'many' | 'one' | 'other' | 'two' | {'error',{'Elixir.Cldr.InvalidLanguageTag',<<_:64,_:_*8>>} | {'Elixir.Cldr.UnknownPluralRules',<<_:64,_:_*8>>}},non_neg_integer()>
+    """
+
+    assert Dialyxir.PrettyPrint.pretty_print_type(input)
+  end
 end

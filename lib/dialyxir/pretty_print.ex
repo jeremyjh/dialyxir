@@ -246,7 +246,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:pattern, pattern_items}) do
-    "<#{Enum.map_join(pattern_items, ", ", &do_pretty_print/1)}>"
+    "#{Enum.map_join(pattern_items, ", ", &do_pretty_print/1)}"
   end
 
   defp do_pretty_print({:pipe_list, head, tail}) do
