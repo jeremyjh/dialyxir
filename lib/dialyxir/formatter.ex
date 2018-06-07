@@ -7,56 +7,6 @@ defmodule Dialyxir.Formatter do
   """
   import Dialyxir.Output, only: [info: 1]
 
-  @warnings Enum.into(
-              [
-                Dialyxir.Warnings.AppCall,
-                Dialyxir.Warnings.Apply,
-                Dialyxir.Warnings.BinaryConstruction,
-                Dialyxir.Warnings.Call,
-                Dialyxir.Warnings.CallToMissingFunction,
-                Dialyxir.Warnings.CallWithOpaque,
-                Dialyxir.Warnings.CallWithoutOpaque,
-                Dialyxir.Warnings.CallbackArgumentTypeMismatch,
-                Dialyxir.Warnings.CallbackInfoMissing,
-                Dialyxir.Warnings.CallbackMissing,
-                Dialyxir.Warnings.CallbackSpecArgumentTypeMismatch,
-                Dialyxir.Warnings.CallbackSpecTypeMismatch,
-                Dialyxir.Warnings.CallbackTypeMismatch,
-                Dialyxir.Warnings.ContractDiff,
-                Dialyxir.Warnings.ContractSubtype,
-                Dialyxir.Warnings.ContractSupertype,
-                Dialyxir.Warnings.ContractWithOpaque,
-                Dialyxir.Warnings.ExactEquality,
-                Dialyxir.Warnings.ExtraRange,
-                Dialyxir.Warnings.FuncionApplicationArguments,
-                Dialyxir.Warnings.FunctionApplicationNoFunction,
-                Dialyxir.Warnings.GuardFail,
-                Dialyxir.Warnings.GuardFailPattern,
-                Dialyxir.Warnings.ImproperListConstruction,
-                Dialyxir.Warnings.InvalidContract,
-                Dialyxir.Warnings.NegativeGuardFail,
-                Dialyxir.Warnings.NoReturn,
-                Dialyxir.Warnings.OpaqeGuard,
-                Dialyxir.Warnings.OpaqueEquality,
-                Dialyxir.Warnings.OpaqueMatch,
-                Dialyxir.Warnings.OpaqueNonequality,
-                Dialyxir.Warnings.OpaqueTypeTest,
-                Dialyxir.Warnings.OverlappingContract,
-                Dialyxir.Warnings.PatternMatch,
-                Dialyxir.Warnings.PatternMatchCovered,
-                Dialyxir.Warnings.RaceCondition,
-                Dialyxir.Warnings.RecordConstruction,
-                Dialyxir.Warnings.RecordMatching,
-                Dialyxir.Warnings.UnknownBehaviour,
-                Dialyxir.Warnings.UnknownFunction,
-                Dialyxir.Warnings.UnknownType,
-                Dialyxir.Warnings.UnmatchedReturn,
-                Dialyxir.Warnings.UnusedFunction
-              ],
-              %{},
-              fn warning -> {warning.warning(), warning} end
-            )
-
   def formatted_time(duration_ms) do
     minutes = div(duration_ms, 6_000_000)
     seconds = (rem(duration_ms, 6_000_000) / 1_000_000) |> Float.round(2)
@@ -65,6 +15,22 @@ defmodule Dialyxir.Formatter do
 
   def format_and_filter(warnings, _, :raw) do
     Enum.map(warnings, &inspect/1)
+  end
+
+  def format_and_filter(_, _, :list_warnings) do
+    warnings =
+      Dialyxir.Warnings.warnings()
+      |> Map.keys()
+      |> Enum.sort()
+      |> Enum.map_join("\n", &Atom.to_string/1)
+
+    [
+      """
+      Explain warning with mix dialyzer --explain warning
+
+      #{warnings}
+      """
+    ]
   end
 
   def format_and_filter(warnings, filterer, :dialyxir) do
@@ -112,7 +78,7 @@ defmodule Dialyxir.Formatter do
   end
 
   def format_and_filter(_, _, warning_name) do
-    warning = Map.get(@warnings, warning_name)
+    warning = Map.get(Dialyxir.Warnings.warnings(), warning_name)
     [warning.explain()]
   end
 
@@ -210,8 +176,10 @@ defmodule Dialyxir.Formatter do
   end
 
   defp warning(warning_name) do
-    if Map.has_key?(@warnings, warning_name) do
-      Map.get(@warnings, warning_name)
+    warnings = Dialyxir.Warnings.warnings()
+
+    if Map.has_key?(warnings, warning_name) do
+      Map.get(warnings, warning_name)
     else
       throw({:error, :unknown_warning, warning_name})
     end

@@ -7,7 +7,7 @@ defmodule Dialyxir.Dialyzer do
   defmodule Runner do
     def run(args, filterer) do
       try do
-        {split, args} = Keyword.split(args, [:raw, :format, :explain])
+        {split, args} = Keyword.split(args, [:raw, :format, :explain, :list])
 
         formatter =
           cond do
@@ -22,6 +22,9 @@ defmodule Dialyxir.Dialyzer do
 
             split[:format] == "short" ->
               :short
+
+            split[:list] ->
+              :list_warnings
 
             split[:explain] ->
               String.to_existing_atom(split[:explain])
