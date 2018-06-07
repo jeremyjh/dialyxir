@@ -24,11 +24,13 @@ defmodule Dialyxir.Formatter do
       |> Enum.sort()
       |> Enum.map_join("\n", &Atom.to_string/1)
 
-    ["""
-    Explain warning with mix dialyzer --explain warning
+    [
+      """
+      Explain warning with mix dialyzer --explain warning
 
-    #{warnings}
-    """]
+      #{warnings}
+      """
+    ]
   end
 
   def format_and_filter(warnings, filterer, :dialyxir) do
