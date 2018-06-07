@@ -21,7 +21,7 @@ defmodule Dialyxir.Warnings.OpaqueMatch do
         opaque_term
       end
 
-    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
+    pretty_pattern = Dialyxir.PrettyPrint.pretty_print(pattern)
 
     "The attempt to match a term of type #{opaque_term} against the #{pretty_pattern} " <>
       "breaks the opaqueness of #{term}."
