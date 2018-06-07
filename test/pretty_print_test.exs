@@ -312,4 +312,15 @@ defmodule Dialyxir.Test.PretyPrintTest do
 
     assert Dialyxir.PrettyPrint.pretty_print_type(input)
   end
+
+  test "named SSA variables with @s get pretty printed appropriately" do
+    input = ~S"""
+    (_number@1::#{'__struct__':='Elixir.Decimal', 'sign':=_, _=>_})
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(_number :: %Decimal{:sign => _, _ => _})"
+    assert pretty_printed == expected_output
+  end
 end

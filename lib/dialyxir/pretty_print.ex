@@ -239,6 +239,7 @@ defmodule Dialyxir.PrettyPrint do
     name
     |> deatomize()
     |> to_string()
+    |> strip_var_version()
   end
 
   defp do_pretty_print({nil}) do
