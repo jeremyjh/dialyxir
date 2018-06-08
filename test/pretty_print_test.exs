@@ -304,4 +304,23 @@ defmodule Dialyxir.Test.PretyPrintTest do
     expected_output = "_money"
     assert pretty_printed == expected_output
   end
+
+  test "that patterns do not error when calling pretty_print_type/1 " do
+    input = ~S"""
+    <'few' | 'many' | 'one' | 'other' | 'two' | {'error',{'Elixir.Cldr.InvalidLanguageTag',<<_:64,_:_*8>>} | {'Elixir.Cldr.UnknownPluralRules',<<_:64,_:_*8>>}},non_neg_integer()>
+    """
+
+    assert Dialyxir.PrettyPrint.pretty_print_type(input)
+  end
+
+  test "named SSA variables with @s get pretty printed appropriately" do
+    input = ~S"""
+    (_number@1::#{'__struct__':='Elixir.Decimal', 'sign':=_, _=>_})
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(_number :: %Decimal{:sign => _, _ => _})"
+    assert pretty_printed == expected_output
+  end
 end
