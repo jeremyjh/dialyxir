@@ -275,7 +275,21 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:type, module, type}) do
-    "#{atomize(module)}.#{deatomize(type)}()"
+    module =
+      if is_tuple(module) do
+        do_pretty_print(module)
+      else
+        atomize(module)
+      end
+
+    type =
+      if is_tuple(type) do
+        do_pretty_print(type)
+      else
+        deatomize(type)
+      end
+
+    "#{module}.#{type}()"
   end
 
   defp do_pretty_print({:type, module, type, inner_type}) do

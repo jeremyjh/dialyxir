@@ -27,7 +27,7 @@ document -> values : '$1'.
 values -> value : ['$1'].
 values -> value values : ['$1'] ++ '$2'.
 
-value -> atom ':' ':' atom '(' ')' : {type, '$1', '$4'}.
+value -> alias '::' atom '(' ')' : {type, '$1', '$3'}.
 value -> atom ':' atom empty_list_paren : {type, '$1', '$3'}.
 value -> '...' : {rest}.
 value -> atom ':' atom '(' value ')' : {type, '$1', '$3', '$5'}.
