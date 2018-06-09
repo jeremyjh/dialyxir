@@ -237,10 +237,6 @@ defmodule Dialyxir.PrettyPrint do
     end
   end
 
-  defp do_pretty_print({:named_value, name, value}) do
-    "#{do_pretty_print(name)} :: #{do_pretty_print(value)}"
-  end
-
   defp do_pretty_print({:named_type, named_type, type})
        when is_tuple(named_type) and is_tuple(type) do
     case named_type do
@@ -276,13 +272,6 @@ defmodule Dialyxir.PrettyPrint do
         name = do_pretty_print(other)
         "#{name} :: #{deatomize(type)}()"
     end
-  end
-
-  defp do_pretty_print({:name, name}) do
-    name
-    |> deatomize()
-    |> to_string()
-    |> strip_var_version()
   end
 
   defp do_pretty_print({nil}) do
