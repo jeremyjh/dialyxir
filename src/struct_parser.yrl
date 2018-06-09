@@ -3,11 +3,12 @@ Nonterminals
 empty_list_paren
 document
 values value
-list list_items
+list
 map map_items map_entry
-tuple tuple_items
+tuple
 binary binary_items binary_part
-pattern pattern_items
+pattern
+value_items
 byte_list byte_items
 byte
 range
@@ -69,21 +70,18 @@ binary_items -> binary_part  ',' binary_items : ['$1'] ++ '$3'.
 binary_part -> '_' ':' value : {binary_part, {any}, '$3'}.
 binary_part -> '_' ':' '_' '*' value : {binary_part, {any}, {any}, {size, '$5'}}.
 
-list -> '(' list_items ')' : {list, paren, '$2'}.
+list -> '(' value_items ')' : {list, paren, '$2'}.
 list -> '[' ']' : {empty_list, square}.
-list -> '[' list_items ']' : {list, square, '$2'}.
-list_items -> value : ['$1'].
-list_items -> value ',' list_items : ['$1'] ++ '$3'.
+list -> '[' value_items ']' : {list, square, '$2'}.
 
 empty_list_paren -> '(' ')' : {empty_list, paren}.
 
-tuple -> '{' tuple_items '}' : {tuple, '$2'}.
-tuple_items -> value : ['$1'].
-tuple_items -> value ',' tuple_items : ['$1'] ++ '$3'.
+tuple -> '{' value_items '}' : {tuple, '$2'}.
 
-pattern -> '<' pattern_items '>' : {pattern, '$2'}.
-pattern_items -> value : ['$1'].
-pattern_items -> value ',' pattern_items : ['$1'] ++ '$3'.
+pattern -> '<' value_items '>' : {pattern, '$2'}.
+
+value_items -> value : ['$1'].
+value_items -> value ',' value_items : ['$1'] ++ '$3'.
 
 map -> '#' '{' '}' : {empty_map}.
 map -> '#' '{' map_items '}' : {map, '$3'}.
