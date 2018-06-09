@@ -66,10 +66,10 @@ defmodule Dialyxir.Test.PretyPrintTest do
   end
 
   test "or'd mixed types are pretty printed appropriately" do
-    input = "'Elixir.Keyword':t() | map()"
+    input = "'Elixir.Keyword':t() | map() | nil"
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
-    expected_output = "Keyword.t() | map()"
+    expected_output = "Keyword.t() | map() | nil"
     assert pretty_printed == expected_output
   end
 
@@ -321,6 +321,39 @@ defmodule Dialyxir.Test.PretyPrintTest do
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
     expected_output = "(_number :: %Decimal{:sign => _, _ => _})"
+    assert pretty_printed == expected_output
+  end
+
+  test "multiple SSA variables are pretty printed appropriately" do
+    input = ~S"""
+    ('start',Vcompile@1::map(),Vruntime@1::map())
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(:start, compile :: map(), runtime :: map())"
+    assert pretty_printed == expected_output
+  end
+
+  test "named parts in specs are pretty printed appropriately" do
+    input = ~S"""
+    Vcompile@1::map()
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "compile :: map()"
+    assert pretty_printed == expected_output
+  end
+
+  test "tuple assigns are pretty printed appropriately" do
+    input = ~S"""
+    (Vres@1::{'error',_})
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(res :: {:error, _})"
     assert pretty_printed == expected_output
   end
 end

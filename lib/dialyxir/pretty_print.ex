@@ -144,8 +144,14 @@ defmodule Dialyxir.PrettyPrint do
     "(... -> any)"
   end
 
-  defp do_pretty_print({:assignment, name, value}) do
-    "#{do_pretty_print(name)} = #{do_pretty_print(value)}"
+  defp do_pretty_print({:assignment, {:atom, atom}, value}) do
+    name =
+      atom
+      |> deatomize()
+      |> to_string()
+      |> strip_var_version()
+
+    "#{name} = #{do_pretty_print(value)}"
   end
 
   defp do_pretty_print({:atom, [:_]}) do
@@ -235,6 +241,43 @@ defmodule Dialyxir.PrettyPrint do
     "#{do_pretty_print(name)} :: #{do_pretty_print(value)}"
   end
 
+  defp do_pretty_print({:named_type, named_type, type})
+       when is_tuple(named_type) and is_tuple(type) do
+    case named_type do
+      {:atom, name} ->
+        name =
+          name
+          |> deatomize()
+          |> to_string()
+          |> strip_var_version()
+
+        "#{name} :: #{do_pretty_print(type)}"
+
+      other ->
+        "#{do_pretty_print(other)} :: #{do_pretty_print(type)}"
+    end
+  end
+
+  defp do_pretty_print({:named_type, named_type, type}) when is_tuple(named_type) do
+    case named_type do
+      {:atom, name = '\'Elixir' ++ _} ->
+        "#{atomize(name)}.#{deatomize(type)}()"
+
+      {:atom, name} ->
+        name =
+          name
+          |> deatomize()
+          |> to_string()
+          |> strip_var_version()
+
+        "#{name} :: #{deatomize(type)}()"
+
+      other ->
+        name = do_pretty_print(other)
+        "#{name} :: #{deatomize(type)}()"
+    end
+  end
+
   defp do_pretty_print({:name, name}) do
     name
     |> deatomize()
@@ -275,25 +318,16 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:type, module, type}) do
-    {module, name?} =
-      if is_tuple(module) do
-        {do_pretty_print(module), true}
-      else
-        {atomize(module), false}
-      end
+    module = do_pretty_print(module)
 
     type =
       if is_tuple(type) do
         do_pretty_print(type)
       else
-        deatomize(type)
+        deatomize(type) <> "()"
       end
 
-    if name? do
-      "#{module} :: #{type}()"
-    else
-      "#{module}.#{type}()"
-    end
+    "#{module}.#{type}"
   end
 
   defp do_pretty_print({:type, module, type, inner_type}) do
@@ -304,22 +338,23 @@ defmodule Dialyxir.PrettyPrint do
     "#{deatomize(type)}#{do_pretty_print(types)}"
   end
 
-  defp do_pretty_print({:variable_alias, variable_alias}) do
-    variable_alias
-    |> to_string()
-    |> strip_var_version()
-  end
-
   defp atomize("Elixir." <> module_name) do
     "#{String.trim(module_name, "'")}"
   end
 
   defp atomize(atom) when is_list(atom) do
-    atom
-    |> deatomize()
-    |> to_string()
-    |> strip_var_version()
-    |> atomize()
+    atom_string =
+      atom
+      |> deatomize()
+      |> to_string()
+
+    stripped = strip_var_version(atom_string)
+
+    if stripped == atom_string do
+      atomize(stripped)
+    else
+      stripped
+    end
   end
 
   defp atomize(<<atom>>) when is_number(atom) do
