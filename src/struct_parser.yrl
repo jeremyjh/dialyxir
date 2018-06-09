@@ -1,6 +1,5 @@
 Nonterminals
 
-empty_list_paren
 document
 values value
 list
@@ -51,7 +50,6 @@ type -> atom '::' type : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' map : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' tuple : {named_type, {atom, '$1'}, '$3'}.
 type -> atom list : {type_list, '$1', '$2'}.
-type -> atom empty_list_paren : {type, '$1'}.
 
 atom -> '\'' atom '\'' : '$2'.
 atom -> atom_full : unwrap('$1').
@@ -70,11 +68,10 @@ binary_items -> binary_part  ',' binary_items : ['$1'] ++ '$3'.
 binary_part -> '_' ':' value : {binary_part, {any}, '$3'}.
 binary_part -> '_' ':' '_' '*' value : {binary_part, {any}, {any}, {size, '$5'}}.
 
+list -> '(' ')' : {empty_list, paren}.
 list -> '(' value_items ')' : {list, paren, '$2'}.
 list -> '[' ']' : {empty_list, square}.
 list -> '[' value_items ']' : {list, square, '$2'}.
-
-empty_list_paren -> '(' ')' : {empty_list, paren}.
 
 tuple -> '{' value_items '}' : {tuple, '$2'}.
 
@@ -95,10 +92,8 @@ map_entry -> value '=>' value : {map_entry, '$1', '$3'}.
 range -> int '..' int : {range, unwrap('$1'), unwrap('$3')}.
 
 function -> 'fun(' ')' : {any_function}.
-function -> 'fun(' empty_list_paren '->' value ')' : {function, {args, '$2'}, {return, '$4'}}.
 function -> 'fun(' list '->' value ')' : {function, {args, '$2'}, {return, '$4'}}.
 
-contract -> empty_list_paren '->' value : {contract, {args, {empty_list, paren}}, {return, '$3'}}.
 contract -> list '->' value : {contract, {args, '$1'}, {return, '$3'}}.
 
 byte_list -> '#' '{' '}' '#' : {byte_list, []}.
