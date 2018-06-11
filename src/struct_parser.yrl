@@ -67,6 +67,8 @@ value -> value '|' value : {pipe_list, '$1', '$3'}.
 type -> atom ':' type : {type, {atom, '$1'}, '$3'}.
 type -> atom '::' type : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' map : {named_type, {atom, '$1'}, '$3'}.
+type -> atom '::' binary : {named_type, {atom, '$1'}, '$3'}.
+type -> atom '::' list : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' tuple : {named_type, {atom, '$1'}, '$3'}.
 type -> atom list : {type_list, '$1', '$2'}.
 

@@ -356,4 +356,17 @@ defmodule Dialyxir.Test.PretyPrintTest do
     expected_output = "(res :: {:error, _})"
     assert pretty_printed == expected_output
   end
+
+  test "binary and list assigns are pretty printed appropriately" do
+    input = ~S"""
+    (Vurl@1::<<_:272>>,Vreal_payload@1::{'multipart',[any()]},Vheaders@1::[{[45 | 65 | 85 | 101 | 103 | 110 | 114 | 115 | 116,...],[1..255,...]},...],[{'follow_redirect','true'},...])
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output =
+      "(url :: <<_ :: 272>>, real_payload :: {:multipart, [any()]}, headers :: [{[45 | 65 | 85 | 101 | 103 | 110 | 114 | 115 | 116, ...], [1..255, ...]}, ...], [{:follow_redirect, true}, ...])"
+
+    assert pretty_printed == expected_output
+  end
 end
