@@ -213,7 +213,7 @@ defmodule Dialyxir.PrettyPrint do
     "%{}"
   end
 
-  defp do_pretty_print({:function, {:args, args}, {:return, return}}) do
+  defp do_pretty_print({:function, {:contract, {:args, args}, {:return, return}}}) do
     "(#{do_pretty_print(args)} -> #{do_pretty_print(return)})"
   end
 
