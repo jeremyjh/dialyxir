@@ -19,6 +19,12 @@ defmodule Dialyxir.PrettyPrint do
     end
   end
 
+  def pretty_print_infix('=:='), do: "==="
+  def pretty_print_infix('=/='), do: "!=="
+  def pretty_print_infix('/='), do: "!="
+  def pretty_print_infix('!='), do: "<="
+  def pretty_print_infix(other), do: to_string(other)
+
   @spec pretty_print(String.t()) :: String.t()
   def pretty_print(str) do
     parsed =

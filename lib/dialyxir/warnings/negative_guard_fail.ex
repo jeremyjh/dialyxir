@@ -25,9 +25,11 @@ defmodule Dialyxir.Warnings.NegativeGuardFail do
   end
 
   def format_long([arg1, infix, arg2]) do
+    pretty_infix = Dialyxir.PrettyPrint.pretty_print_infix(infix)
+
     """
     Guard test:
-    not #{arg1} #{infix} #{arg2}
+    not #{arg1} #{pretty_infix} #{arg2}
 
     can never succeed.
     """
