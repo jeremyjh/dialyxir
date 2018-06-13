@@ -64,14 +64,11 @@ mix dialyzer
   * `--no-check`           - do not perform (quick) check to see if PLT needs updated.
   * `--halt-exit-status`   - exit immediately with same exit status as dialyzer.
     useful for CI. do not use with `mix do`.
-  * `--plt`                - only build the required plt(s) and exit.
   *  `--format short`      - format the warnings in a compact format.
   *  `--format raw`        - format the warnings in format returned before Dialyzer formatting
   *  `--format dialyxir`   - format the warnings in a pretty printed format
   *  `--format dialyzer`   - format the warnings in the original Dialyzer format
-  *  `--explain warning`   - explain the class of warnings, e.g. no_return
   *  `--quiet`             - suppress all informational messages
-  *  `--list`              - list the known warnings
 
 Warning flags passed to this task are passed on to `:dialyzer`.
 

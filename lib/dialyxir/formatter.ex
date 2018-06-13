@@ -17,22 +17,6 @@ defmodule Dialyxir.Formatter do
     Enum.map(warnings, &inspect/1)
   end
 
-  def format_and_filter(_, _, :list_warnings) do
-    warnings =
-      Dialyxir.Warnings.warnings()
-      |> Map.keys()
-      |> Enum.sort()
-      |> Enum.map_join("\n", &Atom.to_string/1)
-
-    [
-      """
-      Explain warning with mix dialyzer --explain warning
-
-      #{warnings}
-      """
-    ]
-  end
-
   def format_and_filter(warnings, filterer, :dialyxir) do
     divider = String.duplicate("_", 80)
 
@@ -75,11 +59,6 @@ defmodule Dialyxir.Formatter do
     |> filter_warnings(filterer)
     |> filter_legacy_warnings(filterer)
     |> Enum.map(&format_warning(&1, :short))
-  end
-
-  def format_and_filter(_, _, warning_name) do
-    warning = Map.get(Dialyxir.Warnings.warnings(), warning_name)
-    [warning.explain()]
   end
 
   defp format_warning(warning, :dialyzer) do

@@ -17,9 +17,7 @@ defmodule Mix.Tasks.Dialyzer do
     *  --format raw        - format the warnings in format returned before Dialyzer formatting
     *  --format dialyxir   - format the warnings in a pretty printed format
     *  --format dialyzer   - format the warnings in the original Dialyzer format
-    *  --explain warning   - explain the class of warnings, e.g. no_return
     *  --quiet             - suppress all informational messages
-    *  --list              - suppress all informational messages
 
   Warning flags passed to this task are passed on to `:dialyzer`.
 
@@ -222,10 +220,8 @@ defmodule Mix.Tasks.Dialyzer do
       {:init_plt, String.to_charlist(Project.plt_file())},
       {:files_rec, Project.dialyzer_paths()},
       {:warnings, dialyzer_warnings(dargs)},
-      {:explain, opts[:explain]},
       {:format, opts[:format]},
-      {:raw, opts[:raw]},
-      {:list, opts[:list]}
+      {:raw, opts[:raw]}
     ]
 
     info("Starting Dialyzer")
