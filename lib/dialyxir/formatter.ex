@@ -131,6 +131,13 @@ defmodule Dialyxir.Formatter do
         """
 
         wrap_error_message(message, dialyzer_warning)
+    rescue
+      e ->
+        message = """
+        Unknown error occurred: #{inspect(e)}
+        """
+
+        wrap_error_message(message, dialyzer_warning)
     end
   end
 
