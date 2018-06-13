@@ -6,6 +6,12 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 ## Changes in 1.0
 
+A release candidate has been published on Hex for 1.0. To use it add to your mix.exs deps:
+
+```
+  {:dialyxir, "~> 1.0.0-rc.0", only: [:dev], runtime: false}
+```
+
 Elixir 1.6 is required, to support the new pretty printing feature. If your
 project is not yet on 1.6, continue to specify 0.5 in your mix deps.
 
