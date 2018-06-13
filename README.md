@@ -75,6 +75,14 @@ Warning flags passed to this task are passed on to `:dialyzer`.
   e.g.
     `mix dialyzer --unmatched_returns`
 
+There is information available about the warnings via the explain task - e.g.
+
+```console
+mix dialyzer.explain unmatched_return
+```
+
+If invoked without arguments, `mix dialyzer.explain` will list all the known warnings.
+
 ## With Explaining Stuff
 
 [Dialyzer](http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html) is a static analysis tool for Erlang and other languages that compile to BEAM bytecode for the Erlang VM. It can analyze the BEAM files and provide warnings about problems in your code including type mismatches and other issues that are commonly detected by static language compilers. The analysis can be improved by inclusion of type hints (called [specs](http://elixir-lang.org/docs/stable/elixir/typespecs.html)) but it can be useful even without those. For more information I highly recommend the [Success Typings](http://user.it.uu.se/~kostis/Papers/succ_types.pdf) paper that describes the theory behind the tool.
