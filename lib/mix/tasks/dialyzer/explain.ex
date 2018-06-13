@@ -33,8 +33,14 @@ defmodule Mix.Tasks.Dialyzer.Explain do
 
   defp explanation_text(warning_name) do
     warning = String.to_atom(warning_name)
-    module = Map.get(Dialyxir.Warnings.warnings(), warning)
-    (module && module.explain()) || "Uknown warning named: #{warning_name}"
+
+    case Map.get(Dialyxir.Warnings.warnings(), warning) do
+      nil ->
+        "Unknown warning named: #{warning_name}"
+
+      module ->
+        module.explain()
+    end
   end
 
   defp list_warnings do
