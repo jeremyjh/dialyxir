@@ -91,6 +91,13 @@ defmodule Dialyxir.Formatter do
       #{base_name}:#{line}:#{warning_name}
       #{string}
       """
+    rescue
+      e ->
+        message = """
+        Unknown error occurred: #{inspect(e)}
+        """
+
+        wrap_error_message(message, dialyzer_warning)
     catch
       {:error, :unknown_warning, warning_name} ->
         message = """
