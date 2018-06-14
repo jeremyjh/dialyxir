@@ -4,7 +4,7 @@ defmodule Dialyxir.Mixfile do
   def project do
     [
       app: :dialyxir,
-      version: "1.0.0-rc.1",
+      version: "1.0.0-rc.2",
       elixir: ">= 1.6.0",
       description: description(),
       package: package(),
@@ -36,7 +36,14 @@ defmodule Dialyxir.Mixfile do
 
   defp package do
     [
-      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      files: [
+        "lib",
+        "mix.exs",
+        "README.md",
+        "LICENSE",
+        "src/struct_lexer.xrl",
+        "src/struct_parser.yrl"
+      ],
       maintainers: ["Jeremy Huffman"],
       licenses: ["Apache 2.0"],
       links: %{"GitHub" => "https://github.com/jeremyjh/dialyxir"}
