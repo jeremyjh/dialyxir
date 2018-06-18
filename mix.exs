@@ -14,7 +14,6 @@ defmodule Dialyxir.Mixfile do
         ignore_warnings: ".dialyzer_ignore.exs",
         flags: [:unmatched_returns, :error_handling, :underspecs]
       ],
-
       # Docs
       name: "Dialyxir",
       source_url: "https://github.com/jeremyjh/dialyxir",
@@ -41,8 +40,8 @@ defmodule Dialyxir.Mixfile do
         "mix.exs",
         "README.md",
         "LICENSE",
-        "src/struct_lexer.xrl",
-        "src/struct_parser.yrl"
+        "src/dialyzer_lexer.xrl",
+        "src/dialyzer_parser.yrl"
       ],
       maintainers: ["Jeremy Huffman"],
       licenses: ["Apache 2.0"],

@@ -1,7 +1,7 @@
 defmodule Dialyxir.PrettyPrint do
   defp lex(str) do
     try do
-      {:ok, tokens, _} = :struct_lexer.string(str)
+      {:ok, tokens, _} = :dialyzer_lexer.string(str)
       tokens
     rescue
       _ ->
@@ -11,7 +11,7 @@ defmodule Dialyxir.PrettyPrint do
 
   defp parse(tokens) do
     try do
-      {:ok, [first | _]} = :struct_parser.parse(tokens)
+      {:ok, [first | _]} = :dialyzer_parser.parse(tokens)
       first
     rescue
       _ ->

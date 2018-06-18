@@ -28,7 +28,7 @@ defmodule Dialyxir.Warnings do
                 Dialyxir.Warnings.InvalidContract,
                 Dialyxir.Warnings.NegativeGuardFail,
                 Dialyxir.Warnings.NoReturn,
-                Dialyxir.Warnings.OpaqeGuard,
+                Dialyxir.Warnings.OpaqueGuard,
                 Dialyxir.Warnings.OpaqueEquality,
                 Dialyxir.Warnings.OpaqueMatch,
                 Dialyxir.Warnings.OpaqueNonequality,
