@@ -1,4 +1,4 @@
-defmodule Dialyxir.Warnings.OpaqeGuard do
+defmodule Dialyxir.Warnings.OpaqueGuard do
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning

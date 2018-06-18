@@ -5,5 +5,5 @@ doc
 erl_crash.dump
 *.ez
 .elixir_ls
-src/struct_parser.erl
-src/struct_lexer.erl
+src/dialyzer_parser.erl
+src/dialyzer_lexer.erl
