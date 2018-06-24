@@ -135,8 +135,7 @@ defmodule Mix.Tasks.Dialyzer do
     quiet: :boolean,
     raw: :boolean,
     list: :boolean,
-    format: :string,
-    explain: :string
+    format: :string
   ]
 
   def run(args) do
