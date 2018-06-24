@@ -346,6 +346,17 @@ defmodule Dialyxir.Test.PretyPrintTest do
     assert pretty_printed == expected_output
   end
 
+  test "named atoms in specs are pretty printed appropriately" do
+    input = ~S"""
+    (Vrules_page_html@1::'nil')
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "(rules_page_html :: nil)"
+    assert pretty_printed == expected_output
+  end
+
   test "tuple assigns are pretty printed appropriately" do
     input = ~S"""
     (Vres@1::{'error',_})

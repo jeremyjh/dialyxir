@@ -125,6 +125,7 @@ type -> atom '::' list : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' map : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' tuple : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' type : {named_type, {atom, '$1'}, '$3'}.
+type -> atom '::' atom : {named_type, {atom, '$1'}, {atom, '$3'}}.
 type -> atom list : {type_list, '$1', '$2'}.
 
 byte_items -> byte : ['$1'].
