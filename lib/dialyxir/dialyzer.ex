@@ -1,5 +1,5 @@
 defmodule Dialyxir.Dialyzer do
-  import Dialyxir.Output, only: [color: 2]
+  import Dialyxir.Output, only: [color: 2, info: 1]
   alias String.Chars
   alias Dialyxir.Formatter
   alias Dialyxir.Project
@@ -29,6 +29,12 @@ defmodule Dialyxir.Dialyzer do
             true ->
               :dialyxir
           end
+
+        info("Starting Dialyzer")
+
+        args
+        |> inspect(label: "dialyzer args", pretty: true)
+        |> info
 
         {duration_ms, result} = :timer.tc(&:dialyzer.run/1, [args])
 

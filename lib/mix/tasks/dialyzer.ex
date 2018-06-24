@@ -134,7 +134,6 @@ defmodule Mix.Tasks.Dialyzer do
     plt: :boolean,
     quiet: :boolean,
     raw: :boolean,
-    list: :boolean,
     format: :string
   ]
 
@@ -222,12 +221,6 @@ defmodule Mix.Tasks.Dialyzer do
       {:format, opts[:format]},
       {:raw, opts[:raw]}
     ]
-
-    info("Starting Dialyzer")
-
-    args
-    |> inspect(label: "dialyzer args", pretty: true)
-    |> info
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
