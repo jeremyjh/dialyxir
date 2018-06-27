@@ -85,6 +85,33 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   def pretty_print_contract(str) do
+    multiple_heads? =
+      str
+      |> to_string()
+      |> String.contains?(";")
+
+    if multiple_heads? do
+      [head | tail] =
+        str
+        |> to_string()
+        |> String.split(";")
+
+      joiner = "Contract head: "
+
+      pretty =
+        Enum.map_join([head | tail], joiner, fn str ->
+          str
+          |> to_charlist()
+          |> do_pretty_print_contract()
+        end)
+
+      joiner <> pretty
+    else
+      do_pretty_print_contract(str)
+    end
+  end
+
+  def do_pretty_print_contract(str) do
     prefix = "@spec a"
     suffix = "\ndef a() do\n  :ok\nend"
     pretty = pretty_print(str)
