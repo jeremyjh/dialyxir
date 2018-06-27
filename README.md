@@ -194,7 +194,9 @@ end
 
 Any line of dialyzer output (partially) matching a line in `"dialyzer.ignore-warnings"` is filtered.
 
-For example, in project where `mix dialyzer` outputs:
+Note that copying output in the default format will not work!  Run `mix dialyzer --format dialyzer` to produce output suitable for the ignore file.
+
+For example, in project where `mix dialyzer --format dialyzer` outputs:
 
 ```
   Proceeding with analysis...
