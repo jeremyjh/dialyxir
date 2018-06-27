@@ -41,7 +41,7 @@ defmodule Dialyxir.WarningHelpers do
       ) do
     pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
 
-    if Enum.empty?(arg_positions) or overloaded? do
+    if Enum.empty?(arg_positions) || overloaded? do
       # We do not know which arguments caused the failure
       """
       breaks the contract

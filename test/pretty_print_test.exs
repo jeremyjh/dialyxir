@@ -380,4 +380,17 @@ defmodule Dialyxir.Test.PretyPrintTest do
 
     assert pretty_printed == expected_output
   end
+
+  test "contracts with semicolons are pretty printed appropriately" do
+    input = ~S"""
+    ('nil','Elixir.Dnsimple.Events.HostCreateRequested':t()) -> {'ok',{'Elixir.Dnsimple.Models.Host':t(),'Elixir.Dnsimple.Models.Order':t()}} ; ({'Elixir.Dnsimple.Models.Host':t(),'Elixir.Dnsimple.Models.Order':t()},'Elixir.Dnsimple.Events.HostCreateSucceeded':t()) -> {'ok',{'Elixir.Dnsimple.Models.Host':t(),'Elixir.Dnsimple.Models.Order':t()}}
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print_contract(input)
+
+    expected_output =
+      "Contract head: (nil, Dnsimple.Events.HostCreateRequested.t()) ::\n  {:ok, {Dnsimple.Models.Host.t(), Dnsimple.Models.Order.t()}}Contract head: (\n  {Dnsimple.Models.Host.t(), Dnsimple.Models.Order.t()},\n  Dnsimple.Events.HostCreateSucceeded.t()\n) :: {:ok, {Dnsimple.Models.Host.t(), Dnsimple.Models.Order.t()}}"
+
+    assert pretty_printed == expected_output
+  end
 end
