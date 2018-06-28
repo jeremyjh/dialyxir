@@ -368,6 +368,17 @@ defmodule Dialyxir.Test.PretyPrintTest do
     assert pretty_printed == expected_output
   end
 
+  test "empty binaries are pretty printed appropriately" do
+    input = ~S"""
+    ([#{'__struct__':='Elixir.MyApp.Actions.Update', 'function':='update', 'old_style?':='true', 'params':=[{_,_},...], 'route':=<<>>, 'rules':='update'},...])
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "([%MyApp.Actions.Update{:function => :update, :old_style? => true, :params => [{_, _}, ...], :route => <<>>, :rules => :update}, ...])"
+    assert pretty_printed == expected_output
+  end
+
   test "binary and list assigns are pretty printed appropriately" do
     input = ~S"""
     (Vurl@1::<<_:272>>,Vreal_payload@1::{'multipart',[any()]},Vheaders@1::[{[45 | 65 | 85 | 101 | 103 | 110 | 114 | 115 | 116,...],[1..255,...]},...],[{'follow_redirect','true'},...])
