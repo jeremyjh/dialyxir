@@ -375,7 +375,9 @@ defmodule Dialyxir.Test.PretyPrintTest do
 
     pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
 
-    expected_output = "([%MyApp.Actions.Update{:function => :update, :old_style? => true, :params => [{_, _}, ...], :route => <<>>, :rules => :update}, ...])"
+    expected_output =
+      "([%MyApp.Actions.Update{:function => :update, :old_style? => true, :params => [{_, _}, ...], :route => <<>>, :rules => :update}, ...])"
+
     assert pretty_printed == expected_output
   end
 
