@@ -173,9 +173,10 @@ defmodule Dialyxir.Formatter do
 
   defp filter_warnings(warnings, filterer) do
     Enum.reject(warnings, fn warning = {_, {file, line}, {warning_type, _}} ->
-      filterer.filter_warning?(
-        {to_string(file), warning_type, line, format_warning(warning, :short)}
-      )
+      Map.has_key?(Dialyxir.Warnings.warnings(), warning_type) &&
+        filterer.filter_warning?(
+          {to_string(file), warning_type, line, format_warning(warning, :short)}
+        )
     end)
   end
 
