@@ -207,6 +207,14 @@ defmodule Dialyxir.PrettyPrint do
     "#{do_pretty_print(value)} :: #{do_pretty_print(size)}"
   end
 
+  defp do_pretty_print({:binary, [{:binary_part, {:any}, {:any}, {:size, {:int, 8}}}]}) do
+    "binary()"
+  end
+
+  defp do_pretty_print({:binary, [{:binary_part, {:any}, {:any}, {:size, {:int, 1}}}]}) do
+    "bitstring()"
+  end
+
   defp do_pretty_print({:binary, binary_parts}) do
     binary_parts = Enum.map_join(binary_parts, ", ", &do_pretty_print/1)
     "<<#{binary_parts}>>"
@@ -252,12 +260,47 @@ defmodule Dialyxir.PrettyPrint do
     "(#{Enum.map_join(items, ", ", &do_pretty_print/1)})"
   end
 
+  defp do_pretty_print(
+         {:list, :square,
+          [
+            tuple: [
+              {:type_list, ['a', 't', 'o', 'm'], {:empty_list, :paren}},
+              {:atom, [:_]}
+            ]
+          ]}
+       ) do
+    "Keyword.t()"
+  end
+
+  defp do_pretty_print(
+         {:list, :square,
+          [
+            tuple: [
+              {:type_list, ['a', 't', 'o', 'm'], {:empty_list, :paren}},
+              t
+            ]
+          ]}
+       ) do
+    "Keyword.t(#{do_pretty_print(t)})"
+  end
+
   defp do_pretty_print({:list, :square, items}) do
     "[#{Enum.map_join(items, ", ", &do_pretty_print/1)}]"
   end
 
   defp do_pretty_print({:map_entry, key, value}) do
     "#{do_pretty_print(key)} => #{do_pretty_print(value)}"
+  end
+
+  defp do_pretty_print(
+         {:map,
+          [
+            {:map_entry, {:atom, '\'__struct__\''},
+             {:type_list, ['a', 't', 'o', 'm'], {:empty_list, :paren}}},
+            {:map_entry, {:atom, [:_]}, {:atom, [:_]}}
+          ]}
+       ) do
+    "struct()"
   end
 
   defp do_pretty_print({:map, map_keys}) do
@@ -313,6 +356,20 @@ defmodule Dialyxir.PrettyPrint do
 
   defp do_pretty_print({:pattern, pattern_items}) do
     "#{Enum.map_join(pattern_items, ", ", &do_pretty_print/1)}"
+  end
+
+  defp do_pretty_print(
+         {:pipe_list, {:atom, ['f', 'a', 'l', 's', 'e']}, {:atom, ['t', 'r', 'u', 'e']}}
+       ) do
+    "boolean()"
+  end
+
+  defp do_pretty_print(
+         {:pipe_list, {:atom, '\'infinity\''},
+          {:type_list, ['n', 'o', 'n', :_, 'n', 'e', 'g', :_, 'i', 'n', 't', 'e', 'g', 'e', 'r'],
+           {:empty_list, :paren}}}
+       ) do
+    "timeout()"
   end
 
   defp do_pretty_print({:pipe_list, head, tail}) do
