@@ -394,6 +394,83 @@ defmodule Dialyxir.Test.PretyPrintTest do
     assert pretty_printed == expected_output
   end
 
+  test "binary transformation layer pretty prints appropriately" do
+    input = ~S"""
+    <<_:_*8>>
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "binary()"
+    assert pretty_printed == expected_output
+  end
+
+  test "bitstring transformation layer pretty prints appropriately" do
+    input = ~S"""
+    <<_:_*1>>
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "bitstring()"
+    assert pretty_printed == expected_output
+  end
+
+  test "boolean transformation layer pretty prints appropriately" do
+    input = ~S"""
+    false | true
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "boolean()"
+    assert pretty_printed == expected_output
+  end
+
+  test "struct transformation layer pretty prints appropriately" do
+    input = ~S"""
+    #{'__struct__':=atom(), _=>_}
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "struct()"
+    assert pretty_printed == expected_output
+  end
+
+  test "timeout transformation layer pretty prints appropriately" do
+    input = ~S"""
+    'infinity' | non_neg_integer()
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "timeout()"
+    assert pretty_printed == expected_output
+  end
+
+  test "Keyword.t() transformation layer pretty prints appropriately" do
+    input = ~S"""
+    [{atom(), _}]
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "Keyword.t()"
+    assert pretty_printed == expected_output
+  end
+
+  test "Keyword.t(integer()) transformation layer pretty prints appropriately" do
+    input = ~S"""
+    [{atom(), integer()}]
+    """
+
+    pretty_printed = Dialyxir.PrettyPrint.pretty_print(input)
+
+    expected_output = "Keyword.t(integer())"
+    assert pretty_printed == expected_output
+  end
+
   test "contracts with semicolons are pretty printed appropriately" do
     input = ~S"""
     ('nil','Elixir.Dnsimple.Events.HostCreateRequested':t()) -> {'ok',{'Elixir.Dnsimple.Models.Host':t(),'Elixir.Dnsimple.Models.Order':t()}} ; ({'Elixir.Dnsimple.Models.Host':t(),'Elixir.Dnsimple.Models.Order':t()},'Elixir.Dnsimple.Events.HostCreateSucceeded':t()) -> {'ok',{'Elixir.Dnsimple.Models.Host':t(),'Elixir.Dnsimple.Models.Order':t()}}

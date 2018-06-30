@@ -140,7 +140,7 @@ Explanations are available for classes of warnings by passing the `--explain war
 #### Formats
 Dialyxir supports formatting the errors in several different ways:
   * Short - By passing `--format short`, the structs and other spec/type information will be dropped from the error message, with a minimal message. This is useful for CI environments. Includes `warning_name ` for use in explanations.
-  * Dialyzer - By passing `--format dialyzer`, the messages will be printed in the default Dialyzer format.
+  * Dialyzer - By passing `--format dialyzer`, the messages will be printed in the default Dialyzer format. This format is used in [legacy string matching](#simple-string-matches) ignore files.
   * Raw - By passing `--format raw`, messages will be printed in their form before being pretty printed by Dialyzer or Dialyxir.
   * Dialyxir (default) -- By passing `--format dialyxir`, messages will be converted to Elixir style messages then pretty printed and formatted. Includes `warning_name ` for use in explanations.
 
@@ -192,11 +192,15 @@ def project do
 end
 ```
 
-Any line of dialyzer output (partially) matching a line in `"dialyzer.ignore-warnings"` is filtered.
+This file comes in two formats: `--format dialyzer` string matches (compatbile with <= 0.5.1 ignore files), and the [term format](#elixir-term-format).
+
+#### Simple String Matches
+
+Any line of dialyzer format output (partially) matching a line in `"dialyzer.ignore-warnings"` is filtered.
 
 Note that copying output in the default format will not work!  Run `mix dialyzer --format dialyzer` to produce output suitable for the ignore file.
 
-For example, in project where `mix dialyzer --format dialyzer` outputs:
+For example, in a project where `mix dialyzer --format dialyzer` outputs:
 
 ```
   Proceeding with analysis...
@@ -223,11 +227,12 @@ config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_
 done (warnings were emitted)
 ```
 
-### Elixir Term Format
+#### Elixir Term Format
 
-Dialyzer also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following:
+Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following:
 
 ```elixir
+# .dialyzer_ignore.exs
 [
   # {short_description}
   {":0:unknown_function Function :erl_types.t_is_opaque/1/1 does not exist."},
