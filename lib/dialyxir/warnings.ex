@@ -26,6 +26,7 @@ defmodule Dialyxir.Warnings do
                 Dialyxir.Warnings.GuardFailPattern,
                 Dialyxir.Warnings.ImproperListConstruction,
                 Dialyxir.Warnings.InvalidContract,
+                Dialyxir.Warnings.MissingRange,
                 Dialyxir.Warnings.NegativeGuardFail,
                 Dialyxir.Warnings.NoReturn,
                 Dialyxir.Warnings.OpaqueGuard,
