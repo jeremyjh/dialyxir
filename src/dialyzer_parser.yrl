@@ -49,6 +49,7 @@ document -> values : '$1'.
 values -> value : ['$1'].
 values -> value values : ['$1'] ++ '$2'.
 
+value -> '\'' value '\'' : '$2'.
 value -> assignment : '$1'.
 value -> atom : {atom, '$1'}.
 value -> binary : '$1'.
@@ -84,8 +85,6 @@ map -> '#' '{' '}' : {map, []}.
 map -> '#' '{' map_items '}' : {map, '$3'}.
 
 pipe_list -> value '|' value : {pipe_list, '$1', '$3'}.
-pipe_list -> pipe_list '|' value : {pipe_list, '$1', '$3'}.
-pipe_list -> '\'' pipe_list '\'' : '$2'.
 
 map_entry -> value ':=' value : {map_entry, '$1', '$3'}.
 map_entry -> value '=>' value : {map_entry, '$1', '$3'}.
@@ -103,14 +102,11 @@ byte -> '#' '<' int '>' '(' int ',' int ',' atom ',' '[' atom ',' atom ']' ')' :
 contract -> list '->' value : {contract, {args, '$1'}, {return, '$3'}}.
 
 range -> int '..' int : {range, unwrap('$1'), unwrap('$3')}.
-range -> '\'' range '\'' : '$2'.
 
 rest -> '...' : {rest}.
 
-integer -> '\'' int '\'' : {int, unwrap('$2')}.
 integer -> int : {int, unwrap('$1')}.
 
-atom -> '\'' atom '\'' : '$2'.
 atom -> atom_full : unwrap('$1').
 atom -> sub_atom : ['$1'].
 atom -> sub_atom integer : ['$1'] ++ ['$2'].
