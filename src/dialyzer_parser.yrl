@@ -75,12 +75,12 @@ tuple -> '{' value_items '}' : {tuple, '$2'}.
 byte_list -> '#' '{' '}' '#' : {byte_list, []}.
 byte_list -> '#' '{' byte_items '}' '#' : {byte_list, '$3'}.
 
-list -> '(' ')' : {empty_list, paren}.
+list -> '(' ')' : {list, paren, []}.
 list -> '(' value_items ')' : {list, paren, '$2'}.
-list -> '[' ']' : {empty_list, square}.
+list -> '[' ']' : {list, square, []}.
 list -> '[' value_items ']' : {list, square, '$2'}.
 
-map -> '#' '{' '}' : {empty_map}.
+map -> '#' '{' '}' : {map, []}.
 map -> '#' '{' map_items '}' : {map, '$3'}.
 
 pipe_list -> value '|' value : {pipe_list, '$1', '$3'}.

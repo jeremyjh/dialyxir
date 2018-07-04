@@ -236,18 +236,6 @@ defmodule Dialyxir.PrettyPrint do
     "#{do_pretty_print(args)} :: #{do_pretty_print(return)}"
   end
 
-  defp do_pretty_print({:empty_list, :paren}) do
-    "()"
-  end
-
-  defp do_pretty_print({:empty_list, :square}) do
-    "[]"
-  end
-
-  defp do_pretty_print({:empty_map}) do
-    "%{}"
-  end
-
   defp do_pretty_print({:function, {:contract, {:args, args}, {:return, return}}}) do
     "(#{do_pretty_print(args)} -> #{do_pretty_print(return)})"
   end
@@ -264,7 +252,7 @@ defmodule Dialyxir.PrettyPrint do
          {:list, :square,
           [
             tuple: [
-              {:type_list, ['a', 't', 'o', 'm'], {:empty_list, :paren}},
+              {:type_list, ['a', 't', 'o', 'm'], {:list, :paren, []}},
               {:atom, [:_]}
             ]
           ]}
@@ -276,7 +264,7 @@ defmodule Dialyxir.PrettyPrint do
          {:list, :square,
           [
             tuple: [
-              {:type_list, ['a', 't', 'o', 'm'], {:empty_list, :paren}},
+              {:type_list, ['a', 't', 'o', 'm'], {:list, :paren, []}},
               t
             ]
           ]}
@@ -296,7 +284,7 @@ defmodule Dialyxir.PrettyPrint do
          {:map,
           [
             {:map_entry, {:atom, '\'__struct__\''},
-             {:type_list, ['a', 't', 'o', 'm'], {:empty_list, :paren}}},
+             {:type_list, ['a', 't', 'o', 'm'], {:list, :paren, []}}},
             {:map_entry, {:atom, [:_]}, {:atom, [:_]}}
           ]}
        ) do
@@ -367,7 +355,7 @@ defmodule Dialyxir.PrettyPrint do
   defp do_pretty_print(
          {:pipe_list, {:atom, '\'infinity\''},
           {:type_list, ['n', 'o', 'n', :_, 'n', 'e', 'g', :_, 'i', 'n', 't', 'e', 'g', 'e', 'r'],
-           {:empty_list, :paren}}}
+           {:list, :paren, []}}}
        ) do
     "timeout()"
   end
