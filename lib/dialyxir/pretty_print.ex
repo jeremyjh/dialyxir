@@ -365,7 +365,7 @@ defmodule Dialyxir.PrettyPrint do
   end
 
   defp do_pretty_print({:range, from, to}) do
-    "#{from}..#{to}"
+    "#{do_pretty_print(from)}..#{do_pretty_print(to)}"
   end
 
   defp do_pretty_print({:rest}) do
