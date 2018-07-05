@@ -1,24 +1,24 @@
 Nonterminals
 
-document
 assignment
-rest
-values value
+atom
+binary binary_items binary_part
+byte
+byte_list byte_items
+contract
+document
+function
+integer
 list
 map map_items map_entry
-tuple
-binary binary_items binary_part
 pattern
-value_items
-byte_list byte_items
-byte
-range
-atom sub_atom
-contract
-type
-integer
 pipe_list
-function.
+range
+rest
+tuple
+type
+value_items
+values value.
 
 Terminals
 
@@ -84,8 +84,6 @@ list -> '[' value_items ']' : {list, square, '$2'}.
 map -> '#' '{' '}' : {map, []}.
 map -> '#' '{' map_items '}' : {map, '$3'}.
 
-pipe_list -> value '|' value : {pipe_list, '$1', '$3'}.
-
 map_entry -> value ':=' value : {map_entry, '$1', '$3'}.
 map_entry -> value '=>' value : {map_entry, '$1', '$3'}.
 
@@ -101,35 +99,35 @@ byte -> '#' '<' int '>' '(' int ',' int ',' atom ',' '[' atom ',' atom ']' ')' :
 
 contract -> list '->' value : {contract, {args, '$1'}, {return, '$3'}}.
 
-range -> int '..' int : {range, unwrap('$1'), unwrap('$3')}.
+integer -> int : {int, unwrap('$1')}.
+
+pipe_list -> value '|' value : {pipe_list, '$1', '$3'}.
+
+range -> integer '..' integer : {range, '$1', '$3'}.
 
 rest -> '...' : {rest}.
 
-integer -> int : {int, unwrap('$1')}.
-
 atom -> atom_full : unwrap('$1').
-atom -> sub_atom : ['$1'].
-atom -> sub_atom integer : ['$1'] ++ ['$2'].
+atom -> atom_part : [unwrap('$1')].
+atom -> '_' : ['_'].
+atom -> atom integer : '$1' ++ ['$2'].
 atom -> atom atom : '$1' ++ '$2'.
 
-sub_atom -> atom_part : unwrap('$1').
-sub_atom -> '_' : '_'.
-
 type -> atom ':' type : {type, {atom, '$1'}, '$3'}.
+type -> atom '::' atom : {named_type, {atom, '$1'}, {atom, '$3'}}.
 type -> atom '::' binary : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' integer : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' list : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' map : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' tuple : {named_type, {atom, '$1'}, '$3'}.
 type -> atom '::' type : {named_type, {atom, '$1'}, '$3'}.
-type -> atom '::' atom : {named_type, {atom, '$1'}, {atom, '$3'}}.
 type -> atom list : {type_list, '$1', '$2'}.
-
-byte_items -> byte : ['$1'].
-byte_items -> byte ',' byte_items : ['$1'] ++ '$3'.
 
 binary_items -> binary_part : ['$1'].
 binary_items -> binary_part  ',' binary_items : ['$1'] ++ '$3'.
+
+byte_items -> byte : ['$1'].
+byte_items -> byte ',' byte_items : ['$1'] ++ '$3'.
 
 map_items -> map_entry : ['$1'].
 map_items -> map_entry ',' map_items : ['$1'] ++ '$3'.
