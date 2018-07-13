@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.CallWithOpaque do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "Call with opaqueness type mismatch."
+    "Call with opaque type mismatch."
   end
 
   @impl Dialyxir.Warning
