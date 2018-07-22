@@ -18,7 +18,7 @@ defmodule Dialyxir.Warnings.GuardFail do
   end
 
   def format_long([guard, args]) do
-    pretty_args = Erlex.PrettyPrint.pretty_print_args(args)
+    pretty_args = Erlex.pretty_print_args(args)
 
     """
     Guard test:
@@ -29,9 +29,9 @@ defmodule Dialyxir.Warnings.GuardFail do
   end
 
   def format_long([arg1, infix, arg2]) do
-    pretty_arg1 = Erlex.PrettyPrint.pretty_print_type(arg1)
-    pretty_arg2 = Erlex.PrettyPrint.pretty_print_args(arg2)
-    pretty_infix = Erlex.PrettyPrint.pretty_print_infix(infix)
+    pretty_arg1 = Erlex.pretty_print_type(arg1)
+    pretty_arg2 = Erlex.pretty_print_args(arg2)
+    pretty_infix = Erlex.pretty_print_infix(infix)
 
     """
     Guard test:

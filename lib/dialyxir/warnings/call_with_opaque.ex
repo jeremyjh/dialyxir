@@ -14,7 +14,7 @@ defmodule Dialyxir.Warnings.CallWithOpaque do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, args, arg_positions, expected_args]) do
-    pretty_module = Erlex.PrettyPrint.pretty_print(module)
+    pretty_module = Erlex.pretty_print(module)
 
     "The call #{pretty_module}.#{function}#{args} contains #{form_positions(arg_positions)} " <>
       "when #{form_expected(expected_args)}}."

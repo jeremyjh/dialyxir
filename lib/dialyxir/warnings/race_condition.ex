@@ -12,8 +12,8 @@ defmodule Dialyxir.Warnings.RaceCondition do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, args, reason]) do
-    pretty_args = Erlex.PrettyPrint.pretty_print_args(args)
-    pretty_module = Erlex.PrettyPrint.pretty_print(module)
+    pretty_args = Erlex.pretty_print_args(args)
+    pretty_module = Erlex.pretty_print(module)
 
     "The call #{pretty_module},#{function}#{pretty_args} #{reason}."
   end

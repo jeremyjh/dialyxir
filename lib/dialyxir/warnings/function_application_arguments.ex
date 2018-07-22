@@ -14,8 +14,8 @@ defmodule Dialyxir.Warnings.FuncionApplicationArguments do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([args, type]) do
-    pretty_args = Erlex.PrettyPrint.pretty_print_args(args)
-    pretty_type = Erlex.PrettyPrint.pretty_print(type)
+    pretty_args = Erlex.pretty_print_args(args)
+    pretty_type = Erlex.pretty_print(type)
 
     "Function application with arguments #{pretty_args} will fail " <>
       "since the function has type #{pretty_type}."

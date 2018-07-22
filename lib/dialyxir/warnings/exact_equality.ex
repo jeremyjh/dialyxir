@@ -14,8 +14,8 @@ defmodule Dialyxir.Warnings.ExactEquality do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([type1, op, type2]) do
-    pretty_type1 = Erlex.PrettyPrint.pretty_print_type(type1)
-    pretty_type2 = Erlex.PrettyPrint.pretty_print_type(type2)
+    pretty_type1 = Erlex.pretty_print_type(type1)
+    pretty_type2 = Erlex.pretty_print_type(type2)
 
     "The test #{pretty_type1} #{op} #{pretty_type2} can never evaluate to 'true'."
   end

@@ -12,7 +12,7 @@ defmodule Dialyxir.Warnings.CallbackMissing do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([behaviour, function, arity]) do
-    pretty_behaviour = Erlex.PrettyPrint.pretty_print(behaviour)
+    pretty_behaviour = Erlex.pretty_print(behaviour)
 
     "Undefined callback function #{function}/#{arity} (behaviour #{pretty_behaviour})."
   end

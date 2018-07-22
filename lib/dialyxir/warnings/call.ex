@@ -23,8 +23,8 @@ defmodule Dialyxir.Warnings.Call do
         signature_return,
         contract
       ]) do
-    pretty_args = Erlex.PrettyPrint.pretty_print_args(args)
-    pretty_module = Erlex.PrettyPrint.pretty_print(module)
+    pretty_args = Erlex.pretty_print_args(args)
+    pretty_module = Erlex.pretty_print(module)
 
     call_string =
       Dialyxir.WarningHelpers.call_or_apply_to_string(
