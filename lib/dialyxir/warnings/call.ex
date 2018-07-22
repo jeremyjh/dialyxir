@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.Call do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "The function call will fail."
+    "The function call will not succeed."
   end
 
   @impl Dialyxir.Warning
@@ -36,7 +36,8 @@ defmodule Dialyxir.Warnings.Call do
       )
 
     """
-    The call:
+    The function call will not succeed.
+
     #{pretty_module}.#{function}#{pretty_args}
 
     #{String.trim_trailing(call_string)}
@@ -47,7 +48,7 @@ defmodule Dialyxir.Warnings.Call do
   @spec explain() :: String.t()
   def explain() do
     """
-    The function call will fail.
+    The function call will not succeed.
 
     Example:
 

@@ -18,10 +18,12 @@ defmodule Dialyxir.Warnings.PatternMatch do
     pretty_type = Erlex.pretty_print_type(type)
 
     """
-    The pattern
+    The pattern can never match the type.
+
+    Pattern:
     #{pretty_pattern}
 
-    can never match the type
+    Type:
     #{pretty_type}
     """
   end
