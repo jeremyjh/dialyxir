@@ -12,7 +12,7 @@ defmodule Dialyxir.WarningHelpers do
         _signature_return,
         {_overloaded?, _contract}
       ) do
-    pretty_signature_args = Dialyxir.PrettyPrint.pretty_print_args(signature_args)
+    pretty_signature_args = Erlex.PrettyPrint.pretty_print_args(signature_args)
 
     if Enum.empty?(arg_positions) do
       # We do not know which argument(s) caused the failure
@@ -39,7 +39,7 @@ defmodule Dialyxir.WarningHelpers do
         _signature_return,
         {overloaded?, contract}
       ) do
-    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+    pretty_contract = Erlex.PrettyPrint.pretty_print_contract(contract)
 
     if Enum.empty?(arg_positions) || overloaded? do
       # We do not know which arguments caused the failure
@@ -67,10 +67,10 @@ defmodule Dialyxir.WarningHelpers do
         signature_return,
         {_overloaded?, contract}
       ) do
-    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
+    pretty_contract = Erlex.PrettyPrint.pretty_print_contract(contract)
 
     pretty_print_signature =
-      Dialyxir.PrettyPrint.pretty_print_contract("#{signature_args} -> #{signature_return}")
+      Erlex.PrettyPrint.pretty_print_contract("#{signature_args} -> #{signature_return}")
 
     """
     will never return since the success typing is:

@@ -12,7 +12,7 @@ defmodule Dialyxir.Warnings.UnknownBehaviour do
   @impl Dialyxir.Warning
   @spec format_long(String.t()) :: String.t()
   def format_long(behaviour) do
-    pretty_module = Dialyxir.PrettyPrint.pretty_print(behaviour)
+    pretty_module = Erlex.PrettyPrint.pretty_print(behaviour)
 
     "Unknown behaviour: #{pretty_module}."
   end

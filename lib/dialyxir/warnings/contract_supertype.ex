@@ -14,9 +14,9 @@ defmodule Dialyxir.Warnings.ContractSupertype do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, contract, signature]) do
-    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
-    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract)
-    pretty_signature = Dialyxir.PrettyPrint.pretty_print_contract(signature)
+    pretty_module = Erlex.PrettyPrint.pretty_print(module)
+    pretty_contract = Erlex.PrettyPrint.pretty_print_contract(contract)
+    pretty_signature = Erlex.PrettyPrint.pretty_print_contract(signature)
 
     """
     Type specification is a supertype of the success typing.

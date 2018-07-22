@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.OverlappingContract do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([module, function, arity]) do
-    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    pretty_module = Erlex.PrettyPrint.pretty_print(module)
 
     "Overloaded contract for #{pretty_module}.#{function}/#{arity}"
   end
@@ -39,7 +39,7 @@ defmodule Dialyxir.Warnings.OverlappingContract do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity]) do
-    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    pretty_module = Erlex.PrettyPrint.pretty_print(module)
 
     """
     Overloaded contract for #{pretty_module}.#{function}/#{arity} has

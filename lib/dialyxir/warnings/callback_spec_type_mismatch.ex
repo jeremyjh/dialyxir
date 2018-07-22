@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.CallbackSpecTypeMismatch do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([behaviour, function, arity, _success_type, _callback_type]) do
-    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+    pretty_behaviour = Erlex.PrettyPrint.pretty_print(behaviour)
 
     "The @spec return type for does not match the expected return type" <>
       "for #{function}/#{arity} callback in #{pretty_behaviour} behaviour."
@@ -17,9 +17,9 @@ defmodule Dialyxir.Warnings.CallbackSpecTypeMismatch do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([behaviour, function, arity, success_type, callback_type]) do
-    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
-    pretty_success_type = Dialyxir.PrettyPrint.pretty_print_type(success_type)
-    pretty_callback_type = Dialyxir.PrettyPrint.pretty_print_type(callback_type)
+    pretty_behaviour = Erlex.PrettyPrint.pretty_print(behaviour)
+    pretty_success_type = Erlex.PrettyPrint.pretty_print_type(success_type)
+    pretty_callback_type = Erlex.PrettyPrint.pretty_print_type(callback_type)
 
     """
     The @spec return type for does not match the expected return type

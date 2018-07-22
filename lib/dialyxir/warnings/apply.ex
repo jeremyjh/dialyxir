@@ -14,7 +14,7 @@ defmodule Dialyxir.Warnings.Apply do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([args, arg_positions, fail_reason, signature_args, signature_return, contract]) do
-    pretty_args = Dialyxir.PrettyPrint.pretty_print_args(args)
+    pretty_args = Erlex.PrettyPrint.pretty_print_args(args)
 
     call_string =
       Dialyxir.WarningHelpers.call_or_apply_to_string(

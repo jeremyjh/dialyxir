@@ -12,7 +12,7 @@ defmodule Dialyxir.Warnings.CallbackInfoMissing do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([behaviour]) do
-    pretty_behaviour = Dialyxir.PrettyPrint.pretty_print(behaviour)
+    pretty_behaviour = Erlex.PrettyPrint.pretty_print(behaviour)
 
     "Callback info about the #{pretty_behaviour} behaviour is not available."
   end

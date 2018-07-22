@@ -14,8 +14,8 @@ defmodule Dialyxir.Warnings.PatternMatch do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([pattern, type]) do
-    pretty_pattern = Dialyxir.PrettyPrint.pretty_print_pattern(pattern)
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
+    pretty_pattern = Erlex.PrettyPrint.pretty_print_pattern(pattern)
+    pretty_type = Erlex.PrettyPrint.pretty_print_type(type)
 
     """
     The pattern

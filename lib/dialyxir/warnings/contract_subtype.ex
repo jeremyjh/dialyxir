@@ -14,9 +14,9 @@ defmodule Dialyxir.Warnings.ContractSubtype do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, contract, signature]) do
-    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
-    pretty_signature = Dialyxir.PrettyPrint.pretty_print_contract(signature)
-    pretty_contract = Dialyxir.PrettyPrint.pretty_print_contract(contract, module, function)
+    pretty_module = Erlex.PrettyPrint.pretty_print(module)
+    pretty_signature = Erlex.PrettyPrint.pretty_print_contract(signature)
+    pretty_contract = Erlex.PrettyPrint.pretty_print_contract(contract, module, function)
 
     """
     Type specification is a subtype of the success typing.
