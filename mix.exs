@@ -24,7 +24,7 @@ defmodule Dialyxir.Mixfile do
   end
 
   def application do
-    [mod: {Dialyxir, []}]
+    [mod: {Dialyxir, []}, extra_applications: [:dialyzer, :crypto, :mix]]
   end
 
   defp description do
