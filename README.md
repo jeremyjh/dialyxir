@@ -48,7 +48,7 @@ To install globally as an archive:
 git clone https://github.com/asummers/exerl
 cd exerl
 mix do compile, archive.build, archive.install
-cd ..
+cd -
 git clone https://github.com/jeremyjh/dialyxir
 cd dialyxir
 MIX_ENV=prod mix do compile, archive.build, archive.install
