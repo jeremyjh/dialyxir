@@ -9,7 +9,7 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 A release candidate has been published on Hex for 1.0. To use it add to your mix.exs deps:
 
 ```
-  {:dialyxir, "~> 1.0.0-rc.2", only: [:dev], runtime: false}
+  {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false}
 ```
 
 Elixir 1.6 is required, to support the new pretty printing feature. If your
