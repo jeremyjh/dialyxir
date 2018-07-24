@@ -14,7 +14,7 @@ defmodule Dialyxir.Warnings.UnmatchedReturn do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([type]) do
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
+    pretty_type = Erlex.pretty_print_type(type)
 
     """
     Expression produces a value of type:

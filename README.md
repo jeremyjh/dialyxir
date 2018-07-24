@@ -45,6 +45,10 @@ mix do deps.get, deps.compile
 To install globally as an archive:
 
 ```console
+git clone https://github.com/asummers/exerl
+cd exerl
+mix do compile, archive.build, archive.install
+cd -
 git clone https://github.com/jeremyjh/dialyxir
 cd dialyxir
 MIX_ENV=prod mix do compile, archive.build, archive.install

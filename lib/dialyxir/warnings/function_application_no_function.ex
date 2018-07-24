@@ -14,8 +14,8 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([op, type, arity]) do
-    pretty_op = Dialyxir.PrettyPrint.pretty_print(op)
-    pretty_type = Dialyxir.PrettyPrint.pretty_print_type(type)
+    pretty_op = Erlex.pretty_print(op)
+    pretty_type = Erlex.pretty_print_type(type)
 
     "Function application will fail since #{pretty_op} :: #{pretty_type} is not a function of arity #{
       arity

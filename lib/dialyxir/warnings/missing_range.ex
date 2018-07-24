@@ -14,9 +14,9 @@ defmodule Dialyxir.Warnings.MissingRange do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, extra_ranges, contract_range]) do
-    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
-    pretty_contract_range = Dialyxir.PrettyPrint.pretty_print_contract(contract_range)
-    pretty_extra_ranges = Dialyxir.PrettyPrint.pretty_print_contract(extra_ranges)
+    pretty_module = Erlex.pretty_print(module)
+    pretty_contract_range = Erlex.pretty_print_contract(contract_range)
+    pretty_extra_ranges = Erlex.pretty_print_contract(extra_ranges)
 
     """
     Type specification is missing types returned by function.

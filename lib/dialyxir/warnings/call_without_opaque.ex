@@ -14,7 +14,7 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, args, expected_triples]) do
-    pretty_module = Dialyxir.PrettyPrint.pretty_print(module)
+    pretty_module = Erlex.pretty_print(module)
 
     "The call #{pretty_module}.#{function}#{args} does not have #{
       form_expected_without_opaque(expected_triples)

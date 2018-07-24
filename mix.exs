@@ -8,9 +8,9 @@ defmodule Dialyxir.Mixfile do
       elixir: ">= 1.6.0",
       description: description(),
       package: package(),
-      deps: [{:ex_doc, ">= 0.0.0", only: :dev}],
+      deps: deps(),
       dialyzer: [
-        plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib],
+        plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib, :erlex],
         ignore_warnings: ".dialyzer_ignore.exs",
         flags: [:unmatched_returns, :error_handling, :underspecs]
       ],
@@ -24,7 +24,7 @@ defmodule Dialyxir.Mixfile do
   end
 
   def application do
-    [mod: {Dialyxir, []}, applications: [:dialyzer, :crypto, :mix]]
+    [mod: {Dialyxir, []}, extra_applications: [:dialyzer, :crypto, :mix]]
   end
 
   defp description do
@@ -33,15 +33,20 @@ defmodule Dialyxir.Mixfile do
     """
   end
 
+  defp deps do
+    [
+      {:erlex, "~> 0.1"},
+      {:ex_doc, ">= 0.0.0", only: :dev}
+    ]
+  end
+
   defp package do
     [
       files: [
         "lib",
         "mix.exs",
         "README.md",
-        "LICENSE",
-        "src/dialyzer_lexer.xrl",
-        "src/dialyzer_parser.yrl"
+        "LICENSE"
       ],
       maintainers: ["Jeremy Huffman"],
       licenses: ["Apache 2.0"],
