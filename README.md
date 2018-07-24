@@ -45,8 +45,8 @@ mix do deps.get, deps.compile
 To install globally as an archive:
 
 ```console
-git clone https://github.com/asummers/exerl
-cd exerl
+git clone https://github.com/asummers/erlex
+cd erlex
 mix do compile, archive.build, archive.install
 cd -
 git clone https://github.com/jeremyjh/dialyxir
