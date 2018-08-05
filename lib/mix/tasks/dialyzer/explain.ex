@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Dialyzer.Explain do
-  @shortdoc "Display information about dialzer warnings."
+  @shortdoc "Display information about dialyzer warnings."
 
   @moduledoc """
   This task provides background information about dialyzer warnings.
