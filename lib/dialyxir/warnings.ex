@@ -15,6 +15,7 @@ defmodule Dialyxir.Warnings do
                 Dialyxir.Warnings.CallbackSpecTypeMismatch,
                 Dialyxir.Warnings.CallbackTypeMismatch,
                 Dialyxir.Warnings.ContractDiff,
+                Dialyxir.Warnings.ContractRange,
                 Dialyxir.Warnings.ContractSubtype,
                 Dialyxir.Warnings.ContractSupertype,
                 Dialyxir.Warnings.ContractWithOpaque,
