@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.ContractRange do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([_, _, _, _, line, _]) do
-    "Contract cannot be correct beacuse return type on line number #{line} is mismatched."
+    "Contract cannot be correct because return type on line number #{line} is mismatched."
   end
 
   @impl Dialyxir.Warning
@@ -20,7 +20,7 @@ defmodule Dialyxir.Warnings.ContractRange do
     pretty_args = Erlex.pretty_print_args(arg_strings)
 
     """
-    Contract cannot be correct beacuse return type on line number #{line} is mismatched.
+    Contract cannot be correct because return type on line number #{line} is mismatched.
 
     Function:
     #{pretty_module}.#{function}#{pretty_args}
