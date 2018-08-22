@@ -30,6 +30,7 @@
   {"lib/dialyxir/warnings/callback_spec_type_mismatch.ex", :no_return},
   {"lib/dialyxir/warnings/callback_type_mismatch.ex", :no_return},
   {"lib/dialyxir/warnings/contract_diff.ex", :no_return},
+  {"lib/dialyxir/warnings/contract_range.ex", :no_return},
   {"lib/dialyxir/warnings/contract_subtype.ex", :no_return},
   {"lib/dialyxir/warnings/contract_supertype.ex", :no_return},
   {"lib/dialyxir/warnings/contract_with_opaque.ex", :no_return},
