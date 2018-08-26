@@ -1,5 +1,5 @@
 %{
   "earmark": {:hex, :earmark, "1.0.2", "a0b0904d74ecc14da8bd2e6e0248e1a409a2bc91aade75fcf428125603de3853", [:mix], []},
-  "erlex": {:hex, :erlex, "0.1.1", "c8dc477179c2080d1c2077383f010abbfd1cc0147c16954dee1bd2b26f337307", [:mix], [], "hexpm"},
+  "erlex": {:hex, :erlex, "0.1.2", "47a26543a8db992d2c6f78bb6ca8d31a784788e5bf9d8b821e020dbacb1e8bdf", [:mix], [], "hexpm"},
   "ex_doc": {:hex, :ex_doc, "0.14.3", "e61cec6cf9731d7d23d254266ab06ac1decbb7651c3d1568402ec535d387b6f7", [:mix], [{:earmark, "~> 1.0", [hex: :earmark, optional: false]}]},
 }
