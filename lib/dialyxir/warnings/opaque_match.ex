@@ -15,6 +15,7 @@ defmodule Dialyxir.Warnings.OpaqueMatch do
   @spec format_long([String.t()]) :: String.t()
   def format_long([pattern, opaque_type, opaque_term]) do
     pretty_opaque_term = Erlex.pretty_print(opaque_term)
+
     term =
       if opaque_type == opaque_term do
         "the term"
