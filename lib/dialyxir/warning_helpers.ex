@@ -82,6 +82,6 @@ defmodule Dialyxir.WarningHelpers do
   end
 
   def form_position_string(arg_positions) do
-    Enum.join(arg_positions, " and ")
+    Enum.map_join(arg_positions, " and ", &ordinal/1)
   end
 end
