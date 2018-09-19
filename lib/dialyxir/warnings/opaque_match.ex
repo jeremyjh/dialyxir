@@ -8,28 +8,62 @@ defmodule Dialyxir.Warnings.OpaqueMatch do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "Attempted to match against opaque term."
+    "Attempted to pattern match against the internal structure of an opaque term."
   end
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([pattern, opaque_type, opaque_term]) do
+    pretty_opaque_term = Erlex.pretty_print(opaque_term)
+
     term =
       if opaque_type == opaque_term do
         "the term"
       else
-        opaque_term
+        pretty_opaque_term
       end
 
-    pretty_pattern = Erlex.pretty_print(pattern)
+    pretty_pattern = Erlex.pretty_print_pattern(pattern)
 
-    "The attempt to match a term of type #{opaque_term} against the #{pretty_pattern} " <>
-      "breaks the opaqueness of #{term}."
+    """
+    Attempted to pattern match against the internal structure of an opaque term.
+
+    Type:
+    #{pretty_opaque_term}
+
+    Pattern:
+    #{pretty_pattern}
+
+    This breaks the opaqueness of #{term}.
+    """
   end
 
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    Dialyxir.Warning.default_explain()
+    """
+    Attempted to pattern match against the internal structure of an opaque term.
+
+    Example:
+
+    defmodule OpaqueStruct do
+      defstruct [:opaque]
+
+      @opaque t :: %__MODULE__{}
+
+      @spec opaque() :: t
+      def opaque() do
+        %__MODULE__{}
+      end
+    end
+
+    defmodule Example do
+      @spec error() :: :error
+      def error() do
+        %{opaque: _} = OpaqueStruct.opaque()
+        :error
+      end
+    end
+    """
   end
 end
