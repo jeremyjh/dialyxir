@@ -41,6 +41,7 @@
   {"lib/dialyxir/warnings/guard_fail_pattern.ex", :no_return},
   {"lib/dialyxir/warnings/improper_list_construction.ex", :no_return},
   {"lib/dialyxir/warnings/invalid_contract.ex", :no_return},
+  {"lib/dialyxir/warnings/opaque_match.ex", :no_return},
   {"lib/dialyxir/warnings/pattern_match.ex", :no_return},
   {"lib/dialyxir/warnings/pattern_match_covered.ex", :no_return},
   {"lib/dialyxir/warnings/race_condition.ex", :no_return},
