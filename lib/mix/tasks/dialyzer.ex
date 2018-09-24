@@ -15,11 +15,11 @@ defmodule Mix.Tasks.Dialyzer do
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
       useful for CI. do not use with `mix do`.
     * `--plt`              - only build the required plt(s) and exit.
-    *  --format short      - format the warnings in a compact format.
-    *  --format raw        - format the warnings in format returned before Dialyzer formatting
-    *  --format dialyxir   - format the warnings in a pretty printed format
-    *  --format dialyzer   - format the warnings in the original Dialyzer format
-    *  --quiet             - suppress all informational messages
+    *  `--format short`    - format the warnings in a compact format.
+    *  `--format raw`      - format the warnings in format returned before Dialyzer formatting
+    *  `--format dialyxir` - format the warnings in a pretty printed format
+    *  `--format dialyzer` - format the warnings in the original Dialyzer format
+    *  `--quiet`           - suppress all informational messages
 
   Warning flags passed to this task are passed on to `:dialyzer`.
 
