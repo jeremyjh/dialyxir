@@ -10,6 +10,8 @@ defmodule Mix.Tasks.Dialyzer do
 
     * `--no-compile`       - do not compile even if needed.
     * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
+    * `--force_check`      - force PLT check also if lock file is unchanged.
+       useful when dealing with local deps.
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
       useful for CI. do not use with `mix do`.
     * `--plt`              - only build the required plt(s) and exit.
@@ -130,6 +132,7 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options [
     no_compile: :boolean,
     no_check: :boolean,
+    force_check: :boolean,
     halt_exit_status: :boolean,
     plt: :boolean,
     quiet: :boolean,
@@ -139,6 +142,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   def run(args) do
     {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
+    opts = Keyword.update(opts, :force_check, false, &(&1 || false))
     original_shell = Mix.shell()
     if opts[:quiet], do: Mix.shell(Mix.Shell.Quiet)
     opts = Keyword.delete(opts, :quiet)
@@ -153,7 +157,7 @@ defmodule Mix.Tasks.Dialyzer do
       _ =
         unless no_check?(opts) do
           info("Finding suitable PLTs")
-          check_plt()
+          check_plt(opts[:force_check])
         end
 
       unless opts[:plt], do: run_dialyzer(opts, dargs)
@@ -200,11 +204,11 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp check_plt() do
+  defp check_plt(force_check) do
     info("Checking PLT...")
     {apps, hash} = dependency_hash()
 
-    if check_hash?(hash) do
+    if not force_check and check_hash?(hash) do
       info("PLT is up to date!")
     else
       Project.plts_list(apps) |> Plt.check()
@@ -214,7 +218,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   defp run_dialyzer(opts, dargs) do
     args = [
-      {:check_plt, false},
+      {:check_plt, opts[:force_check]},
       {:init_plt, String.to_charlist(Project.plt_file())},
       {:files_rec, Project.dialyzer_paths()},
       {:warnings, dialyzer_warnings(dargs)},
