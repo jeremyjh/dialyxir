@@ -95,7 +95,7 @@ If invoked without arguments, `mix dialyzer.explain` will list all the known war
 
 ## With Explaining Stuff
 
-[Dialyzer](http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html) is a static analysis tool for Erlang and other languages that compile to BEAM bytecode for the Erlang VM. It can analyze the BEAM files and provide warnings about problems in your code including type mismatches and other issues that are commonly detected by static language compilers. The analysis can be improved by inclusion of type hints (called [specs](http://elixir-lang.org/docs/stable/elixir/typespecs.html)) but it can be useful even without those. For more information I highly recommend the [Success Typings](http://user.it.uu.se/~kostis/Papers/succ_types.pdf) paper that describes the theory behind the tool.
+[Dialyzer](http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html) is a static analysis tool for Erlang and other languages that compile to BEAM bytecode for the Erlang VM. It can analyze the BEAM files and provide warnings about problems in your code including type mismatches and other issues that are commonly detected by static language compilers. The analysis can be improved by inclusion of type hints (called [specs](https://hexdocs.pm/elixir/typespecs.html)) but it can be useful even without those. For more information I highly recommend the [Success Typings](http://user.it.uu.se/~kostis/Papers/succ_types.pdf) paper that describes the theory behind the tool.
 
 
 Usage is straightforward but you should be aware of the available configuration settings you may wish to add to your mix.exs file.
@@ -118,6 +118,7 @@ The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`.
 If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT. Using this option will mean dependencies are not added automatically (see below). If you want to just add an application to the list of defaults and dependencies you can use the `:plt_add_apps` key.
 
 #### Dependencies
+
 OTP application dependencies are (transitively) added to your PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
   * :project - Direct Mix and OTP dependencies
   * :apps_direct - Only Direct OTP application dependencies - not the entire tree
@@ -138,10 +139,11 @@ end
 ```
 
 #### Explanations
+
 Explanations are available for classes of warnings by passing the `--explain warning_name` flag. It will include a description about the type of warning, as well as a small example that would also cause that warning. Poor explanations and examples should be considered issues in this library, and pull requests are very welcome! The warning name is returned from the `--format short` and `--format dialyzer` flags. List available warnings with `--list`.
 
-
 #### Formats
+
 Dialyxir supports formatting the errors in several different ways:
   * Short - By passing `--format short`, the structs and other spec/type information will be dropped from the error message, with a minimal message. This is useful for CI environments. Includes `warning_name ` for use in explanations.
   * Dialyzer - By passing `--format dialyzer`, the messages will be printed in the default Dialyzer format. This format is used in [legacy string matching](#simple-string-matches) ignore files.
