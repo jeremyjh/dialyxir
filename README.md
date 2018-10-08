@@ -17,10 +17,6 @@ project is not yet on 1.6, continue to specify 0.5 in your mix deps.
 
 Warning messages have been greatly improved, but are filtered through the legacy formatter to support your existing ignore files. You can optionally use the new Elixir [term format](#elixir-term-format) for ignore files. You may want to use the `--format short` argument in your CI pipelines. There are several formats, also there is a new `explain` feature - for details see CLI [options](#command-line-options).
 
-## Changes in 0.4 and 0.5
-
-If you've been using earlier versions of Dialyxir there are some changes you may need to make in the configuration of your existing projects. A summary of the most common issues and changes are found in the Wiki pages for [0.4](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.4) and [0.5](https://github.com/jeremyjh/dialyxir/wiki/Upgrading-to-0.5).
-
 ## Quickstart
 If you are planning to use Dialyzer with an application built with the [Phoenix Framework](http://www.phoenixframework.org/), check out the [Quickstart wiki](https://github.com/jeremyjh/dialyxir/wiki/Phoenix-Dialyxir-Quickstart).
 
