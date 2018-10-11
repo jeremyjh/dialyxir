@@ -9,7 +9,7 @@ defmodule Dialyxir.Formatter do
 
   def formatted_time(duration_us) do
     minutes = div(duration_us, 60_000_000)
-    seconds = (rem(duration_us, 60_000_000) / 1_000) |> Float.round(2)
+    seconds = (rem(duration_us, 60_000_000) / 1_000_000) |> Float.round(2)
     "done in #{minutes}m#{seconds}s"
   end
 
