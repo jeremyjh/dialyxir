@@ -231,7 +231,8 @@ done (warnings were emitted)
 
 #### Elixir Term Format
 
-Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following:
+Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following, and can match either tuple patterns or an arbitrary Regex 
+applied to the *short-description* (`mix dialyzer --format short`):
 
 ```elixir
 # .dialyzer_ignore.exs
@@ -248,6 +249,8 @@ Dialyxir also recognizes an Elixir format of the ignore file. If your ignore fil
   {"lib/dialyxir/warning_helpers.ex", :no_return},
   # {file}
   {"lib/dialyxir/warnings/app_call.ex"},
+  # regex
+  ~r/my_file\.ex.*my_function.*no local return/
 ]
 ```
 
