@@ -28,5 +28,16 @@ defmodule Dialyxir.FormatterTest do
         assert remaining =~ ~r/different_file.* no local return/
       end)
     end
+
+    test "can filter by regex" do
+      warning =
+        {:warn_return_no_exit, {'a/regex_file.ex', 17},
+         {:no_return, [:only_normal, :format_long, 1]}}
+
+      in_project(:ignore, fn ->
+        remaining = Formatter.format_and_filter([warning], Project, :short)
+        assert remaining == []
+      end)
+    end
   end
 end
