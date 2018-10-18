@@ -7,3 +7,4 @@ erl_crash.dump
 .elixir_ls
 src/dialyzer_parser.erl
 src/dialyzer_lexer.erl
+lib/example.ex

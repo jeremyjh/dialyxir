@@ -69,6 +69,11 @@ defmodule Dialyxir.Project do
   defp skip?({short_description, warning, line}, {_, warning, line, short_description}), do: true
   defp skip?({short_description, warning}, {_, warning, _, short_description}), do: true
   defp skip?({short_description}, {_, _, _, short_description}), do: true
+
+  defp skip?(%Regex{} = pattern, {_, _, _, short_description}) do
+    Regex.match?(pattern, short_description)
+  end
+
   defp skip?(_, _), do: false
 
   def filter_warning?({file, warning, line, short_description}) do
