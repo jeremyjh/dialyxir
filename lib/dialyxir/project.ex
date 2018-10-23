@@ -77,32 +77,28 @@ defmodule Dialyxir.Project do
   defp skip?(_, _), do: false
 
   def filter_warning?({file, warning, line, short_description}) do
-    case dialyzer_ignore_warnings() do
-      nil ->
-        false
+    ignore_file = dialyzer_ignore_warnings()
 
-      ignore_file ->
-        if String.ends_with?(ignore_file, ".exs") do
-          {ignore, _} =
-            ignore_file
-            |> File.read!()
-            |> Code.eval_string()
+    if legacy_ignore_warnings?() do
+      false
+    else
+      {ignore, _} =
+        ignore_file
+        |> File.read!()
+        |> Code.eval_string()
 
-          Enum.any?(ignore, &skip?(&1, {file, warning, line, short_description}))
-        else
-          false
-        end
+      Enum.any?(ignore, &skip?(&1, {file, warning, line, short_description}))
     end
   end
 
   def filter_warnings(output) do
-    case dialyzer_ignore_warnings() do
-      nil ->
-        output
+    ignore_file = dialyzer_ignore_warnings()
 
-      ignore_file ->
-        pattern = File.read!(ignore_file)
-        filter_warnings(output, pattern)
+    if legacy_ignore_warnings?() do
+      pattern = File.read!(ignore_file)
+      filter_warnings(output, pattern)
+    else
+      output
     end
   end
 
@@ -125,6 +121,17 @@ defmodule Dialyxir.Project do
     rescue
       _ ->
         output
+    end
+  end
+
+  @spec legacy_ignore_warnings?() :: boolean
+  defp legacy_ignore_warnings?() do
+    case dialyzer_ignore_warnings() do
+      nil ->
+        false
+
+      ignore_file ->
+        !String.ends_with?(ignore_file, ".exs")
     end
   end
 
