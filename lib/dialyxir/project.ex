@@ -79,7 +79,7 @@ defmodule Dialyxir.Project do
   def filter_warning?({file, warning, line, short_description}) do
     ignore_file = dialyzer_ignore_warnings()
 
-    if legacy_ignore_warnings?() do
+    if ignore_file == nil or legacy_ignore_warnings?() do
       false
     else
       {ignore, _} =
@@ -94,11 +94,11 @@ defmodule Dialyxir.Project do
   def filter_warnings(output) do
     ignore_file = dialyzer_ignore_warnings()
 
-    if legacy_ignore_warnings?() do
+    if ignore_file == nil or !legacy_ignore_warnings?() do
+      output
+    else
       pattern = File.read!(ignore_file)
       filter_warnings(output, pattern)
-    else
-      output
     end
   end
 
