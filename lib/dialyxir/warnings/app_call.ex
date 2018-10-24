@@ -7,9 +7,8 @@ defmodule Dialyxir.Warnings.AppCall do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([module, function, _arity, _culprit, _expected_type, _actual_type]) do
-    pretty_module = Erlex.pretty_print(module)
-    "Module or function to apply is not an atom: #{pretty_module}.#{function}."
+  def format_short([_module, function | _]) do
+    "Module or function to apply is not an atom in #{function}."
   end
 
   @impl Dialyxir.Warning

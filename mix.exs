@@ -6,6 +6,7 @@ defmodule Dialyxir.Mixfile do
       app: :dialyxir,
       version: "1.0.0-rc.4",
       elixir: ">= 1.6.0",
+      elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
       deps: deps(),
@@ -32,6 +33,9 @@ defmodule Dialyxir.Mixfile do
     Mix tasks to simplify use of Dialyzer in Elixir projects.
     """
   end
+
+  defp elixirc_paths(:examples), do: ["lib", "test/examples"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [

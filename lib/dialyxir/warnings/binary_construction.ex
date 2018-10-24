@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.BinaryConstruction do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Binary construction will fail."
+  def format_short([culprit | _]) do
+    "Binary construction with #{culprit} will fail."
   end
 
   @impl Dialyxir.Warning
