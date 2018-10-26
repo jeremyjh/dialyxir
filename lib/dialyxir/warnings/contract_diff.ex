@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.ContractDiff do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Type specification is not equal to the success typing."
+  def format_short([_module, function | _]) do
+    "Type specification is not equal to the success typing for #{function}."
   end
 
   @impl Dialyxir.Warning
