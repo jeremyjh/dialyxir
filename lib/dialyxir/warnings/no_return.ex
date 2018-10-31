@@ -15,7 +15,7 @@ defmodule Dialyxir.Warnings.NoReturn do
     name_string =
       case name do
         [] ->
-          "The created function"
+          "The created anonymous function"
 
         [function, arity] ->
           "Function #{function}/#{arity}"
