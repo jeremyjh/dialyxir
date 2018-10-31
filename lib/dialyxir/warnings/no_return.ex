@@ -15,7 +15,7 @@ defmodule Dialyxir.Warnings.NoReturn do
     name_string =
       case name do
         [] ->
-          "The created fun"
+          "The created function"
 
         [function, arity] ->
           "Function #{function}/#{arity}"
@@ -36,7 +36,7 @@ defmodule Dialyxir.Warnings.NoReturn do
           "has no local return."
       end
 
-    name_string <> " " <> type_string
+    "#{name_string} #{type_string}"
   end
 
   @impl Dialyxir.Warning
