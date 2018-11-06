@@ -8,44 +8,70 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "Call without opaqueness type mismatch."
+    "Function call without opaqueness type mismatch."
   end
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, args, expected_triples]) do
+    expected = form_expected_without_opaque(expected_triples)
     pretty_module = Erlex.pretty_print(module)
+    pretty_args = Erlex.pretty_print_args(args)
 
-    "The call #{pretty_module}.#{function}#{args} does not have #{
-      form_expected_without_opaque(expected_triples)
-    }."
+    """
+    Function call without opaqueness type mismatch.
+
+    Call does not have expected #{expected}.
+
+    #{pretty_module}.#{function}#{pretty_args}
+    """
   end
 
   # We know which positions N are to blame;
   # the list of triples will never be empty.
   defp form_expected_without_opaque([{position, type, type_string}]) do
+    pretty_type = Erlex.pretty_print_type(type_string)
     form_position_string = Dialyxir.WarningHelpers.form_position_string([position])
 
-    message =
-      if :erl_types.t_is_opaque(type) do
-        "an opaque term of type #{type_string} in "
-      else
-        "a term of type #{type_string} (with opaque subterms) in "
-      end
-
-    message <> form_position_string
+    if :erl_types.t_is_opaque(type) do
+      "opaque term of type #{pretty_type} in the #{form_position_string} position"
+    else
+      "term of type #{pretty_type} (with opaque subterms) in the #{form_position_string} position"
+    end
   end
 
   # TODO: can do much better here
   defp form_expected_without_opaque(expected_triples) do
     {arg_positions, _typess, _type_strings} = :lists.unzip3(expected_triples)
     form_position_string = Dialyxir.WarningHelpers.form_position_string(arg_positions)
-    "opaque terms in #{form_position_string}"
+    "opaque terms in the #{form_position_string} position"
   end
 
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    Dialyxir.Warning.default_explain()
+    """
+    Function call without opaqueness type mismatch.
+
+    Example:
+
+    defmodule OpaqueStruct do
+      defstruct [:opaque]
+
+      @opaque t :: %OpaqueStruct{}
+    end
+
+    defmodule Example do
+      @spec error(OpaqueStruct.t()) :: :error
+      def error(struct = %OpaqueStruct{}) do
+        do_error(struct)
+      end
+
+      @spec do_error(OpaqueStruct.t()) :: :error
+      defp do_error(_) do
+        :error
+      end
+    end
+    """
   end
 end
