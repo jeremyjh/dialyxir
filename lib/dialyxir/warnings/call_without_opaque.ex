@@ -20,8 +20,7 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
     """
     Function call without opaqueness type mismatch.
 
-    Call does not have the expected:
-    #{form_expected_without_opaque(expected_triples)}.
+    Call does not have expected #{form_expected_without_opaque(expected_triples)}.
 
     #{pretty_module}.#{function}#{pretty_args}
     """
