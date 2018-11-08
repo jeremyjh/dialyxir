@@ -7,9 +7,10 @@ defmodule Dialyxir.Project do
     erlang_apps = [:erts, :kernel, :stdlib, :crypto]
 
     core_plts =
-      case exclude_core do
-        true -> []
-        false -> [{elixir_plt(), elixir_apps}, {erlang_plt(), erlang_apps}]
+      if exclude_core do
+        []
+      else
+        [{elixir_plt(), elixir_apps}, {erlang_plt(), erlang_apps}]
       end
 
     if include_project do
@@ -77,35 +78,40 @@ defmodule Dialyxir.Project do
   defp skip?(_, _), do: false
 
   def filter_warning?({file, warning, line, short_description}) do
-    ignore_file = dialyzer_ignore_warnings()
+    cond do
+      legacy_ignore_warnings?() ->
+        false
 
-    if ignore_file == nil or legacy_ignore_warnings?() do
-      false
-    else
-      {ignore, _} =
-        ignore_file
-        |> File.read!()
-        |> Code.eval_string()
+      dialyzer_ignore_warnings() == nil && !File.exists?(default_ignore_warnings()) ->
+        false
 
-      Enum.any?(ignore, &skip?(&1, {file, warning, line, short_description}))
+      true ->
+        ignore_file = dialyzer_ignore_warnings() || default_ignore_warnings()
+
+        {ignore, _} =
+          ignore_file
+          |> File.read!()
+          |> Code.eval_string()
+
+        Enum.any?(ignore, &skip?(&1, {file, warning, line, short_description}))
     end
   end
 
-  def filter_warnings(output) do
+  def filter_legacy_warnings(output) do
     ignore_file = dialyzer_ignore_warnings()
 
-    if ignore_file == nil or !legacy_ignore_warnings?() do
-      output
-    else
+    if legacy_ignore_warnings?() do
       pattern = File.read!(ignore_file)
-      filter_warnings(output, pattern)
+      filter_legacy_warnings(output, pattern)
+    else
+      output
     end
   end
 
-  def filter_warnings(output, nil), do: output
-  def filter_warnings(output, ""), do: output
+  def filter_legacy_warnings(output, nil), do: output
+  def filter_legacy_warnings(output, ""), do: output
 
-  def filter_warnings(output, pattern) do
+  def filter_legacy_warnings(output, pattern) do
     lines = Enum.map(output, &String.trim_trailing/1)
 
     patterns =
@@ -133,6 +139,10 @@ defmodule Dialyxir.Project do
       ignore_file ->
         !String.ends_with?(ignore_file, ".exs")
     end
+  end
+
+  def default_ignore_warnings() do
+    ".dialyzer_ignore.exs"
   end
 
   def dialyzer_ignore_warnings() do

@@ -160,6 +160,14 @@ defmodule Mix.Tasks.Dialyzer do
           check_plt(force_check?)
         end
 
+      unless Dialyxir.Project.dialyzer_ignore_warnings() do
+        info("""
+        No :ignore_warnings opt specified in mix.exs. Using default: #{
+          Dialyxir.Project.default_ignore_warnings()
+        }
+        """)
+      end
+
       unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
       info("No mix project found - checking core PLTs...")
