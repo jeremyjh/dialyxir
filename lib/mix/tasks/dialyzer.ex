@@ -160,12 +160,28 @@ defmodule Mix.Tasks.Dialyzer do
           check_plt(force_check?)
         end
 
-      unless Dialyxir.Project.dialyzer_ignore_warnings() do
-        info("""
-        No :ignore_warnings opt specified in mix.exs. Using default: #{
-          Dialyxir.Project.default_ignore_warnings()
-        }
-        """)
+      default = Dialyxir.Project.default_ignore_warnings()
+      ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
+      cond do
+        !ignore_warnings && File.exists?(default) ->
+          info("""
+          No :ignore_warnings opt specified in mix.exs. Using default: #{default}.
+          """)
+
+        ignore_warnings && File.exists?(ignore_warnings) ->
+          info("""
+          ignore_warnings: #{ignore_warnings}
+          """)
+
+        ignore_warnings ->
+          info("""
+          :ignore_warnings opt specified in mix.exs: #{ignore_warnings}, but file does not exist.
+          """)
+
+        true ->
+          info("""
+          No :ignore_warnings opt specified in mix.exs and default does not exist.
+          """)
       end
 
       unless opts[:plt], do: run_dialyzer(opts, dargs)
