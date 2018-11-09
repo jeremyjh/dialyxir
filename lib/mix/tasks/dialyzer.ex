@@ -162,6 +162,7 @@ defmodule Mix.Tasks.Dialyzer do
 
       default = Dialyxir.Project.default_ignore_warnings()
       ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
+
       cond do
         !ignore_warnings && File.exists?(default) ->
           info("""
