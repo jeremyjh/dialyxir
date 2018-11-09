@@ -187,7 +187,7 @@ defmodule Dialyxir.Formatter do
         |> format_warning(:dialyzer)
         |> List.wrap()
 
-      Enum.empty?(filterer.filter_warnings(formatted_warnings))
+      Enum.empty?(filterer.filter_legacy_warnings(formatted_warnings))
     end)
   end
 end

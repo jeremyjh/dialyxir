@@ -143,7 +143,7 @@ defmodule Dialyxir.ProjectTest do
       Guard test is_binary(_@4::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
       """
 
-      lines = Project.filter_warnings(output_list, pattern)
+      lines = Project.filter_legacy_warnings(output_list, pattern)
       assert lines == ["project.ex:9 This should still be here"]
     end)
   end
