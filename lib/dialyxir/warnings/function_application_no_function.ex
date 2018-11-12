@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Function application arity mismatch."
+  def format_short([_, _, arity]) do
+    "Function application will fail since anonymous function has arity of #{arity}."
   end
 
   @impl Dialyxir.Warning

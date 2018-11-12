@@ -7,11 +7,8 @@ defmodule Dialyxir.Warnings.ExtraRange do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([module, function, arity, _extra_ranges, _signature_range]) do
-    pretty_module = Erlex.pretty_print(module)
-
-    "@spec for #{pretty_module}.#{function}/#{arity} has more types " <>
-      "than returned by function."
+  def format_short([_module, function | _]) do
+    "@spec for #{function} has more types " <> "than returned by function."
   end
 
   @impl Dialyxir.Warning

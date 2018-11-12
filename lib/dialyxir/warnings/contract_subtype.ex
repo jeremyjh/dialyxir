@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.ContractSubtype do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Type specification is a subtype of the success typing."
+  def format_short([_module, function | _]) do
+    "Type specification for #{function} is a subtype of the success typing."
   end
 
   @impl Dialyxir.Warning
@@ -35,6 +35,7 @@ defmodule Dialyxir.Warnings.ContractSubtype do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
+    #TODO: could not create warning with this example (and --overspecs)
     """
     The type in the @spec does not completely cover the types returned
     by function.
