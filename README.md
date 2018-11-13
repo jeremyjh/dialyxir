@@ -22,6 +22,8 @@ If you are planning to use Dialyzer with an application built with the [Phoenix 
 
 ## Installation
 
+### Project installation
+
 Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir).
 
 You can either add it as a dependency in your mix.exs, or install it globally as an archive task.
@@ -38,23 +40,28 @@ end
 mix do deps.get, deps.compile
 ```
 
+### Global installation
+
 To install globally as an archive:
 
 ```console
 git clone https://github.com/asummers/erlex
 cd erlex
-mix do compile, archive.build, archive.install
+mix do deps.get, compile, archive.build, archive.install
 cd -
 git clone https://github.com/jeremyjh/dialyxir
 cd dialyxir
-MIX_ENV=prod mix do compile, archive.build, archive.install
+MIX_ENV=prod mix do deps.get, compile, archive.build, archive.install
 ```
 or, in Windows:
 ```console
 git clone https://github.com/jeremyjh/dialyxir
 cd dialyxir
-set "MIX_ENV=prod" && mix do compile, archive.build, archive.install
+set "MIX_ENV=prod" && mix do deps.get, compile, archive.build, archive.install
 ```
+
+Do note however that this install may fail if you have a previous version of dialyxir installed globally.
+If this is the case, you need to run `mix archive.uninstall dialyxir-**put_version_here**` before using the above commands.
 
 ## Usage
 
