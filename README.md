@@ -22,6 +22,14 @@ If you are planning to use Dialyzer with an application built with the [Phoenix 
 
 ## Installation
 
+Before installing dialyxir make sure you have the correct version of elixir installed.
+You should have an elixir version with the otp bundle inside like `X-otp-Y`, where `X` is an elixir version, like 1.7.3 and Y an erlang version, like 21.
+For example, the following install command with `asdf` would install a compatible version with dialyxir:
+
+- `asdf install elixir 1.7.3-otp-21`
+
+However the command `asdf install elixir 1.7.3` would install an incompatible version, which would result in several warnings.
+
 ### Project installation
 
 Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir).
@@ -62,6 +70,9 @@ set "MIX_ENV=prod" && mix do deps.get, compile, archive.build, archive.install
 
 Do note however that this install may fail if you have a previous version of dialyxir installed globally.
 If this is the case, you need to run `mix archive.uninstall dialyxir-**put_version_here**` before using the above commands.
+
+**Warning**: If you install dialyxir globally make sure none of your projects has it as a local dependency. 
+If they do the different versions will collide and you won't be able to make it work.
 
 ## Usage
 
