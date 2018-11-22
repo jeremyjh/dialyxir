@@ -3,11 +3,13 @@ defmodule Dialyxir.Dialyzer do
   alias String.Chars
   alias Dialyxir.Formatter
   alias Dialyxir.Project
+  alias Dialyxir.FilterMap
 
   defmodule Runner do
     def run(args, filterer) do
       try do
-        {split, args} = Keyword.split(args, [:raw, :format])
+        split_args = [:raw, :format, :list_unused_filters, :halt_exit_status]
+        {split, args} = Keyword.split(args, split_args)
 
         formatter =
           cond do
@@ -39,8 +41,19 @@ defmodule Dialyxir.Dialyzer do
         {duration_ms, result} = :timer.tc(&:dialyzer.run/1, [args])
 
         formatted_time_elapsed = Formatter.formatted_time(duration_ms)
-        formatted_warnings = Formatter.format_and_filter(result, filterer, formatter)
-        {:ok, {formatted_time_elapsed, formatted_warnings}}
+
+        filter_map_args = FilterMap.to_args(split)
+
+        case Formatter.format_and_filter(result, filterer, filter_map_args, formatter) do
+          {:ok, formatted_warnings, :no_unused_filters} ->
+            {:ok, {formatted_time_elapsed, formatted_warnings, ""}}
+
+          {:warn, formatted_warnings, {:unused_filters_present, formatted_unnecessary_skips}} ->
+            {:ok, {formatted_time_elapsed, formatted_warnings, formatted_unnecessary_skips}}
+
+          {:error, _formatted_warnings, {:unused_filters_present, formatted_unnecessary_skips}} ->
+            {:error, {"unused filters present", formatted_unnecessary_skips}}
+        end
       catch
         {:dialyzer_error, msg} ->
           {:error, ":dialyzer.run error: " <> Chars.to_string(msg)}
@@ -56,12 +69,23 @@ defmodule Dialyxir.Dialyzer do
 
   def dialyze(args, runner \\ Runner, filterer \\ Project) do
     case runner.run(args, filterer) do
-      {:ok, {time, []}} ->
-        {:ok, @success_return_code, [time, @success_msg]}
+      {:ok, {time, [], formatted_unnecessary_skips}} ->
+        {:ok, @success_return_code, [time, formatted_unnecessary_skips, @success_msg]}
 
-      {:ok, {time, result}} ->
+      {:ok, {time, result, formatted_unnecessary_skips}} ->
         warnings = Enum.map(result, &color(&1, :red))
-        {:warn, @warning_return_code, [time] ++ warnings ++ [@warnings_msg]}
+
+        {:warn, @warning_return_code,
+         [time] ++ warnings ++ [formatted_unnecessary_skips, @warnings_msg]}
+
+      {:warn, {time, result, formatted_unnecessary_skips}} ->
+        warnings = Enum.map(result, &color(&1, :red))
+
+        {:warn, @warning_return_code,
+         [time] ++ warnings ++ [formatted_unnecessary_skips, @warnings_msg]}
+
+      {:error, {msg, formatted_unnecessary_skips}} ->
+        {:error, @error_return_code, [color(formatted_unnecessary_skips, :red), color(msg, :red)]}
 
       {:error, msg} ->
         {:error, @error_return_code, [color(msg, :red)]}

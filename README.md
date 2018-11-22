@@ -237,3 +237,19 @@ applied to the *short-description* (`mix dialyzer --format short`):
 ```
 
 `:ignore_warnings` works as you may expect with `--halt-exit-status` - by resetting the exit status to 0 if all warnings are filtered.
+
+#### List unused Filters
+
+As filters tend to become obsolete (either because a discrepancy was fixed, or because the location
+for which a filter is needed changes), listing unused filters might be useful. This can be done by
+setting the `:list_unused_filters` option to `true` in `mix.exs`. For example:
+
+```elixir
+dialyzer: [
+    ignore_warnings: "ignore_test.exs",
+    list_unused_filters: true
+]
+```
+
+This option can also be set on the command line with `--list-unused-filters`. When used with
+`--halt-exit-status`, this option will result in an error status code.
