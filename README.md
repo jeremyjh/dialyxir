@@ -38,24 +38,6 @@ end
 mix do deps.get, deps.compile
 ```
 
-To install globally as an archive:
-
-```console
-git clone https://github.com/asummers/erlex
-cd erlex
-mix do compile, archive.build, archive.install
-cd -
-git clone https://github.com/jeremyjh/dialyxir
-cd dialyxir
-MIX_ENV=prod mix do compile, archive.build, archive.install
-```
-or, in Windows:
-```console
-git clone https://github.com/jeremyjh/dialyxir
-cd dialyxir
-set "MIX_ENV=prod" && mix do compile, archive.build, archive.install
-```
-
 ## Usage
 
 Use dialyxir from the directory of the mix project you want to analyze; a PLT file will be created or updated if required and the project will be automatically compiled.
