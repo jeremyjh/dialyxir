@@ -2,7 +2,7 @@ defmodule Dialyxir.ProjectTest do
   alias Dialyxir.Project
 
   use ExUnit.Case
-  import ExUnit.CaptureIO, only: [capture_io: 1]
+  import ExUnit.CaptureIO, only: [capture_io: 1, capture_io: 2]
 
   defp in_project(app, f) when is_atom(app) do
     Mix.Project.in_project(app, "test/fixtures/#{Atom.to_string(app)}", fn _ -> f.() end)
@@ -145,6 +145,13 @@ defmodule Dialyxir.ProjectTest do
 
       lines = Project.filter_legacy_warnings(output_list, pattern)
       assert lines == ["project.ex:9 This should still be here"]
+    end)
+  end
+
+  test "Project with non-existent dependency" do
+    in_project(:nonexistent_deps, fn ->
+      out = capture_io(:stderr, &Project.cons_apps/0)
+      assert Regex.match?(~r/Error loading nonexistent, dependency list may be incomplete/, out)
     end)
   end
 end

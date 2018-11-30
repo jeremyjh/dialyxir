@@ -277,7 +277,7 @@ defmodule Dialyxir.Project do
 
       {:error, err} ->
         nil
-        error("Error loading #{app}, dependency list may be incomplete.\n #{err}")
+        error("Error loading #{app}, dependency list may be incomplete.\n #{inspect(err)}")
     end
 
     case Application.spec(app, :applications) do
