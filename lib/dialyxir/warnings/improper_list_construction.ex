@@ -7,9 +7,7 @@ defmodule Dialyxir.Warnings.ImproperListConstruction do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Cons will produce an improper list."
-  end
+  def format_short(args), do: format_long(args)
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()

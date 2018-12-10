@@ -35,7 +35,7 @@ defmodule Dialyxir.Warnings.ContractSubtype do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    #TODO: could not create warning with this example (and --overspecs)
+    # TODO: could not create warning with this example (and --overspecs)
     """
     The type in the @spec does not completely cover the types returned
     by function.

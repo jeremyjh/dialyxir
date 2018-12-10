@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.MissingRange do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Type specification is missing types returned by function."
+  def format_short([_module, function | _]) do
+    "Type specification is missing types returned by #{function}."
   end
 
   @impl Dialyxir.Warning
