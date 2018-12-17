@@ -86,14 +86,13 @@ defmodule Dialyxir.WarningHelpers do
 
   def unqualify_module(name) when is_binary(name) do
     case String.split(name, ".") do
-      [only] -> only
+      [only] ->
+        only
+
       multiple ->
         multiple
-        |> Enum.reverse()
-        |> Enum.take(2)
-        |> Enum.reverse()
+        |> Enum.take(-2)
         |> Enum.join(".")
     end
   end
-
 end
