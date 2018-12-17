@@ -51,6 +51,9 @@ defmodule Dialyxir.Dialyzer do
           {:warn, formatted_warnings, {:unused_filters_present, formatted_unnecessary_skips}} ->
             {:ok, {formatted_time_elapsed, formatted_warnings, formatted_unnecessary_skips}}
 
+          {:warn, formatted_warnings, :no_unused_filters} ->
+            {:ok, {formatted_time_elapsed, formatted_warnings, ""}}
+
           {:error, _formatted_warnings, {:unused_filters_present, formatted_unnecessary_skips}} ->
             {:error, {"unused filters present", formatted_unnecessary_skips}}
         end
