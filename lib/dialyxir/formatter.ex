@@ -16,7 +16,9 @@ defmodule Dialyxir.Formatter do
   end
 
   def format_and_filter(warnings, _, _filter_map_args, :raw) do
-    Enum.map(warnings, &inspect/1)
+    warnings
+    |> Enum.map(&inspect/1)
+    |> result()
   end
 
   def format_and_filter(warnings, filterer, filter_map_args, :dialyxir) do
@@ -40,6 +42,53 @@ defmodule Dialyxir.Formatter do
     show_count_skipped(warnings, formatted_warnings, filter_map)
     formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
 
+    result(formatted_warnings, filter_map, formatted_unnecessary_skips)
+  end
+
+  def format_and_filter(warnings, filterer, filter_map_args, :dialyzer) do
+    filter_map = filterer.filter_map(filter_map_args)
+
+    {filtered_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
+
+    formatted_warnings =
+      filtered_warnings
+      |> filter_legacy_warnings(filterer)
+      |> Enum.map(fn warning ->
+        warning
+        |> format_warning(:dialyzer)
+        |> String.replace_trailing("\n", "")
+      end)
+
+    show_count_skipped(warnings, filtered_warnings, filter_map)
+    formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
+
+    result(formatted_warnings, filter_map, formatted_unnecessary_skips)
+  end
+
+  def format_and_filter(warnings, filterer, filter_map_args, :short) do
+    filter_map = filterer.filter_map(filter_map_args)
+
+    {formatted_warnings, _skip_map} = filter_warnings(warnings, filterer, filter_map)
+
+    formatted_warnings =
+      formatted_warnings
+      |> filter_legacy_warnings(filterer)
+      |> Enum.map(&format_warning(&1, :short))
+
+    formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
+
+    result(formatted_warnings, filter_map, formatted_unnecessary_skips)
+  end
+
+  defp result(warnings) do
+    if Enum.empty?(warnings) do
+      {:ok, [], :no_unused_filters}
+    else
+      {:warn, warnings, :no_unused_filters}
+    end
+  end
+
+  defp result(formatted_warnings, filter_map, formatted_unnecessary_skips) do
     cond do
       FilterMap.unused_filters?(filter_map) && filter_map.unused_filters_as_errors? ->
         {:error, formatted_warnings, {:unused_filters_present, formatted_unnecessary_skips}}
@@ -50,35 +99,6 @@ defmodule Dialyxir.Formatter do
       true ->
         {:ok, formatted_warnings, :no_unused_filters}
     end
-  end
-
-  def format_and_filter(warnings, filterer, filter_map_args, :dialyzer) do
-    filter_map = filterer.filter_map(filter_map_args)
-
-    {filtered_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
-
-    filtered_warnings =
-      filtered_warnings
-      |> filter_legacy_warnings(filterer)
-      |> Enum.map(fn warning ->
-        warning
-        |> format_warning(:dialyzer)
-        |> String.replace_trailing("\n", "")
-      end)
-
-    show_count_skipped(warnings, filtered_warnings, filter_map)
-
-    filtered_warnings
-  end
-
-  def format_and_filter(warnings, filterer, filter_map_args, :short) do
-    filter_map = filterer.filter_map(filter_map_args)
-
-    {formatted_warnings, _skip_map} = filter_warnings(warnings, filterer, filter_map)
-
-    formatted_warnings
-    |> filter_legacy_warnings(filterer)
-    |> Enum.map(&format_warning(&1, :short))
   end
 
   defp format_warning(warning, :dialyzer) do

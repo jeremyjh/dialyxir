@@ -14,7 +14,9 @@ defmodule Dialyxir.FormatterTest do
         {:warn_return_no_exit, {'a/file.ex', 17}, {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
-        remaining = Formatter.format_and_filter([warning], Project, [], :short)
+        {:warn, remaining, _unused_filters_present} =
+          Formatter.format_and_filter([warning], Project, [], :short)
+
         assert remaining == []
       end)
     end
@@ -25,7 +27,7 @@ defmodule Dialyxir.FormatterTest do
          {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
-        [remaining] = Formatter.format_and_filter([warning], Project, [], :short)
+        {:warn, [remaining], _} = Formatter.format_and_filter([warning], Project, [], :short)
         assert remaining =~ ~r/different_file.* no local return/
       end)
     end
@@ -36,7 +38,9 @@ defmodule Dialyxir.FormatterTest do
          {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
-        remaining = Formatter.format_and_filter([warning], Project, [], :short)
+        {:warn, remaining, _unused_filters_present} =
+          Formatter.format_and_filter([warning], Project, [], :short)
+
         assert remaining == []
       end)
     end
