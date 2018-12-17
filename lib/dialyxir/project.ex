@@ -2,6 +2,8 @@ defmodule Dialyxir.Project do
   @moduledoc false
   import Dialyxir.Output, only: [info: 1, error: 1]
 
+  alias Dialyxir.FilterMap
+
   def plts_list(deps, include_project \\ true, exclude_core \\ false) do
     elixir_apps = [:elixir]
     erlang_apps = [:erts, :kernel, :stdlib, :crypto]
@@ -77,23 +79,27 @@ defmodule Dialyxir.Project do
 
   defp skip?(_, _), do: false
 
-  def filter_warning?({file, warning, line, short_description}) do
+  def filter_warning?({file, warning, line, short_description}, filter_map = %FilterMap{}) do
+    {matching_filters, _non_matching_filters} =
+      filter_map
+      |> FilterMap.filters()
+      |> Enum.split_with(&skip?(&1, {file, warning, line, short_description}))
+
+    {not Enum.empty?(matching_filters), matching_filters}
+  end
+
+  def filter_map(args) do
     cond do
       legacy_ignore_warnings?() ->
-        false
+        %FilterMap{}
 
       dialyzer_ignore_warnings() == nil && !File.exists?(default_ignore_warnings()) ->
-        false
+        %FilterMap{}
 
       true ->
         ignore_file = dialyzer_ignore_warnings() || default_ignore_warnings()
 
-        {ignore, _} =
-          ignore_file
-          |> File.read!()
-          |> Code.eval_string()
-
-        Enum.any?(ignore, &skip?(&1, {file, warning, line, short_description}))
+        FilterMap.from_file(ignore_file, list_unused_filters?(args), halt_exit_status?(args))
     end
   end
 
@@ -147,6 +153,17 @@ defmodule Dialyxir.Project do
 
   def dialyzer_ignore_warnings() do
     dialyzer_config()[:ignore_warnings]
+  end
+
+  defp list_unused_filters?(args) do
+    case Keyword.fetch(args, :list_unused_filters) do
+      :error -> dialyzer_config()[:list_unused_filters]
+      {:ok, list_unused_filters} -> list_unused_filters
+    end
+  end
+
+  defp halt_exit_status?(args) do
+    args[:halt_exit_status]
   end
 
   def elixir_plt() do

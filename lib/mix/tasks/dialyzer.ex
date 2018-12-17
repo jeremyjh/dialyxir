@@ -13,6 +13,7 @@ defmodule Mix.Tasks.Dialyzer do
     * `--force_check`      - force PLT check also if lock file is unchanged.
        useful when dealing with local deps.
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
+    * `--list-unused-filters`      - list unused ignore filters
       useful for CI. do not use with `mix do`.
     * `--plt`              - only build the required plt(s) and exit.
     *  `--format short`    - format the warnings in a compact format.
@@ -134,6 +135,7 @@ defmodule Mix.Tasks.Dialyzer do
     no_check: :boolean,
     force_check: :boolean,
     halt_exit_status: :boolean,
+    list_unused_filters: :boolean,
     plt: :boolean,
     quiet: :boolean,
     raw: :boolean,
@@ -248,7 +250,9 @@ defmodule Mix.Tasks.Dialyzer do
       {:files_rec, Project.dialyzer_paths()},
       {:warnings, dialyzer_warnings(dargs)},
       {:format, opts[:format]},
-      {:raw, opts[:raw]}
+      {:raw, opts[:raw]},
+      {:list_unused_filters, opts[:list_unused_filters]},
+      {:halt_exit_status, opts[:halt_exit_status]}
     ]
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
