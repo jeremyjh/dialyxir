@@ -17,6 +17,9 @@ script:
   - OUTPUT_TESTS=true mix test
   - mix dialyzer --list-unused-filters
   - mix dialyzer --unused-filters-as-errors
+  - mix dialyzer --format short
+  - mix dialyzer --format raw
+  - mix dialyzer --format dialyzer
 branches:
   except:
     - /^[0-9]\.[0-9]/
