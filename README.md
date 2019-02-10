@@ -71,6 +71,51 @@ mix dialyzer.explain unmatched_return
 
 If invoked without arguments, `mix dialyzer.explain` will list all the known warnings.
 
+## Continuous Integration
+
+To use Dialyzer in CI, you must be aware of several things:
+1) Building the PLT file may take a while if a project has many dependencies
+2) The PLT should be cached using the CI caching system
+3) The PLT will need to be rebuilt whenever adding a new Erlang or Elixir version to build matrix
+
+Using Travis, this would look like:
+
+`.travis.yml`
+```markdown
+language: elixir
+
+elixir:
+  - 1.8
+
+otp_release:
+  - 21.0
+
+script:
+  - mix dialyzer --halt-exit-status
+
+cache:
+  directories:
+    - priv/plts
+```
+
+`mix.exs`
+```elixir
+def project do
+  [
+    ...
+    dialyzer: [
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+    ]
+  ]
+end
+```
+
+`.gitignore`
+```
+/priv/plts/*.plt
+/priv/plts/*.plt.hash
+```
+
 ## With Explaining Stuff
 
 [Dialyzer](http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html) is a static analysis tool for Erlang and other languages that compile to BEAM bytecode for the Erlang VM. It can analyze the BEAM files and provide warnings about problems in your code including type mismatches and other issues that are commonly detected by static language compilers. The analysis can be improved by inclusion of type hints (called [specs](https://hexdocs.pm/elixir/typespecs.html)) but it can be useful even without those. For more information I highly recommend the [Success Typings](http://user.it.uu.se/~kostis/Papers/succ_types.pdf) paper that describes the theory behind the tool.
@@ -213,7 +258,7 @@ done (warnings were emitted)
 
 #### Elixir Term Format
 
-Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following, and can match either tuple patterns or an arbitrary Regex 
+Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following, and can match either tuple patterns or an arbitrary Regex
 applied to the *short-description* (`mix dialyzer --format short`):
 
 ```elixir
