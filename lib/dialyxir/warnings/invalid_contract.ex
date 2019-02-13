@@ -9,7 +9,7 @@ defmodule Dialyxir.Warnings.InvalidContract do
   @spec format_short([String.t()]) :: String.t()
   def format_short([module, function, arity, _signature]) do
     pretty_module = Erlex.pretty_print(module)
-    "Invalid type specification for function #{pretty_module}.#{function}/#{arity}."
+    "The @spec for the function #{pretty_module}.#{function}/#{arity} does not match the success typing of the function."
   end
 
   @impl Dialyxir.Warning
@@ -19,7 +19,7 @@ defmodule Dialyxir.Warnings.InvalidContract do
     pretty_signature = Erlex.pretty_print_contract(signature)
 
     """
-    Invalid type specification for function.
+    The @spec for the function does not match the success typing of the function.
 
     Function:
     #{pretty_module}.#{function}/#{arity}
@@ -39,11 +39,17 @@ defmodule Dialyxir.Warnings.InvalidContract do
     Example:
 
     defmodule Example do
-      @spec ok(:error) :: :ok
-      def ok(:ok) do
+      @spec process(:error) :: :ok
+      def process(:ok) do
         :ok
       end
     end
+
+    This does not match because the success typing (what actually happens) is
+    that the function returns `:ok`, if and only if the function receives `:ok`,
+    but the @spec of the function says that it receives `:error` and returns
+    `:ok`, but actually when the function receives `:error` it throws a
+    `FunctionClauseError`
     """
   end
 end
