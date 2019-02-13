@@ -45,11 +45,8 @@ defmodule Dialyxir.Warnings.InvalidContract do
       end
     end
 
-    This does not match because the success typing (what actually happens) is
-    that the function returns `:ok`, if and only if the function receives `:ok`,
-    but the @spec of the function says that it receives `:error` and returns
-    `:ok`, but actually when the function receives `:error` it throws a
-    `FunctionClauseError`
+    The @spec in this case claims that the function accepts a parameter :error
+    but the function head only accepts :ok, resulting in the mismatch.
     """
   end
 end
