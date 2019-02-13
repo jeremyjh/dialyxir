@@ -54,8 +54,7 @@ defmodule Dialyxir.WarningHelpers do
       breaks the contract
       #{pretty_contract}
 
-      in argument
-      #{position_string}
+      in #{position_string} argument
       """
     end
   end
