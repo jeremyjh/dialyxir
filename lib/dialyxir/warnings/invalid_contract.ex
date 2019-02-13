@@ -9,7 +9,9 @@ defmodule Dialyxir.Warnings.InvalidContract do
   @spec format_short([String.t()]) :: String.t()
   def format_short([module, function, arity, _signature]) do
     pretty_module = Erlex.pretty_print(module)
-    "The @spec for the function #{pretty_module}.#{function}/#{arity} does not match the success typing of the function."
+
+    "The @spec for the function #{pretty_module}.#{function}/#{arity} " <>
+      "does not match the success typing of the function."
   end
 
   @impl Dialyxir.Warning
