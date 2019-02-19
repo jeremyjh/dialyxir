@@ -153,11 +153,12 @@ The example below changes the default to include only direct OTP dependencies, a
 
 ```elixir
 def project do
- [ app: :my_app,
-   version: "0.0.1",
-   deps: deps,
-   dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
- ]
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
+  ]
 end
 ```
 
@@ -179,11 +180,12 @@ Dialyzer supports a number of warning flags used to enable or disable certain ki
 
 ```elixir
 def project do
- [ app: :my_app,
-   version: "0.0.1",
-   deps: deps,
-   dialyzer: [ flags: ["-Wunmatched_returns", :error_handling, :race_conditions, :underspecs]]
- ]
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :race_conditions, :underspecs]]
+  ]
 end
 ```
 
@@ -193,13 +195,16 @@ By default only the ebin in the `_build` directory for the current mix environme
 
 ```elixir
 def project do
- [ app: :my_app,
-   version: "0.0.1",
-   deps: deps,
-   dialyzer: [plt_add_apps: [:mnesia],
-             flags: [:unmatched_returns,:error_handling,:race_conditions, :no_opaque],
-             paths: ["_build/dev/lib/my_app/ebin", "_build/dev/lib/foo/ebin"]]
- ]
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [
+      plt_add_apps: [:mnesia],
+      flags: [:unmatched_returns, :error_handling, :race_conditions, :no_opaque],
+      paths: ["_build/dev/lib/my_app/ebin", "_build/dev/lib/foo/ebin"]
+    ]
+  ]
 end
 ```
 
@@ -213,11 +218,12 @@ If you want to ignore well-known warnings, you can specify a file path in `:igno
 
 ```elixir
 def project do
- [ app: :my_app,
-   version: "0.0.1",
-   deps: deps,
-   dialyzer: [ignore_warnings: "dialyzer.ignore-warnings"]
- ]
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [ignore_warnings: "dialyzer.ignore-warnings"]
+  ]
 end
 ```
 
@@ -291,8 +297,8 @@ setting the `:list_unused_filters` option to `true` in `mix.exs`. For example:
 
 ```elixir
 dialyzer: [
-    ignore_warnings: "ignore_test.exs",
-    list_unused_filters: true
+  ignore_warnings: "ignore_test.exs",
+  list_unused_filters: true
 ]
 ```
 

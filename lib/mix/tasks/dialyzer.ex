@@ -39,11 +39,12 @@ defmodule Mix.Tasks.Dialyzer do
 
   ```elixir
   def project do
-  [ app: :my_app,
-  version: "0.0.1",
-  deps: deps,
-  dialyzer: [ flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
-  ]
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
+    ]
   end
   ```
 
@@ -60,10 +61,11 @@ defmodule Mix.Tasks.Dialyzer do
 
   ```
   def project do
-    [ app: :my_app,
-    version: "0.0.1",
-    deps: deps,
-    dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
     ]
   end
   ```
