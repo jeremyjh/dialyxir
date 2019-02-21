@@ -73,6 +73,9 @@ defmodule Mix.Tasks.Dialyzer do
   * `dialyzer: :plt_add_apps` - applications to include
   *in addition* to the core applications and project dependencies.
 
+  * `dialyzer: :plt_ignore_apps` - applications to ignore from the list of core
+  applications and dependencies.
+
   * `dialyzer: :plt_apps` - a list of applications to include that will replace the default,
   include all the apps you need e.g.
 
