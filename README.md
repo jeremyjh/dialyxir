@@ -140,6 +140,8 @@ The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`.
 
 If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT. Using this option will mean dependencies are not added automatically (see below). If you want to just add an application to the list of defaults and dependencies you can use the `:plt_add_apps` key.
 
+If you want to ignore a specific dependency, you can specify it in the `:plt_ignore_apps` key.
+
 #### Dependencies
 
 OTP application dependencies are (transitively) added to your PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
@@ -149,7 +151,7 @@ OTP application dependencies are (transitively) added to your PLT by default. Th
   * :app_tree - Transitive OTP application dependencies e.g. `mix app.tree` (default)
 
 
-The example below changes the default to include only direct OTP dependencies, and adds another specific dependency to the list. This can be helpful if a large dependency tree is creating memory issues and only some of the transitive dependencies are required for analysis.
+The example below changes the default to include only direct OTP dependencies, adds another specific dependency, and removes a dependency from the list. This can be helpful if a large dependency tree is creating memory issues and only some of the transitive dependencies are required for analysis.
 
 ```elixir
 def project do
@@ -157,7 +159,11 @@ def project do
     app: :my_app,
     version: "0.0.1",
     deps: deps,
-    dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
+    dialyzer: [
+      plt_add_deps: :apps_direct,
+      plt_add_apps: [:wx],
+      plt_ignore_apps: [:mnesia]
+    ]
   ]
 end
 ```
