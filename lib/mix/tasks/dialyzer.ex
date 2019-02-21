@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Dialyzer do
 
     * `--no-compile`       - do not compile even if needed.
     * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
-    * `--force_check`      - force PLT check also if lock file is unchanged.
+    * `--force-check`      - force PLT check also if lock file is unchanged.
        useful when dealing with local deps.
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
     * `--list-unused-filters`      - list unused ignore filters
@@ -39,11 +39,12 @@ defmodule Mix.Tasks.Dialyzer do
 
   ```elixir
   def project do
-  [ app: :my_app,
-  version: "0.0.1",
-  deps: deps,
-  dialyzer: [ flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
-  ]
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
+    ]
   end
   ```
 
@@ -60,10 +61,11 @@ defmodule Mix.Tasks.Dialyzer do
 
   ```
   def project do
-    [ app: :my_app,
-    version: "0.0.1",
-    deps: deps,
-    dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx]]
     ]
   end
   ```
