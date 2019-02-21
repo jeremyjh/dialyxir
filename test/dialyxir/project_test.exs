@@ -102,6 +102,14 @@ defmodule Dialyxir.ProjectTest do
     end)
   end
 
+  test "App list for :plt_ignore_apps does not contain the ignored dependency" do
+    in_project(:ignore_apps, fn ->
+      apps = Project.cons_apps()
+
+      refute Enum.member?(apps, :logger)
+    end)
+  end
+
   test "Core PLT files located in mix home by default" do
     in_project(:default_apps, fn ->
       assert String.contains?(Project.erlang_plt(), Mix.Utils.mix_home())
