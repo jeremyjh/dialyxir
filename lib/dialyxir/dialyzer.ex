@@ -35,7 +35,7 @@ defmodule Dialyxir.Dialyzer do
         info("Starting Dialyzer")
 
         args
-        |> inspect(label: "dialyzer args", pretty: true, limit: 10)
+        |> inspect(label: "dialyzer args", pretty: true)
         |> info
 
         {duration_ms, result} = :timer.tc(&:dialyzer.run/1, [args])

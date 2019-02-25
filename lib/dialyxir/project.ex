@@ -61,7 +61,7 @@ defmodule Dialyxir.Project do
     |> Enum.map(fn {_file, path} -> path |> to_charlist() end)
   end
 
-  def dialyzer_paths do
+  defp dialyzer_paths do
     paths = dialyzer_config()[:paths] || default_paths()
     excluded_paths = dialyzer_config()[:excluded_paths] || []
     Enum.map(paths -- excluded_paths, &String.to_charlist/1)
@@ -225,8 +225,8 @@ defmodule Dialyxir.Project do
   end
 
   defp default_paths() do
-    reduce_umbrella_children([], fn paths ->
-      [Mix.Project.compile_path() | [Mix.Project.consolidation_path() | paths]]
+    reduce_umbrella_children([Mix.Project.consolidation_path()], fn paths ->
+      [Mix.Project.compile_path() | paths]
     end)
   end
 
