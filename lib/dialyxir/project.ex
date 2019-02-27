@@ -45,12 +45,11 @@ defmodule Dialyxir.Project do
     Mix.Tasks.Deps.Loadpaths.run([])
     # compile & load current project paths
     Mix.Project.compile([])
-    apps = plt_apps() || (plt_add_apps() ++ include_deps())
+    apps = plt_apps() || plt_add_apps() ++ (include_deps() -- plt_ignore_apps())
 
     apps
     |> Enum.sort()
     |> Enum.uniq()
-    |> Kernel.--(plt_ignore_apps())
   end
 
   def dialyzer_paths do
