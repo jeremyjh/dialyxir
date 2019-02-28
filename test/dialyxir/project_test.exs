@@ -162,4 +162,10 @@ defmodule Dialyxir.ProjectTest do
       assert Regex.match?(~r/Error loading nonexistent, dependency list may be incomplete/, out)
     end)
   end
+
+  test "igonored apps are removed in umbrella projects" do
+    in_project(:umbrella_ignore_apps, fn ->
+      refute Enum.member?(Project.cons_apps(), :logger)
+    end)
+  end
 end
