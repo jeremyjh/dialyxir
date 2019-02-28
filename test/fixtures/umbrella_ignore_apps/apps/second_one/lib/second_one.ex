@@ -1,2 +1,0 @@
-defmodule SecondOne do
-end
