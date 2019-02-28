@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.OpaqueTypeTest do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "The type test breaks the opaqueness of the term."
+  def format_short([function, _opaque]) do
+    "The type test in #{function} breaks the opaqueness of the term."
   end
 
   @impl Dialyxir.Warning
