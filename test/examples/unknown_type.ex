@@ -1,4 +1,4 @@
-defmodule UnknownTypeExample do
+defmodule Dialyxir.Examples.UnknownType do
   defmodule Missing do
   end
 

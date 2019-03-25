@@ -1,4 +1,4 @@
-defmodule GuardFailExample do
+defmodule Dialyxir.Examples.GuardFail do
   def ok() do
     ok(0)
   end

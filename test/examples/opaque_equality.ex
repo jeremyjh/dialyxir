@@ -1,14 +1,15 @@
-defmodule Verbose.ModuleTree.OpaqueEqualityTypes do
-  @opaque type :: :ok
+defmodule Dialyxir.Examples.OpaqueEquality do
 
-  @spec ok() :: type()
-  def ok() do
-    :ok
+  defmodule Types do
+    @opaque type :: :ok
+
+    @spec ok() :: type()
+    def ok() do
+      :ok
+    end
   end
-end
 
-defmodule OpaqueEqualityExample do
   def eq_ok() do
-    Verbose.ModuleTree.OpaqueEqualityTypes.ok() == :ok
+    Types.ok() == :ok
   end
 end

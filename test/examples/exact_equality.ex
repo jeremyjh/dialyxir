@@ -1,4 +1,4 @@
-defmodule ExactEqualityExample do
+defmodule Dialyxir.Examples.ExactEquality do
   def ok() do
     :ok == :error
   end

@@ -1,9 +1,9 @@
-defmodule CallbackSpecArgumentExampleBehaviour do
-  @callback ok(:ok) :: :ok
-end
+defmodule Dialyxir.Examples.CallbackSpecArgument do
+  defmodule Behaviour do
+    @callback ok(:ok) :: :ok
+  end
 
-defmodule CallbackSpecArgumentExample do
-  @behaviour CallbackSpecArgumentExampleBehaviour
+  @behaviour Behaviour
 
   @spec ok(:error) :: :ok
   def ok(:ok) do

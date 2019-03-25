@@ -1,18 +1,19 @@
-defmodule OpaqueMatchExampleStruct do
-  defstruct [:opaque]
 
-  @opaque t :: %__MODULE__{}
+defmodule Dialyxir.Examples.OpaqueMatch do
+  defmodule Struct do
+    defstruct [:opaque]
 
-  @spec opaque() :: t
-  def opaque() do
-    %__MODULE__{}
+    @opaque t :: %__MODULE__{}
+
+    @spec opaque() :: t
+    def opaque() do
+      %__MODULE__{}
+    end
   end
-end
 
-defmodule OpaqueMatchExample do
   @spec error() :: :error
   def error() do
-    %{opaque: _} = OpaqueMatchExampleStruct.opaque()
+    %{opaque: _} = Struct.opaque()
     :error
   end
 end

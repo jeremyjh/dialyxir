@@ -1,4 +1,4 @@
-defmodule CallExample do
+defmodule Dialyxir.Examples.Call do
   def ok() do
     ok(:error)
   end
