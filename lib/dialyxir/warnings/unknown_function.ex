@@ -7,7 +7,9 @@ defmodule Dialyxir.Warnings.UnknownFunction do
 
   @impl Dialyxir.Warning
   @spec format_short({String.t(), String.t(), String.t()}) :: String.t()
-  def format_short(args), do: format_long(args)
+  def format_short({_module, function, arity}) do
+    "Function #{function}/#{arity} does not exist."
+  end
 
   @impl Dialyxir.Warning
   @spec format_long({String.t(), String.t(), String.t()}) :: String.t()
