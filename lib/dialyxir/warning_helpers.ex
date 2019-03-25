@@ -83,16 +83,4 @@ defmodule Dialyxir.WarningHelpers do
   def form_position_string(arg_positions) do
     Enum.map_join(arg_positions, " and ", &ordinal/1)
   end
-
-  def unqualify_module(name) when is_binary(name) do
-    case String.split(name, ".") do
-      [only] ->
-        only
-
-      multiple ->
-        multiple
-        |> Enum.take(-2)
-        |> Enum.join(".")
-    end
-  end
 end

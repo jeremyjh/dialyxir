@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.ExtraRange do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([_module, function | _]) do
-    "@spec for #{function} has more types " <> "than returned by function."
+    "@spec for #{function} has more types than returned by function."
   end
 
   @impl Dialyxir.Warning

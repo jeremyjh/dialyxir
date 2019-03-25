@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.CallbackArgumentTypeMismatch do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([_behaviour, function | _]) do
-    "Type mismatch for argument to callback #{function}."
+  def format_short([_behaviour, function, arity | _]) do
+    "Type mismatch with behaviour callback to #{function}/#{arity}."
   end
 
   @impl Dialyxir.Warning
