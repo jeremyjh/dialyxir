@@ -1,4 +1,3 @@
-
 defmodule Dialyxir.Examples.OpaqueMatch do
   defmodule Struct do
     defstruct [:opaque]

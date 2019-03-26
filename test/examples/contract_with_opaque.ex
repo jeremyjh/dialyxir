@@ -1,9 +1,9 @@
-defmodule Dialyxir.Examples.ContractWithOpaqueTypes do
-  @opaque type :: :ok
-end
-
 defmodule Dialyxir.Examples.ContractWithOpaque do
-  @spec ok() :: ContractWithOpaqueTypes.type()
+  defmodule Types do
+    @opaque type :: :ok
+  end
+
+  @spec ok() :: Types.type()
   def ok() do
     :ok
   end
