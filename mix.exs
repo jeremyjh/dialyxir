@@ -4,7 +4,7 @@ defmodule Dialyxir.Mixfile do
   def project do
     [
       app: :dialyxir,
-      version: "1.0.0-rc.4",
+      version: "1.0.0-rc.5",
       elixir: ">= 1.6.0",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
@@ -39,7 +39,7 @@ defmodule Dialyxir.Mixfile do
 
   defp deps do
     [
-      {:erlex, "~> 0.2"},
+      {:erlex, "~> 0.2.1"},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
