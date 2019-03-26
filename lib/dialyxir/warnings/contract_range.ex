@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.ContractRange do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([_, _, _, _, line, _]) do
-    "Contract cannot be correct because return type on line number #{line} is mismatched."
+  def format_short([_, _, function | _]) do
+    "Contract cannot be correct because return type for #{function} is mismatched."
   end
 
   @impl Dialyxir.Warning

@@ -13,8 +13,12 @@ defmodule Dialyxir.Warnings.RecordConstruction do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Record construction violates the declared type."
+  def format_short([_types, name]) do
+    "Record construction violates the declared type for #{name}."
+  end
+
+  def format_short([name, _field, _type]) do
+    "Record construction violates the declared type for #{name}."
   end
 
   @impl Dialyxir.Warning

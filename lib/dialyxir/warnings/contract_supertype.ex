@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.ContractSupertype do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Type specification is a supertype of the success typing."
+  def format_short([_module, function | _]) do
+    "Type specification for #{function} is a supertype of the success typing."
   end
 
   @impl Dialyxir.Warning

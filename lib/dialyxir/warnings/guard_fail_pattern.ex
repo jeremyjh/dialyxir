@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.GuardFailPattern do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Clause guard cannot succeed."
+  def format_short([pattern, _]) do
+    "Clause guard #{pattern} cannot succeed."
   end
 
   @impl Dialyxir.Warning
