@@ -13,10 +13,8 @@ script:
   - mix test --trace
   - MIX_ENV=prod mix do compile --warnings-as-errors, archive.build, archive.install --force
   - mix format --check-formatted
-  - MIX_ENV=prod mix dialyzer --halt-exit-status
+  - MIX_ENV=prod mix dialyzer --list-unused-filters --halt-exit-status
   - OUTPUT_TESTS=true mix test
-  - MIX_ENV=prod mix dialyzer --list-unused-filters
-  - MIX_ENV=prod mix dialyzer --unused-filters-as-errors
   - MIX_ENV=prod mix dialyzer --format short
   - MIX_ENV=prod mix dialyzer --format raw
   - MIX_ENV=prod mix dialyzer --format dialyzer
