@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Dialyzer do
   ## Command line options
 
     * `--no-compile`       - do not compile even if needed.
-    * `--no-check`         - do not perform (quick) check to see if PLT needs updated.
+    * `--no-check`         - do not perform (quick) check to see if PLT needs update.
     * `--force-check`      - force PLT check also if lock file is unchanged.
        useful when dealing with local deps.
     * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
