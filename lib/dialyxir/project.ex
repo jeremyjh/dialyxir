@@ -156,10 +156,13 @@ defmodule Dialyxir.Project do
     dialyzer_config()[:ignore_warnings]
   end
 
-  defp list_unused_filters?(args) do
+  def list_unused_filters?(args) do
     case Keyword.fetch(args, :list_unused_filters) do
-      :error -> dialyzer_config()[:list_unused_filters]
-      {:ok, list_unused_filters} -> list_unused_filters
+      {:ok, list_unused_filters} when not is_nil(list_unused_filters) ->
+        list_unused_filters
+
+      _else ->
+        dialyzer_config()[:list_unused_filters]
     end
   end
 
