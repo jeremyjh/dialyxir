@@ -168,4 +168,14 @@ defmodule Dialyxir.ProjectTest do
       refute Enum.member?(Project.cons_apps(), :logger)
     end)
   end
+
+  test "list_unused_filters? works as intended" do
+    assert Project.list_unused_filters?(list_unused_filters: true)
+    refute Project.list_unused_filters?(list_unused_filters: nil)
+
+    # Override in mix.exs
+    in_project(:ignore, fn ->
+      assert Project.list_unused_filters?(list_unused_filters: nil)
+    end)
+  end
 end
