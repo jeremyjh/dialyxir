@@ -68,7 +68,7 @@ defmodule Dialyxir.Formatter do
   def format_and_filter(warnings, filterer, filter_map_args, :short) do
     filter_map = filterer.filter_map(filter_map_args)
 
-    {formatted_warnings, _skip_map} = filter_warnings(warnings, filterer, filter_map)
+    {formatted_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
 
     formatted_warnings =
       formatted_warnings

@@ -1,6 +1,8 @@
 defmodule Dialyxir.FormatterTest do
   use ExUnit.Case
 
+  import ExUnit.CaptureIO, only: [capture_io: 1]
+
   alias Dialyxir.Formatter
   alias Dialyxir.Project
 
@@ -85,6 +87,35 @@ defmodule Dialyxir.FormatterTest do
                  Formatter.format_and_filter([warning], Project, filter_args, :dialyxir)
 
         refute warning =~ "Unused filters:"
+      end)
+    end
+  end
+
+  test "listing unused filter behaves the same for different formats" do
+    warnings = [
+      {:warn_return_no_exit, {'a/regex_file.ex', 17},
+       {:no_return, [:only_normal, :format_long, 1]}},
+      {:warn_return_no_exit, {'a/another-file.ex', 18}, {:unknown_type, {:M, :F, :A}}}
+    ]
+
+    expected_warning = "a/another-file.ex:18"
+
+    expected_unused_filter =
+      "Unused filters:\n{\"a/file.ex:17:no_return Function format_long/1 has no local return.\"}"
+
+    filter_args = [{:list_unused_filters, true}]
+
+    for format <- [:short, :dialyxir, :dialyzer] do
+      in_project(:ignore, fn ->
+        capture_io(fn ->
+          result = Formatter.format_and_filter(warnings, Project, filter_args, format)
+
+          assert {:warn, [warning], {:unused_filters_present, unused}} = result
+          assert warning =~ expected_warning
+          assert unused =~ expected_unused_filter
+          # A warning for regex_file.ex was explicitly put into format_and_filter.
+          refute unused =~ "regex_file.ex"
+        end)
       end)
     end
   end
