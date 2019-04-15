@@ -7,7 +7,9 @@ defmodule Dialyxir.Warnings.RaceCondition do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(args), do: format_long(args)
+  def format_short([_module, function | _]) do
+    "Possible race condition in #{function}."
+  end
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()

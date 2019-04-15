@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.ContractWithOpaque do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "The @spec has an opaque subtype which is violated by the success typing"
+  def format_short([_module, function | _]) do
+    "The @spec for #{function} has an opaque subtype which is violated by the success typing"
   end
 
   @impl Dialyxir.Warning

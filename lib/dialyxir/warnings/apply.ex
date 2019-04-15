@@ -7,8 +7,9 @@ defmodule Dialyxir.Warnings.Apply do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Function application will not succeed."
+  def format_short([args | _]) do
+    pretty_args = Erlex.pretty_print_args(args)
+    "Function application with args #{pretty_args} will not succeed."
   end
 
   @impl Dialyxir.Warning

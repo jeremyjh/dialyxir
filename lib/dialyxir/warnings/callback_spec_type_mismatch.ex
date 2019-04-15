@@ -7,11 +7,8 @@ defmodule Dialyxir.Warnings.CallbackSpecTypeMismatch do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([behaviour, function, arity, _success_type, _callback_type]) do
-    pretty_behaviour = Erlex.pretty_print(behaviour)
-
-    "The @spec return type for does not match the expected return type" <>
-      "for #{function}/#{arity} callback in #{pretty_behaviour} behaviour."
+  def format_short([_behaviour, function | _]) do
+    "The @spec return type does not match the expected return type for #{function}."
   end
 
   @impl Dialyxir.Warning

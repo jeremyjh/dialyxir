@@ -7,14 +7,16 @@ defmodule Dialyxir.Warnings.UnknownType do
 
   @impl Dialyxir.Warning
   @spec format_short({String.t(), String.t(), String.t()}) :: String.t()
-  def format_short(args), do: format_long(args)
+  def format_short({module, function, arity}) do
+    pretty_module = Erlex.pretty_print(module)
+
+    "Unknown type: #{pretty_module}.#{function}/#{arity}."
+  end
 
   @impl Dialyxir.Warning
   @spec format_long({String.t(), String.t(), String.t()}) :: String.t()
   def format_long({module, function, arity}) do
-    pretty_module = Erlex.pretty_print(module)
-
-    "Unknown type: #{pretty_module}.#{function}/#{arity}."
+    format_short({module, function, arity})
   end
 
   @impl Dialyxir.Warning

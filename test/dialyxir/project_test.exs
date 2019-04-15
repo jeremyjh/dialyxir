@@ -162,4 +162,20 @@ defmodule Dialyxir.ProjectTest do
       assert Regex.match?(~r/Error loading nonexistent, dependency list may be incomplete/, out)
     end)
   end
+
+  test "igonored apps are removed in umbrella projects" do
+    in_project(:umbrella_ignore_apps, fn ->
+      refute Enum.member?(Project.cons_apps(), :logger)
+    end)
+  end
+
+  test "list_unused_filters? works as intended" do
+    assert Project.list_unused_filters?(list_unused_filters: true)
+    refute Project.list_unused_filters?(list_unused_filters: nil)
+
+    # Override in mix.exs
+    in_project(:ignore, fn ->
+      assert Project.list_unused_filters?(list_unused_filters: nil)
+    end)
+  end
 end

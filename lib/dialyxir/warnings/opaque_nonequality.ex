@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.OpaqueNonequality do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(_) do
-    "Attempted to test for inequality between a type and an opaque type."
+  def format_short([type, _op, opaque_type]) do
+    "Attempted to test for inequality between #{type} and opaque type #{opaque_type}."
   end
 
   @impl Dialyxir.Warning
