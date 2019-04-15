@@ -252,7 +252,7 @@ defmodule Mix.Tasks.Dialyzer do
     args = [
       {:check_plt, opts[:force_check] || false},
       {:init_plt, String.to_charlist(Project.plt_file())},
-      {:files_rec, Project.dialyzer_paths()},
+      {:files, Project.dialyzer_files()},
       {:warnings, dialyzer_warnings(dargs)},
       {:format, opts[:format]},
       {:raw, opts[:raw]},
