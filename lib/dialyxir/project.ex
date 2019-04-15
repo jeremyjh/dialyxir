@@ -53,11 +53,19 @@ defmodule Dialyxir.Project do
   end
 
   def dialyzer_files do
-    dialyzer_paths()
-    |> Enum.map(fn path ->
-      path |> Path.join("*.beam") |> Path.wildcard() |> Enum.map(&{Path.basename(&1), &1})
-    end)
-    |> Enum.reduce(%{}, fn entries, acc -> Map.merge(acc, Map.new(entries)) end)
+    beam_files =
+      dialyzer_paths()
+      |> Enum.flat_map(&beam_files_with_paths/1)
+      |> Map.new()
+
+    consolidated_files =
+      Mix.Project.consolidation_path()
+      |> beam_files_with_paths()
+      |> Enum.filter(fn {file_name, _path} -> beam_files |> Map.has_key?(file_name) end)
+      |> Map.new()
+
+    beam_files
+    |> Map.merge(consolidated_files)
     |> Enum.map(fn {_file, path} -> path |> to_charlist() end)
   end
 
@@ -65,6 +73,10 @@ defmodule Dialyxir.Project do
     paths = dialyzer_config()[:paths] || default_paths()
     excluded_paths = dialyzer_config()[:excluded_paths] || []
     Enum.map(paths -- excluded_paths, &String.to_charlist/1)
+  end
+
+  defp beam_files_with_paths(path) do
+    path |> Path.join("*.beam") |> Path.wildcard() |> Enum.map(&{Path.basename(&1), &1})
   end
 
   def dialyzer_removed_defaults do
@@ -225,7 +237,7 @@ defmodule Dialyxir.Project do
   end
 
   defp default_paths() do
-    reduce_umbrella_children([Mix.Project.consolidation_path()], fn paths ->
+    reduce_umbrella_children([], fn paths ->
       [Mix.Project.compile_path() | paths]
     end)
   end
