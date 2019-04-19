@@ -121,7 +121,7 @@ defmodule Dialyxir.Project do
       true ->
         ignore_file = dialyzer_ignore_warnings() || default_ignore_warnings()
 
-        FilterMap.from_file(ignore_file, list_unused_filters?(args), halt_exit_status?(args))
+        FilterMap.from_file(ignore_file, list_unused_filters?(args), ignore_exit_status?(args))
     end
   end
 
@@ -187,8 +187,8 @@ defmodule Dialyxir.Project do
     end
   end
 
-  defp halt_exit_status?(args) do
-    args[:halt_exit_status]
+  defp ignore_exit_status?(args) do
+    args[:ignore_exit_status]
   end
 
   def elixir_plt() do

@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Dialyzer do
     * `--no-check`         - do not perform (quick) check to see if PLT needs update.
     * `--force-check`      - force PLT check also if lock file is unchanged.
        useful when dealing with local deps.
-    * `--halt-exit-status` - exit immediately with same exit status as dialyzer.
+    * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code
     * `--list-unused-filters` - list unused ignore filters
       useful for CI. do not use with `mix do`.
     * `--plt`              - only build the required plt(s) and exit.
@@ -135,17 +135,22 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   @default_warnings [:unknown]
-  @command_options [
-    no_compile: :boolean,
-    no_check: :boolean,
-    force_check: :boolean,
-    halt_exit_status: :boolean,
-    list_unused_filters: :boolean,
-    plt: :boolean,
-    quiet: :boolean,
-    raw: :boolean,
-    format: :string
+
+  @old_options [
+    halt_exit_status: :boolean
   ]
+
+  @command_options Keyword.merge(@old_options,
+                     no_compile: :boolean,
+                     no_check: :boolean,
+                     force_check: :boolean,
+                     ignore_exit_status: :boolean,
+                     list_unused_filters: :boolean,
+                     plt: :boolean,
+                     quiet: :boolean,
+                     raw: :boolean,
+                     format: :string
+                   )
 
   def run(args) do
     {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
@@ -192,6 +197,7 @@ defmodule Mix.Tasks.Dialyzer do
           """)
       end
 
+      warn_old_options(opts)
       unless opts[:plt], do: run_dialyzer(opts, dargs)
     else
       info("No mix project found - checking core PLTs...")
@@ -257,14 +263,18 @@ defmodule Mix.Tasks.Dialyzer do
       {:format, opts[:format]},
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
-      {:halt_exit_status, opts[:halt_exit_status]}
+      {:ignore_exit_status, opts[:ignore_exit_status]}
     ]
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
     report = if status == :ok, do: &info/1, else: &error/1
     Enum.each(result, report)
-    if opts[:halt_exit_status], do: :erlang.halt(exit_status)
+
+    unless opts[:ignore_exit_status] do
+      info("Halting VM with exit status #{exit_status}")
+      :erlang.halt(exit_status)
+    end
   end
 
   defp dialyzer_warnings(dargs) do
@@ -326,6 +336,14 @@ defmodule Mix.Tasks.Dialyzer do
 
       :erlang.halt(3)
     end
+  end
+
+  defp warn_old_options(opts) do
+    for {opt, _} <- opts, @old_options[opt] do
+      error("#{opt} is no longer a valid CLI argument.")
+    end
+
+    nil
   end
 
   defp compatibility_notice do
