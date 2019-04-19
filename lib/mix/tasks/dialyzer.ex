@@ -271,7 +271,7 @@ defmodule Mix.Tasks.Dialyzer do
     report = if status == :ok, do: &info/1, else: &error/1
     Enum.each(result, report)
 
-    unless opts[:ignore_exit_status] do
+    unless exit_status == 0 || opts[:ignore_exit_status] do
       info("Halting VM with exit status #{exit_status}")
       :erlang.halt(exit_status)
     end
