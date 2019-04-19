@@ -17,7 +17,7 @@ script:
   - MIX_ENV=prod mix dialyzer --list-unused-filters
   - OUTPUT_TESTS=true mix test
   - MIX_ENV=prod mix dialyzer --format short
-  - MIX_ENV=prod mix dialyzer --format raw
+  - MIX_ENV=prod mix dialyzer --format raw --ignore-exit-status
   - MIX_ENV=prod mix dialyzer --format dialyzer
 branches:
   except:
