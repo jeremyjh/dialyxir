@@ -7,8 +7,13 @@ defmodule Dialyxir.Warnings.CallbackArgumentTypeMismatch do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([_behaviour, function, arity | _]) do
-    "Type mismatch with behaviour callback to #{function}/#{arity}."
+  def format_short([behaviour, function, arity, position, _success_type, _callback_type]) do
+    pretty_behaviour = Erlex.pretty_print(behaviour)
+    ordinal_position = Dialyxir.WarningHelpers.ordinal(position)
+
+    "Type mismatch with behaviour callback #{pretty_behaviour}.#{function}/#{arity} in the #{
+      ordinal_position
+    } argument."
   end
 
   @impl Dialyxir.Warning

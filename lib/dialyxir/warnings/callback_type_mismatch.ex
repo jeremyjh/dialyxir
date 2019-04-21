@@ -7,8 +7,10 @@ defmodule Dialyxir.Warnings.CallbackTypeMismatch do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([_behaviour, function | _]) do
-    "Callback mismatch for @callback #{function}."
+  def format_short([behaviour, function, arity, _fail_type, _success_type]) do
+    pretty_behaviour = Erlex.pretty_print(behaviour)
+
+    "Callback mismatch for @callback #{pretty_behaviour}.#{function}/#{arity}."
   end
 
   @impl Dialyxir.Warning

@@ -7,13 +7,15 @@ defmodule Dialyxir.Warnings.CallToMissingFunction do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short(args), do: format_long(args)
+  def format_short([module, function, arity]) do
+    pretty_module = Erlex.pretty_print(module)
+    "Call to missing or private function #{pretty_module}.#{function}/#{arity}."
+  end
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
-  def format_long([module, function, arity]) do
-    pretty_module = Erlex.pretty_print(module)
-    "Call to missing or private function #{pretty_module}.#{function}/#{arity}."
+  def format_long(args) do
+    format_short(args)
   end
 
   @impl Dialyxir.Warning

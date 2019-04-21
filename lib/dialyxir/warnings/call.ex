@@ -7,8 +7,10 @@ defmodule Dialyxir.Warnings.Call do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([_module, function | _]) do
-    "The function call #{function} will not succeed."
+  def format_short([module, function | _]) do
+    pretty_module = Erlex.pretty_print(module)
+
+    "The function call #{pretty_module}.#{function} will not succeed."
   end
 
   @impl Dialyxir.Warning

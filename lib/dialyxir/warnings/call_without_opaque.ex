@@ -7,8 +7,10 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([_module, function | _]) do
-    "Type mismatch in call without opaque in #{function}."
+  def format_short([module, function | _]) do
+    pretty_module = Erlex.pretty_print(module)
+
+    "Type mismatch in call without opaque in #{pretty_module}.#{function}."
   end
 
   @impl Dialyxir.Warning
