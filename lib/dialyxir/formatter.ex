@@ -15,37 +15,8 @@ defmodule Dialyxir.Formatter do
     "done in #{minutes}m#{seconds}s"
   end
 
-  def format_and_filter(warnings, _, _filter_map_args, :raw) do
-    warnings
-    |> Enum.map(&inspect/1)
-    |> result()
-  end
-
-  def format_and_filter(warnings, filterer, filter_map_args, :dialyxir) do
-    divider = String.duplicate("_", 80)
-    filter_map = filterer.filter_map(filter_map_args)
-
-    {formatted_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
-
-    formatted_warnings =
-      formatted_warnings
-      |> filter_legacy_warnings(filterer)
-      |> Enum.map(fn warning ->
-        message =
-          warning
-          |> format_warning(:dialyxir)
-          |> String.replace_trailing("\n", "")
-
-        message <> "\n" <> divider
-      end)
-
-    show_count_skipped(warnings, formatted_warnings, filter_map)
-    formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
-
-    result(formatted_warnings, filter_map, formatted_unnecessary_skips)
-  end
-
-  def format_and_filter(warnings, filterer, filter_map_args, :dialyzer) do
+  @spec format_and_filter([tuple], module, Keyword.t(), atom) :: tuple
+  def format_and_filter(warnings, filterer, filter_map_args, formatter) do
     filter_map = filterer.filter_map(filter_map_args)
 
     {filtered_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
@@ -53,39 +24,12 @@ defmodule Dialyxir.Formatter do
     formatted_warnings =
       filtered_warnings
       |> filter_legacy_warnings(filterer)
-      |> Enum.map(fn warning ->
-        warning
-        |> format_warning(:dialyzer)
-        |> String.replace_trailing("\n", "")
-      end)
+      |> Enum.map(&format_warning(&1, formatter))
 
-    show_count_skipped(warnings, filtered_warnings, filter_map)
+    show_count_skipped(warnings, formatted_warnings, filter_map)
     formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
 
     result(formatted_warnings, filter_map, formatted_unnecessary_skips)
-  end
-
-  def format_and_filter(warnings, filterer, filter_map_args, :short) do
-    filter_map = filterer.filter_map(filter_map_args)
-
-    {formatted_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
-
-    formatted_warnings =
-      formatted_warnings
-      |> filter_legacy_warnings(filterer)
-      |> Enum.map(&format_warning(&1, :short))
-
-    formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
-
-    result(formatted_warnings, filter_map, formatted_unnecessary_skips)
-  end
-
-  defp result(warnings) do
-    if Enum.empty?(warnings) do
-      {:ok, [], :no_unused_filters}
-    else
-      {:warn, warnings, :no_unused_filters}
-    end
   end
 
   defp result(formatted_warnings, filter_map, formatted_unnecessary_skips) do
@@ -101,12 +45,15 @@ defmodule Dialyxir.Formatter do
     end
   end
 
+  defp format_warning(warning, :raw) do
+    inspect(warning, limit: :infinity)
+  end
+
   defp format_warning(warning, :dialyzer) do
     warning
     |> :dialyzer.format_warning(:fullpath)
     |> String.Chars.to_string()
     |> String.replace_trailing("\n", "")
-    |> String.replace_suffix("", "\n")
   end
 
   defp format_warning({_tag, {file, line}, message}, :short) do
@@ -123,62 +70,65 @@ defmodule Dialyxir.Formatter do
     {warning_name, arguments} = message
     base_name = Path.relative_to_cwd(file)
 
-    try do
-      warning = warning(warning_name)
-      string = warning.format_long(arguments)
+    formatted =
+      try do
+        warning = warning(warning_name)
+        string = warning.format_long(arguments)
 
-      """
-      #{base_name}:#{line}:#{warning_name}
-      #{string}
-      """
-    rescue
-      e ->
-        message = """
-        Unknown error occurred: #{inspect(e)}
         """
-
-        wrap_error_message(message, dialyzer_warning)
-    catch
-      {:error, :unknown_warning, warning_name} ->
-        message = """
-        Unknown warning:
-        #{inspect(warning_name)}
+        #{base_name}:#{line}:#{warning_name}
+        #{string}
         """
+      rescue
+        e ->
+          message = """
+          Unknown error occurred: #{inspect(e)}
+          """
 
-        wrap_error_message(message, dialyzer_warning)
+          wrap_error_message(message, dialyzer_warning)
+      catch
+        {:error, :unknown_warning, warning_name} ->
+          message = """
+          Unknown warning:
+          #{inspect(warning_name)}
+          """
 
-      {:error, :lexing, warning} ->
-        message = """
-        Failed to lex warning:
-        #{inspect(warning)}
-        """
+          wrap_error_message(message, dialyzer_warning)
 
-        wrap_error_message(message, dialyzer_warning)
+        {:error, :lexing, warning} ->
+          message = """
+          Failed to lex warning:
+          #{inspect(warning)}
+          """
 
-      {:error, :parsing, failing_string} ->
-        message = """
-        Failed to parse warning:
-        #{inspect(failing_string)}
-        """
+          wrap_error_message(message, dialyzer_warning)
 
-        wrap_error_message(message, dialyzer_warning)
+        {:error, :parsing, failing_string} ->
+          message = """
+          Failed to parse warning:
+          #{inspect(failing_string)}
+          """
 
-      {:error, :pretty_printing, failing_string} ->
-        message = """
-        Failed to pretty print warning:
-        #{inspect(failing_string)}
-        """
+          wrap_error_message(message, dialyzer_warning)
 
-        wrap_error_message(message, dialyzer_warning)
+        {:error, :pretty_printing, failing_string} ->
+          message = """
+          Failed to pretty print warning:
+          #{inspect(failing_string)}
+          """
 
-      {:error, :formatting, code} ->
-        message = """
-        Failed to format warning:
-        #{inspect(code)}
-        """
+          wrap_error_message(message, dialyzer_warning)
 
-        wrap_error_message(message, dialyzer_warning)
-    end
+        {:error, :formatting, code} ->
+          message = """
+          Failed to format warning:
+          #{inspect(code)}
+          """
+
+          wrap_error_message(message, dialyzer_warning)
+      end
+
+    formatted <> String.duplicate("_", 80)
   end
 
   defp wrap_error_message(message, warning) do
