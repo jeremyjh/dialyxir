@@ -6,12 +6,12 @@ defmodule Dialyxir.Dialyzer do
   alias Dialyxir.FilterMap
 
   defmodule Runner do
-    @dialyxir_args ~w(
-      raw
-      format
-      list_unused_filters
-      ignore_exit_status
-    )a
+    @dialyxir_args [
+      :raw,
+      :format,
+      :list_unused_filters,
+      :ignore_exit_status
+    ]
 
     def run(args, filterer) do
       try do

@@ -141,11 +141,11 @@ defmodule Mix.Tasks.Dialyzer do
   ]
 
   @command_options Keyword.merge(@old_options,
-                     no_compile: :boolean,
-                     no_check: :boolean,
                      force_check: :boolean,
                      ignore_exit_status: :boolean,
                      list_unused_filters: :boolean,
+                     no_check: :boolean,
+                     no_compile: :boolean,
                      plt: :boolean,
                      quiet: :boolean,
                      raw: :boolean,
@@ -273,7 +273,7 @@ defmodule Mix.Tasks.Dialyzer do
 
     unless exit_status == 0 || opts[:ignore_exit_status] do
       error("Halting VM with exit status #{exit_status}")
-      :erlang.halt(exit_status)
+      System.halt(exit_status)
     end
   end
 
