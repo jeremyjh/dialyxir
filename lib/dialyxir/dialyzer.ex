@@ -6,10 +6,16 @@ defmodule Dialyxir.Dialyzer do
   alias Dialyxir.FilterMap
 
   defmodule Runner do
+    @dialyxir_args [
+      :raw,
+      :format,
+      :list_unused_filters,
+      :ignore_exit_status
+    ]
+
     def run(args, filterer) do
       try do
-        split_args = [:raw, :format, :list_unused_filters, :halt_exit_status]
-        {split, args} = Keyword.split(args, split_args)
+        {split, args} = Keyword.split(args, @dialyxir_args)
 
         formatter =
           cond do

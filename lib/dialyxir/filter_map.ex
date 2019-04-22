@@ -10,10 +10,10 @@ defmodule Dialyxir.FilterMap do
   @doc """
   Fill a `FilterMap` from an ignore file.
   """
-  def from_file(ignore_file, list_unused_filters?, halt_exit_status?) do
+  def from_file(ignore_file, list_unused_filters?, ignore_exit_status?) do
     filter_map = %__MODULE__{
       list_unused_filters?: list_unused_filters?,
-      unused_filters_as_errors?: list_unused_filters? && halt_exit_status?
+      unused_filters_as_errors?: list_unused_filters? && !ignore_exit_status?
     }
 
     {ignore, _} =
@@ -30,7 +30,7 @@ defmodule Dialyxir.FilterMap do
   Remove all non-allowed arguments from `args`.
   """
   def to_args(args) do
-    Keyword.take(args, [:list_unused_filters, :halt_exit_status])
+    Keyword.take(args, [:list_unused_filters, :ignore_exit_status])
   end
 
   @doc """

@@ -16,7 +16,7 @@ defmodule Dialyxir.FormatterTest do
         {:warn_return_no_exit, {'a/file.ex', 17}, {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
-        {:warn, remaining, _unused_filters_present} =
+        {:error, remaining, _unused_filters_present} =
           Formatter.format_and_filter([warning], Project, [], :short)
 
         assert remaining == []
@@ -29,7 +29,7 @@ defmodule Dialyxir.FormatterTest do
          {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
-        {:warn, [remaining], _} = Formatter.format_and_filter([warning], Project, [], :short)
+        {:error, [remaining], _} = Formatter.format_and_filter([warning], Project, [], :short)
         assert remaining =~ ~r/different_file.* no local return/
       end)
     end
@@ -40,32 +40,34 @@ defmodule Dialyxir.FormatterTest do
          {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
-        {:warn, remaining, _unused_filters_present} =
+        {:error, remaining, _unused_filters_present} =
           Formatter.format_and_filter([warning], Project, [], :short)
 
         assert remaining == []
       end)
     end
 
-    test "lists unnecessary skips" do
+    test "lists unnecessary skips as warnings if ignoreing exit status " do
       warning =
         {:warn_return_no_exit, {'a/regex_file.ex', 17},
          {:no_return, [:only_normal, :format_long, 1]}}
 
+      filter_args = [{:ignore_exit_status, true}]
+
       in_project(:ignore, fn ->
         assert {:warn, [], {:unused_filters_present, warning}} =
-                 Formatter.format_and_filter([warning], Project, [], :dialyxir)
+                 Formatter.format_and_filter([warning], Project, filter_args, :dialyxir)
 
         assert warning =~ "Unused filters:"
       end)
     end
 
-    test "error on unnecessary skips with halt_exit_status" do
+    test "error on unnecessary skips without ignore_exit_status" do
       warning =
         {:warn_return_no_exit, {'a/regex_file.ex', 17},
          {:no_return, [:only_normal, :format_long, 1]}}
 
-      filter_args = [{:halt_exit_status, true}]
+      filter_args = [{:ignore_exit_status, false}]
 
       in_project(:ignore, fn ->
         {:error, [], {:unused_filters_present, error}} =
@@ -110,7 +112,7 @@ defmodule Dialyxir.FormatterTest do
         capture_io(fn ->
           result = Formatter.format_and_filter(warnings, Project, filter_args, format)
 
-          assert {:warn, [warning], {:unused_filters_present, unused}} = result
+          assert {:error, [warning], {:unused_filters_present, unused}} = result
           assert warning =~ expected_warning
           assert unused =~ expected_unused_filter
           # A warning for regex_file.ex was explicitly put into format_and_filter.

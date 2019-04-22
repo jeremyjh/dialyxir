@@ -52,8 +52,7 @@ mix dialyzer
 
   * `--no-compile`         - do not compile even if needed.
   * `--no-check`           - do not perform (quick) check to see if PLT needs updated.
-  * `--halt-exit-status`   - exit immediately with same exit status as dialyzer.
-    useful for CI. do not use with `mix do`.
+  * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code
   *  `--format short`      - format the warnings in a compact format.
   *  `--format raw`        - format the warnings in format returned before Dialyzer formatting
   *  `--format dialyxir`   - format the warnings in a pretty printed format
