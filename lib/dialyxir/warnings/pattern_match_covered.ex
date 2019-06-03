@@ -7,8 +7,8 @@ defmodule Dialyxir.Warnings.PatternMatchCovered do
 
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
-  def format_short([pattern, _]) do
-    "The pattern #{pattern} can never match the type since it covered by previous clauses."
+  def format_short([_, _]) do
+    "The pattern can never match the type since it covered by previous clauses."
   end
 
   @impl Dialyxir.Warning
