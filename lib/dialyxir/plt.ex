@@ -6,6 +6,7 @@ defmodule Dialyxir.Plt do
   @moduledoc false
 
   import Dialyxir.Output
+  alias Dialyxir.Formatter
 
   def check(plts, fun \\ &check_plt/4) do
     find_plts(plts, [], fun)
@@ -172,7 +173,11 @@ defmodule Dialyxir.Plt do
         Mix.shell().info("Adding #{n} modules to #{Path.basename(plt)}")
         plt = erl_path(plt)
         files = erl_files(files)
-        _ = plt_run(analysis_type: :plt_add, init_plt: plt, files: files)
+
+        {duration_us, _} =
+          :timer.tc(fn -> plt_run(analysis_type: :plt_add, init_plt: plt, files: files) end)
+
+        Mix.shell().info(Formatter.formatted_time(duration_us))
         :ok
     end
   end

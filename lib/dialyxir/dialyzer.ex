@@ -44,9 +44,9 @@ defmodule Dialyxir.Dialyzer do
         |> inspect(label: "dialyzer args", pretty: true, limit: 8)
         |> info
 
-        {duration_ms, result} = :timer.tc(&:dialyzer.run/1, [args])
+        {duration_us, result} = :timer.tc(&:dialyzer.run/1, [args])
 
-        formatted_time_elapsed = Formatter.formatted_time(duration_ms)
+        formatted_time_elapsed = Formatter.formatted_time(duration_us)
 
         filter_map_args = FilterMap.to_args(split)
 
