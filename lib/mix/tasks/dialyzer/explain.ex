@@ -19,7 +19,7 @@ defmodule Mix.Tasks.Dialyzer.Explain do
   alias Dialyxir.Output
 
   def run(args) do
-    case OptionParser.parse(args) do
+    case OptionParser.parse(args, strict: []) do
       {_, [warning], _} ->
         warning |> explanation_text() |> Output.info()
 
