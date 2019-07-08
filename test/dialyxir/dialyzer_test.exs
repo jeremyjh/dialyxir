@@ -15,7 +15,12 @@ defmodule Dialyxir.DialyzerTest do
 
       assert expected_result_code == :ok
       assert expected_exit_code == 0
-      assert expected_messages == ["time", "", "\e[32mdone (passed successfully)\e[0m"]
+
+      assert expected_messages == [
+               "time",
+               "",
+               [[[[], "\e[32m"], "done (passed successfully)"], "\e[0m"]
+             ]
     end
 
     test "formatting with warnings" do
@@ -30,10 +35,10 @@ defmodule Dialyxir.DialyzerTest do
 
       assert expected_messages == [
                "time",
-               "\e[31mwarning 1\e[0m",
-               "\e[31mwarning 2\e[0m",
+               [[[[], "\e[31m"], "warning 1"], "\e[0m"],
+               [[[[], "\e[31m"], "warning 2"], "\e[0m"],
                "",
-               "\e[33mdone (warnings were emitted)\e[0m"
+               [[[[], "\e[33m"], "done (warnings were emitted)"], "\e[0m"]
              ]
     end
 
@@ -46,7 +51,7 @@ defmodule Dialyxir.DialyzerTest do
 
       assert expected_result_code == :error
       assert expected_exit_code == 1
-      assert expected_messages == ["\e[31mdialyzer failed\e[0m"]
+      assert expected_messages == [[[[[], "\e[31m"], "dialyzer failed"], "\e[0m"]]
     end
   end
 end
