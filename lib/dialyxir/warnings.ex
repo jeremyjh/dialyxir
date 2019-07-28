@@ -21,7 +21,7 @@ defmodule Dialyxir.Warnings do
                 Dialyxir.Warnings.ContractWithOpaque,
                 Dialyxir.Warnings.ExactEquality,
                 Dialyxir.Warnings.ExtraRange,
-                Dialyxir.Warnings.FuncionApplicationArguments,
+                Dialyxir.Warnings.FunctionApplicationArguments,
                 Dialyxir.Warnings.FunctionApplicationNoFunction,
                 Dialyxir.Warnings.GuardFail,
                 Dialyxir.Warnings.GuardFailPattern,

@@ -1,4 +1,4 @@
-defmodule Dialyxir.Warnings.FuncionApplicationArguments do
+defmodule Dialyxir.Warnings.FunctionApplicationArguments do
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
