@@ -93,6 +93,18 @@ defmodule Dialyxir.FormatterTest do
     end
   end
 
+  describe "simple string ignore" do
+    test "evaluates an ignore file and ignores warnings matching the pattern" do
+      warning =
+        {:warn_matching, {'a/file.ex', 17}, {:pattern_match, ['pattern \'ok\'', '\'error\'']}}
+
+      in_project(:ignore_string, fn ->
+        assert Formatter.format_and_filter([warning], Project, [], :dialyzer) ==
+                 {:ok, [], :no_unused_filters}
+      end)
+    end
+  end
+
   test "listing unused filter behaves the same for different formats" do
     warnings = [
       {:warn_return_no_exit, {'a/regex_file.ex', 17},
