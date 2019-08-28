@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([_, _, arity]) do
-    "Function application will fail since anonymous function has arity of #{arity}."
+    "Function application will fail, because anonymous function has arity of #{arity}."
   end
 
   @impl Dialyxir.Warning
@@ -17,7 +17,7 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
     pretty_op = Erlex.pretty_print(op)
     pretty_type = Erlex.pretty_print_type(type)
 
-    "Function application will fail since #{pretty_op} :: #{pretty_type} is not a function of arity #{
+    "Function application will fail, because #{pretty_op} :: #{pretty_type} is not a function of arity #{
       arity
     }."
   end
@@ -26,7 +26,7 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
   @spec explain() :: String.t()
   def explain() do
     """
-    The function being invoked exists has an arity mismatch.
+    The function being invoked exists, but has an arity mismatch.
 
     Example:
 
