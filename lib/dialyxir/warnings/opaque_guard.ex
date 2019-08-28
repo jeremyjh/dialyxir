@@ -8,13 +8,13 @@ defmodule Dialyxir.Warnings.OpaqueGuard do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([guard | _]) do
-    "Guard test #{guard} breaks the opaqueness of its argument."
+    "The guard test #{guard} breaks the opaqueness of its argument."
   end
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([guard, args]) do
-    "Guard test #{guard}#{args} breaks the opaqueness of its argument."
+    "The guard test #{guard}#{args} breaks the opaqueness of its argument."
   end
 
   @impl Dialyxir.Warning
