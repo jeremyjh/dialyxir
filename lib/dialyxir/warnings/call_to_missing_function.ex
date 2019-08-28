@@ -20,7 +20,7 @@ defmodule Dialyxir.Warnings.CallToMissingFunction do
   @spec explain() :: String.t()
   def explain() do
     """
-    Function calls a missing or private function. May be a typo, or
+    Function calls a missing or private function. This may be caused by a typo or
     incorrect arity. This is also a compiler warning.
 
     Example:
