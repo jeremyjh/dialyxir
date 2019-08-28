@@ -23,8 +23,8 @@ defmodule Dialyxir.Warnings.FunctionApplicationArguments do
     pretty_args = Erlex.pretty_print_args(args)
     pretty_type = Erlex.pretty_print(type)
 
-    "Function application with arguments #{pretty_args} will fail " <>
-      "since the function has type #{pretty_type}."
+    "Function application with arguments #{pretty_args} will fail, " <>
+      "because the function has type #{pretty_type}."
   end
 
   # OTP 22+ format
@@ -33,8 +33,8 @@ defmodule Dialyxir.Warnings.FunctionApplicationArguments do
     pretty_args = Erlex.pretty_print_args(args)
     pretty_type = Erlex.pretty_print(type)
 
-    "Function application with arguments #{pretty_args} will fail " <>
-      "since the function has type #{pretty_type}, " <>
+    "Function application with arguments #{pretty_args} will fail, " <>
+      "because the function has type #{pretty_type}, " <>
       "which differs in #{pretty_arg_positions}."
   end
 
