@@ -8,13 +8,13 @@ defmodule Dialyxir.Warnings.GuardFail do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "Guard test can never succeed."
+    "Guard clause can never succeed."
   end
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([]) do
-    "Clause guard cannot succeed."
+    "Guard clause can never succeed."
   end
 
   def format_long([guard, args]) do
