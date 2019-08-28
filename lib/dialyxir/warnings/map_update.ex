@@ -33,7 +33,7 @@ defmodule Dialyxir.Warnings.MapUpdate do
   @spec explain() :: String.t()
   def explain() do
     """
-    Can only use the map update syntax to update a key that is in the
+    Elixir can only use the map update syntax to update a key that is in the
     map.
 
     Example:
