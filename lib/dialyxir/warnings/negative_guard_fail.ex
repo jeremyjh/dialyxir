@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.NegativeGuardFail do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "Guard test can never succeed."
+    "The guard test can never succeed."
   end
 
   @impl Dialyxir.Warning
