@@ -8,20 +8,21 @@ defmodule Dialyxir.Warnings.GuardFail do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "Guard clause can never succeed."
+    "The guard clause can never succeed."
   end
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([]) do
-    "Guard clause can never succeed."
+    "The guard clause can never succeed."
   end
 
   def format_long([guard, args]) do
     pretty_args = Erlex.pretty_print_args(args)
 
     """
-    Guard test:
+    The guard test:
+
     #{guard}#{pretty_args}
 
     can never succeed.
@@ -34,7 +35,8 @@ defmodule Dialyxir.Warnings.GuardFail do
     pretty_infix = Erlex.pretty_print_infix(infix)
 
     """
-    Guard test:
+    The guard clause:
+
     #{pretty_arg1}
 
     #{pretty_infix}
