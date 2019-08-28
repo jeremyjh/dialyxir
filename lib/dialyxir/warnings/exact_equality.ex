@@ -22,7 +22,7 @@ defmodule Dialyxir.Warnings.ExactEquality do
   @spec explain() :: String.t()
   def explain() do
     """
-    Expression can never evaluate to true.
+    The expression can never evaluate to true.
 
     Example:
 
