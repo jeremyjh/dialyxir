@@ -1,6 +1,6 @@
 defmodule Dialyxir.Warning do
   @moduledoc """
-  Behaviour for defining warning semantings.
+  Behaviour for defining warning semantics.
 
   Contains callbacks for various warnings
   """

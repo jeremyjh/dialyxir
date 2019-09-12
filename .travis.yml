@@ -5,9 +5,7 @@ elixir:
 otp_release:
   - 20.3
   - 21.3
-matrix:
-  exclude:
-      otp_release: 21.3
+  - 22.0
 script:
   - mix test --trace
   - MIX_ENV=prod mix do compile --warnings-as-errors, archive.build, archive.install --force
@@ -17,6 +15,7 @@ script:
   - MIX_ENV=prod mix dialyzer --format short
   - MIX_ENV=prod mix dialyzer --format raw
   - MIX_ENV=prod mix dialyzer --format dialyzer
+  - MIX_ENV=examples mix dialyzer --format short --ignore-exit-status
 branches:
   except:
     - /^[0-9]\.[0-9]/
