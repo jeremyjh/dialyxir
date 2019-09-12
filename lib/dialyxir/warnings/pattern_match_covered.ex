@@ -22,7 +22,7 @@ defmodule Dialyxir.Warnings.PatternMatchCovered do
     The pattern
     #{pretty_pattern}
 
-    can never match since previous clauses completely cover the type
+    can never match, because previous clauses completely cover the type
     #{pretty_type}.
     """
   end
