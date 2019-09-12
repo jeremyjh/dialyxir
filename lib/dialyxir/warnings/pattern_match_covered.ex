@@ -9,7 +9,7 @@ defmodule Dialyxir.Warnings.PatternMatchCovered do
   @spec format_short([String.t()]) :: String.t()
   def format_short([pattern, _]) do
     "The pattern #{pattern} can never match the type, " <>
-      because it is covered by previous clauses."
+    "because it is covered by previous clauses."
   end
 
   @impl Dialyxir.Warning
