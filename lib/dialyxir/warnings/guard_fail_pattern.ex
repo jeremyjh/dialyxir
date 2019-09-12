@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.GuardFailPattern do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([pattern, _]) do
-    "Clause guard #{pattern} cannot succeed."
+    "The clause guard #{pattern} cannot succeed."
   end
 
   @impl Dialyxir.Warning
@@ -17,7 +17,7 @@ defmodule Dialyxir.Warnings.GuardFailPattern do
     pretty_type = Erlex.pretty_print_type(type)
     pretty_pattern = Erlex.pretty_print_pattern(pattern)
 
-    "Clause guard cannot succeed. The pattern #{pretty_pattern} " <>
+    "The clause guard cannot succeed. The pattern #{pretty_pattern} " <>
       "was matched against the type #{pretty_type}."
   end
 
@@ -25,8 +25,8 @@ defmodule Dialyxir.Warnings.GuardFailPattern do
   @spec explain() :: String.t()
   def explain() do
     """
-    The guard describes a condition of literals that fails the pattern
-    given in function head.
+    The clause guard describes a condition of literals that fails the pattern
+    given in the function head.
 
     Example:
 

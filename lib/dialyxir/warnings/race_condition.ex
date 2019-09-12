@@ -17,7 +17,7 @@ defmodule Dialyxir.Warnings.RaceCondition do
     pretty_args = Erlex.pretty_print_args(args)
     pretty_module = Erlex.pretty_print(module)
 
-    "The call #{pretty_module},#{function}#{pretty_args} #{reason}."
+    "The call #{pretty_module}, #{function}#{pretty_args} #{reason}."
   end
 
   @impl Dialyxir.Warning

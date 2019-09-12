@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.CallbackTypeMismatch do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([_behaviour, function | _]) do
-    "Callback mismatch for @callback #{function}."
+    "Type mismatch for @callback #{function}."
   end
 
   @impl Dialyxir.Warning
@@ -19,7 +19,7 @@ defmodule Dialyxir.Warnings.CallbackTypeMismatch do
     pretty_success_type = Erlex.pretty_print_type(success_type)
 
     """
-    Callback mismatch for @callback #{function}/#{arity} in #{pretty_behaviour} behaviour.
+    Type mismatch for @callback #{function}/#{arity} in #{pretty_behaviour} behaviour.
 
     Expected type:
     #{pretty_success_type}
@@ -34,7 +34,7 @@ defmodule Dialyxir.Warnings.CallbackTypeMismatch do
   def explain() do
     """
     The success type of the function does not match the callback type
-    in behaviour.
+    in the behaviour.
 
     Example:
 

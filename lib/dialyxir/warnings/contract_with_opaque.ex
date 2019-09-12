@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.ContractWithOpaque do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([_module, function | _]) do
-    "The @spec for #{function} has an opaque subtype which is violated by the success typing"
+    "The @spec for #{function} has an opaque subtype which is violated by the success typing."
   end
 
   @impl Dialyxir.Warning
@@ -31,7 +31,7 @@ defmodule Dialyxir.Warnings.ContractWithOpaque do
   @spec explain() :: String.t()
   def explain() do
     """
-    The @spec says the function is returning an opaque type but it is
+    The @spec says the function is returning an opaque type, but it is
     returning a different type.
 
     Example:

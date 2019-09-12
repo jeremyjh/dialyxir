@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.OverlappingContract do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([_module, function, arity]) do
-    "Overloaded contract for #{function}/#{arity}"
+    "The contract for #{function}/#{arity} is overloaded."
   end
 
   @impl Dialyxir.Warning

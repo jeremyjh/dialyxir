@@ -19,8 +19,8 @@ defmodule Dialyxir.Warnings.CallbackSpecTypeMismatch do
     pretty_callback_type = Erlex.pretty_print_type(callback_type)
 
     """
-    The @spec return type for does not match the expected return type
-    for #{function}/#{arity} callback  in #{pretty_behaviour} behaviour.
+    The @spec return type does not match the expected return type
+    for #{function}/#{arity} callback in #{pretty_behaviour} behaviour.
 
     Actual:
     @spec #{function}(...) :: #{pretty_success_type}
@@ -34,7 +34,7 @@ defmodule Dialyxir.Warnings.CallbackSpecTypeMismatch do
   @spec explain() :: String.t()
   def explain() do
     """
-    The type of the return type in the @spec does not match the
+    The return type in the @spec does not match the
     expected return type of the behaviour.
 
     defmodule ExampleBehaviour do

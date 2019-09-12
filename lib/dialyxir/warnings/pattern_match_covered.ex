@@ -8,7 +8,8 @@ defmodule Dialyxir.Warnings.PatternMatchCovered do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([pattern, _]) do
-    "The pattern #{pattern} can never match the type, because it is covered by previous clauses."
+    "The pattern #{pattern} can never match the type, " <>
+    "because it is covered by previous clauses."
   end
 
   @impl Dialyxir.Warning
@@ -22,7 +23,7 @@ defmodule Dialyxir.Warnings.PatternMatchCovered do
     #{pretty_pattern}
 
     can never match, because previous clauses completely cover the type
-    #{pretty_type}
+    #{pretty_type}.
     """
   end
 
@@ -30,7 +31,7 @@ defmodule Dialyxir.Warnings.PatternMatchCovered do
   @spec explain() :: String.t()
   def explain() do
     """
-    The pattern match has a later clause that will never be executed
+    The pattern match has a later clause that will never be executed,
     because a more general clause is higher in the matching order.
 
     Example:
