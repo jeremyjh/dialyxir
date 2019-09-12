@@ -19,7 +19,7 @@ defmodule Dialyxir.Warnings.AppCall do
     pretty_actual_type = Erlex.pretty_print_type(actual_type)
 
     "The call #{pretty_module}.#{function}/#{arity} requires that " <>
-      "#{culprit} is of type #{pretty_expected_type} not #{pretty_actual_type}"
+      "#{culprit} is of type #{pretty_expected_type}, not #{pretty_actual_type}."
   end
 
   @impl Dialyxir.Warning

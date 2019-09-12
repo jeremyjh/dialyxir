@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.ExtraRange do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short([_module, function | _]) do
-    "@spec for #{function} has more types than returned by function."
+    "@spec for #{function} has more types than are returned by the function."
   end
 
   @impl Dialyxir.Warning
@@ -19,7 +19,7 @@ defmodule Dialyxir.Warnings.ExtraRange do
     pretty_signature = Erlex.pretty_print_type(signature_range)
 
     """
-    Type specification has too many types.
+    The type specification has too many types for the function.
 
     Function:
     #{pretty_module}.#{function}/#{arity}

@@ -8,7 +8,7 @@ defmodule Dialyxir.Warnings.UnmatchedReturn do
   @impl Dialyxir.Warning
   @spec format_short([String.t()]) :: String.t()
   def format_short(_) do
-    "Expression produces multiple types but none are matched."
+    "The expression produces multiple types, but none are matched."
   end
 
   @impl Dialyxir.Warning
@@ -17,7 +17,7 @@ defmodule Dialyxir.Warnings.UnmatchedReturn do
     pretty_type = Erlex.pretty_print_type(type)
 
     """
-    Expression produces a value of type:
+    The expression produces a value of type:
 
     #{pretty_type}
 

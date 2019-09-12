@@ -28,7 +28,7 @@ defmodule Dialyxir.Warnings.RecordConstruction do
   end
 
   def format_long([name, field, type]) do
-    "Record construction violates the declared type for ##{name}{} since " <>
-      "#{field} cannot be of type #{type}."
+    "Record construction violates the declared type for ##{name}{}, " <>
+      "because #{field} cannot be of type #{type}."
   end
 end

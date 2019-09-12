@@ -21,7 +21,7 @@ defmodule Dialyxir.Warnings.CallbackMissing do
   @spec explain() :: String.t()
   def explain() do
     """
-    Module implements a behaviour but does not have all of its
+    Module implements a behaviour, but does not have all of its
     callbacks. This is also a compiler warning.
 
     Example:

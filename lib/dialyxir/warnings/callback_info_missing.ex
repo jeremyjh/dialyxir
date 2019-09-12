@@ -21,7 +21,7 @@ defmodule Dialyxir.Warnings.CallbackInfoMissing do
   @spec explain() :: String.t()
   def explain() do
     """
-    The module using a behaviour that does not exist or is not a
+    The module is using a behaviour that does not exist or is not a
     behaviour. This is also a compiler warning.
 
     Example:
