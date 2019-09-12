@@ -67,8 +67,6 @@ defmodule Dialyxir.Dialyzer do
     end
   end
 
-  @success_msg color("done (passed successfully)", :green)
-  @warnings_msg color("done (warnings were emitted)", :yellow)
   @success_return_code 0
   @warning_return_code 2
   @error_return_code 1
@@ -76,19 +74,19 @@ defmodule Dialyxir.Dialyzer do
   def dialyze(args, runner \\ Runner, filterer \\ Project) do
     case runner.run(args, filterer) do
       {:ok, {time, [], formatted_unnecessary_skips}} ->
-        {:ok, @success_return_code, [time, formatted_unnecessary_skips, @success_msg]}
+        {:ok, @success_return_code, [time, formatted_unnecessary_skips, success_msg()]}
 
       {:ok, {time, result, formatted_unnecessary_skips}} ->
         warnings = Enum.map(result, &color(&1, :red))
 
         {:warn, @warning_return_code,
-         [time] ++ warnings ++ [formatted_unnecessary_skips, @warnings_msg]}
+         [time] ++ warnings ++ [formatted_unnecessary_skips, warnings_msg()]}
 
       {:warn, {time, result, formatted_unnecessary_skips}} ->
         warnings = Enum.map(result, &color(&1, :red))
 
         {:warn, @warning_return_code,
-         [time] ++ warnings ++ [formatted_unnecessary_skips, @warnings_msg]}
+         [time] ++ warnings ++ [formatted_unnecessary_skips, warnings_msg()]}
 
       {:error, {msg, formatted_unnecessary_skips}} ->
         {:error, @error_return_code, [color(formatted_unnecessary_skips, :red), color(msg, :red)]}
@@ -97,4 +95,8 @@ defmodule Dialyxir.Dialyzer do
         {:error, @error_return_code, [color(msg, :red)]}
     end
   end
+
+  defp success_msg, do: color("done (passed successfully)", :green)
+
+  defp warnings_msg, do: color("done (warnings were emitted)", :yellow)
 end
