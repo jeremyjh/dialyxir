@@ -92,7 +92,7 @@ otp_release:
   - 21.0
 
 script:
-  - mix dialyzer --halt-exit-status
+  - mix dialyzer
 
 cache:
   directories:
@@ -294,8 +294,6 @@ applied to the *short-description* (`mix dialyzer --format short`):
 ]
 ```
 
-`:ignore_warnings` works as you may expect with `--halt-exit-status` - by resetting the exit status to 0 if all warnings are filtered.
-
 #### List unused Filters
 
 As filters tend to become obsolete (either because a discrepancy was fixed, or because the location
@@ -309,5 +307,5 @@ dialyzer: [
 ]
 ```
 
-This option can also be set on the command line with `--list-unused-filters`. When used with
-`--halt-exit-status`, this option will result in an error status code.
+This option can also be set on the command line with `--list-unused-filters`. When used without
+`--ignore-exit-status`, this option will result in an error status code.
