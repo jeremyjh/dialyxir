@@ -29,19 +29,15 @@ defmodule Dialyxir.Warnings.GuardFail do
     """
   end
 
-  def format_long([arg1, infix, arg2]) do
-    pretty_arg1 = Erlex.pretty_print_type(arg1)
-    pretty_arg2 = Erlex.pretty_print_args(arg2)
+  def format_long([arg, infix, guard]) do
+    pretty_arg = Erlex.pretty_print_args(arg)
     pretty_infix = Erlex.pretty_print_infix(infix)
+    pretty_guard = Erlex.pretty_print(guard)
 
     """
     The guard clause:
 
-    #{pretty_arg1}
-
-    #{pretty_infix}
-
-    #{pretty_arg2}
+    when #{pretty_arg} #{pretty_infix} #{pretty_guard}
 
     can never succeed.
     """
