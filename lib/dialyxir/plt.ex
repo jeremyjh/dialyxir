@@ -161,6 +161,11 @@ defmodule Dialyxir.Plt do
 
   defp plt_copy(plt, new_plt) do
     info("Copying #{Path.basename(plt)} to #{Path.basename(new_plt)}")
+
+    new_plt
+    |> Path.dirname()
+    |> File.mkdir_p!()
+
     File.cp!(plt, new_plt)
   end
 
