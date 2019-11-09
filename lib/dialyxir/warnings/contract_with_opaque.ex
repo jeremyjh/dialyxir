@@ -16,7 +16,7 @@ defmodule Dialyxir.Warnings.ContractWithOpaque do
   def format_long([module, function, arity, type, signature_type]) do
     pretty_module = Erlex.pretty_print(module)
     pretty_type = Erlex.pretty_print_type(type)
-    pretty_success_type = Erlex.pretty_print_type(signature_type)
+    pretty_success_type = Erlex.pretty_print_contract(signature_type)
 
     """
     The @spec for #{pretty_module}.#{function}/#{arity} has an opaque
