@@ -1,4 +1,21 @@
 defmodule Dialyxir.Warnings.PatternMatch do
+  @moduledoc """
+  The pattern matching is never given a value that satisfies all of
+  its clauses.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          unmatched(:ok)
+        end
+
+        defp unmatched(:ok), do: :ok
+
+        defp unmatched(:error), do: :error
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -32,22 +49,6 @@ defmodule Dialyxir.Warnings.PatternMatch do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The pattern matching is never given a value that satisfies all of
-    its clauses.
-
-    Example:
-
-    defmodule Example do
-
-      def ok() do
-        unmatched(:ok)
-      end
-
-      defp unmatched(:ok), do: :ok
-
-      defp unmatched(:error), do: :error
-    end
-    """
+    @moduledoc
   end
 end

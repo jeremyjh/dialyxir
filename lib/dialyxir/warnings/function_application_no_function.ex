@@ -1,4 +1,17 @@
 defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
+  @moduledoc """
+  The function being invoked exists, but has an arity mismatch.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          fun = fn _ -> :ok end
+          fun.()
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -25,17 +38,6 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The function being invoked exists, but has an arity mismatch.
-
-    Example:
-
-    defmodule Example do
-      def ok() do
-        fun = fn _ -> :ok end
-        fun.()
-      end
-    end
-    """
+    @moduledoc
   end
 end

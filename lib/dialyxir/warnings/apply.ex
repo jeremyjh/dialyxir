@@ -1,4 +1,18 @@
 defmodule Dialyxir.Warnings.Apply do
+  @moduledoc """
+  The function being invoked exists, and has the correct arity, but
+  will not succeed.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          fun = fn :ok -> :ok end
+          fun.(:error)
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -32,18 +46,6 @@ defmodule Dialyxir.Warnings.Apply do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The function being invoked exists, and has the correct arity, but
-    will not succeed.
-
-    Example:
-
-    defmodule Example do
-      def ok() do
-        fun = fn :ok -> :ok end
-        fun.(:error)
-      end
-    end
-    """
+    @moduledoc
   end
 end

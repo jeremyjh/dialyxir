@@ -1,4 +1,19 @@
 defmodule Dialyxir.Warnings.CallbackInfoMissing do
+  @moduledoc """
+  The module is using a behaviour that does not exist or is not a
+  behaviour. This is also a compiler warning.
+
+  ## Example
+
+      defmodule Example do
+        @behaviour BehaviourThatDoesNotExist
+
+        def ok() do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -20,20 +35,6 @@ defmodule Dialyxir.Warnings.CallbackInfoMissing do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The module is using a behaviour that does not exist or is not a
-    behaviour. This is also a compiler warning.
-
-    Example:
-
-    defmodule Example do
-
-      @behaviour BehaviourThatDoesNotExist
-
-      def ok() do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

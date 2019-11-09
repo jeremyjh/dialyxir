@@ -1,4 +1,22 @@
 defmodule Dialyxir.Warnings.UnusedFunction do
+  @moduledoc """
+  Due to issues higher in the function or call stack, while the
+  function is recognized as used by the compiler, it will never be
+  recognized as having been called until the other error is resolved.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          raise "error"
+
+          unused()
+        end
+
+        defp unused(), do: :ok
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -18,23 +36,6 @@ defmodule Dialyxir.Warnings.UnusedFunction do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Due to issues higher in the function or call stack, while the
-    function is recognized as used by the compiler, it will never be
-    recognized as having been called until the other error is
-    resolved.
-
-    Example:
-
-    defmodule Example do
-      def ok() do
-        raise "error"
-
-        unused()
-      end
-
-      defp unused(), do: :ok
-    end
-    """
+    @moduledoc
   end
 end

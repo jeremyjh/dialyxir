@@ -1,4 +1,22 @@
 defmodule Dialyxir.Warnings.ContractWithOpaque do
+  @moduledoc """
+  The @spec says the function is returning an opaque type, but it is
+  returning a different type.
+
+  ## Example
+
+      defmodule Types do
+        @opaque type :: :ok
+      end
+
+      defmodule Example do
+        @spec ok() :: Types.type()
+        def ok() do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -30,22 +48,6 @@ defmodule Dialyxir.Warnings.ContractWithOpaque do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The @spec says the function is returning an opaque type, but it is
-    returning a different type.
-
-    Example:
-
-    defmodule Types do
-      @opaque type :: :ok
-    end
-
-    defmodule Example do
-      @spec ok() :: Types.type()
-      def ok() do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

@@ -1,4 +1,24 @@
 defmodule Dialyxir.Warnings.CallbackSpecTypeMismatch do
+  @moduledoc """
+  The return type in the @spec does not match the
+  expected return type of the behaviour.
+
+  ## Example
+
+      defmodule ExampleBehaviour do
+        @callback ok(:ok) :: :ok
+      end
+
+      defmodule Example do
+        @behaviour ExampleBehaviour
+
+        @spec ok(:ok) :: :error
+        def ok(:ok) do
+          :error
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -33,22 +53,6 @@ defmodule Dialyxir.Warnings.CallbackSpecTypeMismatch do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The return type in the @spec does not match the
-    expected return type of the behaviour.
-
-    defmodule ExampleBehaviour do
-      @callback ok(:ok) :: :ok
-    end
-
-    defmodule Example do
-      @behaviour ExampleBehaviour
-
-      @spec ok(:ok) :: :error
-      def ok(:ok) do
-        :error
-      end
-    end
-    """
+    @moduledoc
   end
 end

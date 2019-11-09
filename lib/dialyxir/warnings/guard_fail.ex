@@ -1,4 +1,29 @@
 defmodule Dialyxir.Warnings.GuardFail do
+  @moduledoc """
+  The function guard either presents an impossible guard or the only
+  calls will never succeed against the guards.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          ok(0)
+        end
+
+        defp ok(n) when n > 1 do
+          :ok
+        end
+      end
+
+    or
+
+      defmodule Example do
+        def ok() when 0 > 1 do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -46,29 +71,6 @@ defmodule Dialyxir.Warnings.GuardFail do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The function guard either presents an impossible guard or the only
-    calls will never succeed against the guards.
-
-    Example:
-
-    defmodule Example do
-      def ok() do
-        ok(0)
-      end
-
-      defp ok(n) when n > 1 do
-        :ok
-      end
-    end
-
-    or
-
-    defmodule Example do
-      def ok() when 0 > 1 do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

@@ -1,4 +1,23 @@
 defmodule Dialyxir.Warnings.CallbackTypeMismatch do
+  @moduledoc """
+  The success type of the function does not match the callback type in
+  the behaviour.
+
+  ## Example
+
+      defmodule ExampleBehaviour do
+        @callback ok() :: :ok
+      end
+
+      defmodule Example do
+        @behaviour ExampleBehaviour
+
+        def ok() do
+          :error
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -32,23 +51,6 @@ defmodule Dialyxir.Warnings.CallbackTypeMismatch do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The success type of the function does not match the callback type
-    in the behaviour.
-
-    Example:
-
-    defmodule ExampleBehaviour do
-      @callback ok() :: :ok
-    end
-
-    defmodule Example do
-      @behaviour ExampleBehaviour
-
-      def ok() do
-        :error
-      end
-    end
-    """
+    @moduledoc
   end
 end

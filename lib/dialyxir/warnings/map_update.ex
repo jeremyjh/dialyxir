@@ -1,4 +1,19 @@
 defmodule Dialyxir.Warnings.MapUpdate do
+  @moduledoc """
+  Elixir can only use the map update syntax to update a key that is in
+  the map.
+
+  ## Example
+
+      defmodule Example do
+        @spec error() :: map
+        def error() do
+          map = %{exists: :exists}
+          %{map | does_not_exist: :fail}
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -32,19 +47,6 @@ defmodule Dialyxir.Warnings.MapUpdate do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Elixir can only use the map update syntax to update a key that is in the
-    map.
-
-    Example:
-
-    defmodule Example do
-      @spec error() :: map
-      def error() do
-        map = %{exists: :exists}
-        %{map | does_not_exist: :fail}
-      end
-    end
-    """
+    @moduledoc
   end
 end

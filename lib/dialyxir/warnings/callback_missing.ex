@@ -1,4 +1,24 @@
 defmodule Dialyxir.Warnings.CallbackMissing do
+  @moduledoc """
+  Module implements a behaviour, but does not have all of its
+  callbacks. This is also a compiler warning.
+
+  ## Example
+
+      defmodule ExampleBehaviour do
+        @callback ok() :: :ok
+        @callback missing() :: :ok
+      end
+
+      defmodule Example do
+        @behaviour ExampleBehaviour
+
+        def ok() do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -20,25 +40,6 @@ defmodule Dialyxir.Warnings.CallbackMissing do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Module implements a behaviour, but does not have all of its
-    callbacks. This is also a compiler warning.
-
-    Example:
-
-    defmodule ExampleBehaviour do
-      @callback ok() :: :ok
-      @callback missing() :: :ok
-    end
-
-    defmodule Example do
-
-      @behaviour ExampleBehaviour
-
-      def ok() do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

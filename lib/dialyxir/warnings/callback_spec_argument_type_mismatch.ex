@@ -1,4 +1,23 @@
 defmodule Dialyxir.Warnings.CallbackSpecArgumentTypeMismatch do
+  @moduledoc """
+  Spec type of argument does not match the callback's expected type.
+
+  ## Example
+
+      defmodule ExampleBehaviour do
+        @callback ok(:ok) :: :ok
+      end
+
+      defmodule Example do
+        @behaviour ExampleBehaviour
+
+        @spec ok(:error) :: :ok
+        def ok(:ok) do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -35,23 +54,6 @@ defmodule Dialyxir.Warnings.CallbackSpecArgumentTypeMismatch do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Spec type of argument does not match the callback's expected type.
-
-    Example:
-
-    defmodule ExampleBehaviour do
-      @callback ok(:ok) :: :ok
-    end
-
-    defmodule Example do
-      @behaviour ExampleBehaviour
-
-      @spec ok(:error) :: :ok
-      def ok(:ok) do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

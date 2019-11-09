@@ -1,4 +1,17 @@
 defmodule Dialyxir.Warnings.GuardFailPattern do
+  @moduledoc """
+  The clause guard describes a condition of literals that fails the pattern
+  given in the function head.
+
+  ## Example
+
+      defmodule Example do
+        def ok(n = 0) when not n < 1 do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -24,17 +37,6 @@ defmodule Dialyxir.Warnings.GuardFailPattern do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The clause guard describes a condition of literals that fails the pattern
-    given in the function head.
-
-    Example:
-
-    defmodule Example do
-      def ok(n = 0) when not n < 1 do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

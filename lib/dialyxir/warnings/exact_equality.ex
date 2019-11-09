@@ -1,4 +1,16 @@
 defmodule Dialyxir.Warnings.ExactEquality do
+  @moduledoc """
+  The expression can never evaluate to true.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          :ok == :error
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -21,16 +33,6 @@ defmodule Dialyxir.Warnings.ExactEquality do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The expression can never evaluate to true.
-
-    Example:
-
-    defmodule Example do
-      def ok() do
-        :ok == :error
-      end
-    end
-    """
+    @moduledoc
   end
 end

@@ -1,4 +1,20 @@
 defmodule Dialyxir.Warnings.Call do
+  @moduledoc """
+  The function call will not succeed.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          ok(:error)
+        end
+
+        def ok(:ok) do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -47,20 +63,6 @@ defmodule Dialyxir.Warnings.Call do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The function call will not succeed.
-
-    Example:
-
-    defmodule Example do
-      def ok() do
-        ok(:error)
-      end
-
-      def ok(:ok) do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end
