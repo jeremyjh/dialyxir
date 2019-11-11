@@ -1,4 +1,23 @@
 defmodule Dialyxir.Warnings.ContractSubtype do
+  # TODO: could not create warning with this example (and --overspecs)
+  @moduledoc """
+  The type in the @spec does not completely cover the types returned
+  by function.
+
+  ## Example
+
+      defmodule Example do
+        @spec ok(:ok | :error) :: :ok
+        def ok(:ok) do
+          :ok
+        end
+
+        def ok(:error) do
+          :error
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -35,23 +54,6 @@ defmodule Dialyxir.Warnings.ContractSubtype do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    # TODO: could not create warning with this example (and --overspecs)
-    """
-    The type in the @spec does not completely cover the types returned
-    by function.
-
-    Example:
-
-    defmodule Example do
-      @spec ok(:ok | :error) :: :ok
-      def ok(:ok) do
-        :ok
-      end
-
-      def ok(:error) do
-        :error
-      end
-    end
-    """
+    @moduledoc
   end
 end

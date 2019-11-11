@@ -1,4 +1,27 @@
 defmodule Dialyxir.Warnings.CallToMissingFunction do
+  @moduledoc """
+  Function calls a missing or private function. This may be caused by
+  a typo or incorrect arity. This is also a compiler warning.
+
+  ## Example
+
+      defmodule Missing do
+        def missing(:ok) do
+          :ok
+        end
+
+        defp missing() do
+          :ok
+        end
+      end
+
+      defmodule Example do
+        def error() do
+          Missing.missing()
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -19,27 +42,6 @@ defmodule Dialyxir.Warnings.CallToMissingFunction do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Function calls a missing or private function. This may be caused by a typo or
-    incorrect arity. This is also a compiler warning.
-
-    Example:
-
-    defmodule Missing do
-      def missing(:ok) do
-        :ok
-      end
-
-      defp missing() do
-        :ok
-      end
-    end
-
-    defmodule Example do
-      def error() do
-        Missing.missing()
-      end
-    end
-    """
+    @moduledoc
   end
 end

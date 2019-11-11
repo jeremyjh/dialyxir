@@ -1,4 +1,20 @@
 defmodule Dialyxir.Warnings.UnknownType do
+  @moduledoc """
+  Spec references a missing @type.
+
+  ## Example
+
+      defmodule Missing do
+      end
+
+      defmodule Example do
+        @spec ok(Missing.t()) :: :ok
+        def ok(_) do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -22,20 +38,6 @@ defmodule Dialyxir.Warnings.UnknownType do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Spec references a missing @type.
-
-    Example:
-
-    defmodule Missing do
-    end
-
-    defmodule Example do
-      @spec ok(Missing.t()) :: :ok
-      def ok(_) do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

@@ -1,4 +1,30 @@
 defmodule Dialyxir.Warnings.OpaqueMatch do
+  @moduledoc """
+  Attempted to pattern match against the internal structure of an
+  opaque term.
+
+  ## Example
+
+      defmodule OpaqueStruct do
+        defstruct [:opaque]
+
+        @opaque t :: %__MODULE__{}
+
+        @spec opaque() :: t
+        def opaque() do
+          %__MODULE__{}
+        end
+      end
+
+      defmodule Example do
+        @spec error() :: :error
+        def error() do
+          %{opaque: _} = OpaqueStruct.opaque()
+          :error
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -45,29 +71,6 @@ defmodule Dialyxir.Warnings.OpaqueMatch do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Attempted to pattern match against the internal structure of an opaque term.
-
-    Example:
-
-    defmodule OpaqueStruct do
-      defstruct [:opaque]
-
-      @opaque t :: %__MODULE__{}
-
-      @spec opaque() :: t
-      def opaque() do
-        %__MODULE__{}
-      end
-    end
-
-    defmodule Example do
-      @spec error() :: :error
-      def error() do
-        %{opaque: _} = OpaqueStruct.opaque()
-        :error
-      end
-    end
-    """
+    @moduledoc
   end
 end

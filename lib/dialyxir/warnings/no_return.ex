@@ -1,4 +1,35 @@
 defmodule Dialyxir.Warnings.NoReturn do
+  @moduledoc """
+  The function has no return. This is usually due to an issue later on
+  in the call stack causing it to not be recognized as returning for
+  some reason. It is often helpful to cross reference the complete
+  list of warnings with the call stack in the function and fix the
+  deepest part of the call stack, which will usually fix many of the
+  other no_return errors.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          Enum.each([1, 2, 3], fn _ -> raise "error" end)
+        end
+      end
+
+    or
+
+      defmodule Example do
+        def ok() do
+          raise "error"
+
+          :ok
+        end
+
+        def ok(:ok) do
+          ok()
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -42,33 +73,6 @@ defmodule Dialyxir.Warnings.NoReturn do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The function has no return. This is usually due to an issue later
-    on in the call stack causing it to not be recognized as returning
-    for some reason. It is often helpful to cross reference the
-    complete list of warnings with the call stack in the function and
-    fix the deepest part of the call stack, which will usually fix
-    many of the other no_return errors.
-
-    defmodule Example do
-      def ok() do
-        Enum.each([1, 2, 3], fn _ -> raise "error" end)
-      end
-    end
-
-    or
-
-    defmodule Example do
-      def ok() do
-        raise "error"
-
-        :ok
-      end
-
-      def ok(:ok) do
-        ok()
-      end
-    end
-    """
+    @moduledoc
   end
 end

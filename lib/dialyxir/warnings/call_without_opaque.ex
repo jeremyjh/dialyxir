@@ -1,4 +1,28 @@
 defmodule Dialyxir.Warnings.CallWithoutOpaque do
+  @moduledoc """
+  Function call without opaqueness type mismatch.
+
+  ## Example
+
+      defmodule OpaqueStruct do
+        defstruct [:opaque]
+
+        @opaque t :: %OpaqueStruct{}
+      end
+
+      defmodule Example do
+        @spec error(OpaqueStruct.t()) :: :error
+        def error(struct = %OpaqueStruct{}) do
+          do_error(struct)
+        end
+
+        @spec do_error(OpaqueStruct.t()) :: :error
+        defp do_error(_) do
+          :error
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -50,28 +74,6 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    Function call without opaqueness type mismatch.
-
-    Example:
-
-    defmodule OpaqueStruct do
-      defstruct [:opaque]
-
-      @opaque t :: %OpaqueStruct{}
-    end
-
-    defmodule Example do
-      @spec error(OpaqueStruct.t()) :: :error
-      def error(struct = %OpaqueStruct{}) do
-        do_error(struct)
-      end
-
-      @spec do_error(OpaqueStruct.t()) :: :error
-      defp do_error(_) do
-        :error
-      end
-    end
-    """
+    @moduledoc
   end
 end

@@ -1,4 +1,22 @@
 defmodule Dialyxir.Warnings.OverlappingContract do
+  @moduledoc """
+  The function has an additional @spec that is already covered more
+  generally by a higher @spec.
+
+  ## Example
+
+      defmodule Example do
+        @spec ok(atom) :: :ok
+        def ok(:ok) do
+          :ok
+        end
+
+        @spec ok(:error) :: :ok
+        def ok(:error) do
+          :ok
+        end
+      end
+  """
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -14,24 +32,7 @@ defmodule Dialyxir.Warnings.OverlappingContract do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The function has an additional @spec that is already covered more
-    generally by a higher @spec.
-
-    Example:
-
-    defmodule Example do
-      @spec ok(atom) :: :ok
-      def ok(:ok) do
-        :ok
-      end
-
-      @spec ok(:error) :: :ok
-      def ok(:error) do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 
   @impl Dialyxir.Warning

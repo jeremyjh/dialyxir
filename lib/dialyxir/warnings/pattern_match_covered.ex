@@ -1,4 +1,21 @@
 defmodule Dialyxir.Warnings.PatternMatchCovered do
+  @moduledoc """
+  The pattern match has a later clause that will never be executed,
+  because a more general clause is higher in the matching order.
+
+  ## Example
+
+      defmodule Example do
+        def ok() do
+          unmatched(:error)
+        end
+
+        defp unmatched(_), do: :ok
+
+        defp unmatched(:error), do: :error
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -30,22 +47,6 @@ defmodule Dialyxir.Warnings.PatternMatchCovered do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The pattern match has a later clause that will never be executed,
-    because a more general clause is higher in the matching order.
-
-    Example:
-
-    defmodule Example do
-
-      def ok() do
-        unmatched(:error)
-      end
-
-      defp unmatched(_), do: :ok
-
-      defp unmatched(:error), do: :error
-    end
-    """
+    @moduledoc
   end
 end

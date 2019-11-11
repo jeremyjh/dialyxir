@@ -1,4 +1,29 @@
 defmodule Dialyxir.Warnings.NegativeGuardFail do
+  @moduledoc """
+  The function guard either presents an impossible guard or the only
+  calls will never succeed against the guards.
+
+  ## Example
+
+      defmodule Example do
+        def ok(ok = "ok") when not is_bitstring(ok) do
+          :ok
+        end
+      end
+
+    or
+
+      defmodule Example do
+        def ok() do
+          ok(:ok)
+        end
+
+        defp ok(ok) when not is_atom(ok) do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -38,29 +63,6 @@ defmodule Dialyxir.Warnings.NegativeGuardFail do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The function guard either presents an impossible guard or the only
-    calls will never succeed against the guards.
-
-    Example:
-
-    defmodule Example do
-      def ok(ok = "ok") when not is_bitstring(ok) do
-        :ok
-      end
-    end
-
-    or
-
-    defmodule Example do
-      def ok() do
-        ok(:ok)
-      end
-
-      defp ok(ok) when not is_atom(ok) do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

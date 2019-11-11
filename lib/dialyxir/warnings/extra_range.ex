@@ -1,4 +1,18 @@
 defmodule Dialyxir.Warnings.ExtraRange do
+  @moduledoc """
+  The @spec says the function returns more types than the function
+  actually returns.
+
+  ## Example
+
+      defmodule Example do
+        @spec ok() :: :ok | :error
+        def ok() do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -35,17 +49,6 @@ defmodule Dialyxir.Warnings.ExtraRange do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The @spec says the function returns more types than the function actually returns.
-
-    Example:
-
-    defmodule Example do
-      @spec ok() :: :ok | :error
-      def ok() do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end

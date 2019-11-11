@@ -1,4 +1,18 @@
 defmodule Dialyxir.Warnings.ContractSupertype do
+  @moduledoc """
+  The @spec, while not incorrect, is more general than the type
+  returned by the function.
+
+  ## Example
+
+      defmodule Example do
+        @spec ok() :: any
+        def ok() do
+          :ok
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -35,18 +49,6 @@ defmodule Dialyxir.Warnings.ContractSupertype do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    """
-    The @spec, while not incorrect, is more general than the type
-    returned by the function.
-
-    Example:
-
-    defmodule Example do
-      @spec ok() :: any
-      def ok() do
-        :ok
-      end
-    end
-    """
+    @moduledoc
   end
 end
