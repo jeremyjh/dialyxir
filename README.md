@@ -10,7 +10,9 @@ A release candidate has been published on Hex for 1.0. To use it add to your mix
 
 ```elixir
 defp deps do
-  [{:dialyxir, "~> 1.0.0-rc.7", only: [:dev], runtime: false}]
+  [
+    {:dialyxir, "~> 1.0.0-rc.7", only: [:dev], runtime: false},
+  ]
 end
 ```
 
@@ -32,7 +34,9 @@ To add it to a mix project, just add a line like this in your deps function in m
 
 ```elixir
 defp deps do
-  [{:dialyxir, "~> 0.5", only: [:dev], runtime: false}]
+  [
+    {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+  ]
 end
 ```
 
