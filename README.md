@@ -202,7 +202,7 @@ end
 
 ### Paths
 
-By default only the ebin in the `_build` directory for the current mix environment of your project is included in paths to search for BEAM files to perform analysis on. You can specify a list of locations to find BEAMS for analysis with :paths keyword.
+By default only the ebin in the `_build` directory for the current mix environment of your project is included in paths to search for BEAM files to perform analysis on. You can specify a list of locations to find BEAMS for analysis with :paths or exclude certain paths with :excluded_paths keyword.
 
 ```elixir
 def project do
@@ -213,7 +213,8 @@ def project do
     dialyzer: [
       plt_add_apps: [:mnesia],
       flags: [:unmatched_returns, :error_handling, :race_conditions, :no_opaque],
-      paths: ["_build/dev/lib/my_app/ebin", "_build/dev/lib/foo/ebin"]
+      paths: ["_build/dev/lib/my_app/ebin", "_build/dev/lib/foo/ebin"],
+      excluded_paths: ["_build/dev/lib/bar/ebin"]
     ]
   ]
 end
