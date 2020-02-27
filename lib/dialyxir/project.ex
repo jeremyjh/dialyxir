@@ -67,7 +67,19 @@ defmodule Dialyxir.Project do
 
     beam_files
     |> Map.merge(consolidated_files)
-    |> Enum.map(fn {_file, path} -> path |> to_charlist() end)
+    |> Enum.map(fn {_file, path} -> path end)
+    |> reject_excluded_files()
+    |> Enum.map(&to_charlist(&1))
+  end
+
+  defp reject_excluded_files(files) do
+    file_exclusions = dialyzer_config()[:excluded_file_suffixes] || []
+
+    Enum.reject(files, fn file ->
+      Enum.any?(file_exclusions, fn exclusion ->
+        String.match?(file, ~r/#{exclusion}$/)
+      end)
+    end)
   end
 
   defp dialyzer_paths do
