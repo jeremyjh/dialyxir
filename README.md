@@ -220,6 +220,26 @@ def project do
 end
 ```
 
+You can also exclude specific files with :excluded_file_suffixes keyword, when excluding whole paths is not precise enough.
+```elixir
+def project do
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [
+      plt_add_apps: [:mnesia],
+      flags: [:unmatched_returns, :error_handling, :race_conditions, :no_opaque],
+      excluded_file_suffixes: [
+        "_build/dev/lib/dialyxir/ebin/Elixir.Dialyxir.Project.beam",
+        "lib/dialyxir/ebin/Elixir.Dialyxir.Project.beam",
+        "Elixir.Dialyxir.Warnings.NoReturn.beam"
+      ]
+    ]
+  ]
+end
+```
+
 ### Ignore Warnings
 
 By default `dialyxir` has always included the `:unknown` warning option so that warnings about unknown functions are returned. This is usually a clue that the PLT is not complete and it may be best to leave it on, but it can be disabled entirely by specifying `remove_defaults: [:unknown]` in your config.
