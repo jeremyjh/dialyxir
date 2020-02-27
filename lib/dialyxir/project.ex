@@ -77,7 +77,7 @@ defmodule Dialyxir.Project do
 
     Enum.reject(files, fn file ->
       Enum.any?(file_exclusions, fn exclusion ->
-        String.match?(file, ~r/#{exclusion}$/)
+        String.ends_with?(file, exclusion)
       end)
     end)
   end
