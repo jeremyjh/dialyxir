@@ -205,10 +205,18 @@ defmodule Dialyxir.Formatter do
   defp filter_warning(filterer, warning = {_, {file, line}, {warning_type, _}}, filter_map) do
     if Map.has_key?(Dialyxir.Warnings.warnings(), warning_type) do
       {skip?, matching_filters} =
-        filterer.filter_warning?(
-          {to_string(file), warning_type, line, format_warning(warning, :short)},
-          filter_map
-        )
+        try do
+          filterer.filter_warning?(
+            {to_string(file), warning_type, line, format_warning(warning, :short)},
+            filter_map
+          )
+        rescue
+          _ ->
+            {false, []}
+        catch
+          _ ->
+            {false, []}
+        end
 
       filter_map =
         Enum.reduce(matching_filters, filter_map, fn filter, filter_map ->
