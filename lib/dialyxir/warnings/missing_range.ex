@@ -10,7 +10,7 @@ defmodule Dialyxir.Warnings.MissingRange do
   def format_short([module, function, arity| _]) do
     pretty_module = Erlex.pretty_print(module)
 
-    "The type specification is missing types returned by #{module}.#{function}/#{arity}."
+    "The type specification is missing types returned by #{pretty_module}.#{function}/#{arity}."
   end
 
   @impl Dialyxir.Warning
