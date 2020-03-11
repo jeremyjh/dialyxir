@@ -6,16 +6,6 @@ Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 ## Changes in 1.0
 
-A release candidate has been published on Hex for 1.0. To use it add to your mix.exs deps:
-
-```elixir
-defp deps do
-  [
-    {:dialyxir, "~> 1.0.0-rc.7", only: [:dev], runtime: false},
-  ]
-end
-```
-
 Elixir 1.6 is required, to support the new pretty printing feature. If your
 project is not yet on 1.6, continue to specify 0.5 in your mix deps.
 
@@ -35,7 +25,7 @@ To add it to a mix project, just add a line like this in your deps function in m
 ```elixir
 defp deps do
   [
-    {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+    {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
   ]
 end
 ```
