@@ -271,12 +271,14 @@ defmodule Dialyxir.Project do
             deps_project() ++ deps_app(false)
 
           :project ->
+            info("Dialyxir has deprecated plt_add_deps: :project in favor of apps_direct, which includes only runtime dependencies.")
             deps_project() ++ deps_app(false)
 
           :apps_direct ->
             deps_app(false)
 
           :transitive ->
+            info("Dialyxir has deprecated plt_add_deps: :transitive in favor of app_tree, which includes only runtime dependencies.")
             deps_transitive() ++ deps_app(true)
 
           _app_tree ->

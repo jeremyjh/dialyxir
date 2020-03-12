@@ -140,10 +140,8 @@ If you want to ignore a specific dependency, you can specify it in the `:plt_ign
 #### Dependencies
 
 OTP application dependencies are (transitively) added to your PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
-  * :project - Direct Mix and OTP dependencies
-  * :apps_direct - Only Direct OTP application dependencies - not the entire tree
-  * :transitive - Include Mix and OTP application dependencies recursively
-  * :app_tree - Transitive OTP application dependencies e.g. `mix app.tree` (default)
+  * :apps_direct - Only Direct OTP runtime application dependencies - not the entire tree
+  * :app_tree - Transitive OTP runtime application dependencies e.g. `mix app.tree` (default)
 
 
 The example below changes the default to include only direct OTP dependencies, adds another specific dependency, and removes a dependency from the list. This can be helpful if a large dependency tree is creating memory issues and only some of the transitive dependencies are required for analysis.
