@@ -208,10 +208,26 @@ end
 ```
 
 ### Ignore Warnings
+#### Dialyxir defaults
 
 By default `dialyxir` has always included the `:unknown` warning option so that warnings about unknown functions are returned. This is usually a clue that the PLT is not complete and it may be best to leave it on, but it can be disabled entirely by specifying `remove_defaults: [:unknown]` in your config.
 
 A better option is to ignore the specific warnings you can't fix (maybe due to a bug upstream, or a dependency you just don't want to include in your PLT due to time/memory in building the PLT file.)
+
+#### Module attribute
+
+Dialyzer has a built-in support for ignoring warnings through a `@dialyzer` module attribute. For example:
+
+```elixir
+defmodule Myapp.Repo do
+  use Ecto.Repo, otp_app: :myapp
+  @dialyzer {:nowarn_function, rollback: 1}
+end
+```
+
+More details can be found in the [erlang documentation](http://erlang.org/doc/man/dialyzer.html#requesting-or-suppressing-warnings-in-source-files)
+
+#### Ignore file
 
 If you want to ignore well-known warnings, you can specify a file path in `:ignore_warnings`.
 
