@@ -376,10 +376,12 @@ defmodule Mix.Tasks.Dialyzer do
 
   @spec dependency_hash :: {[atom()], binary()}
   def dependency_hash do
-    lock_file = Mix.Dep.Lock.read() |> :erlang.term_to_binary()
+    # lock_file = Mix.Dep.Lock.read() |> :erlang.term_to_binary()
+
     apps = Project.cons_apps()
     apps |> inspect() |> info()
-    hash = :crypto.hash(:sha, lock_file <> :erlang.term_to_binary(apps))
+    # hash = :crypto.hash(:sha, lock_file <> :erlang.term_to_binary(apps))
+    hash = :crypto.hash(:sha, File.read!(Mix.Project.config()[:lockfile]))
     {apps, hash}
   end
 end
