@@ -154,6 +154,9 @@ defmodule Dialyxir.Plt do
 
   defp plt_new(plt) do
     info("Creating #{Path.basename(plt)}")
+
+    create_directory(plt)
+
     plt = erl_path(plt)
     _ = plt_run(analysis_type: :plt_build, output_plt: plt, apps: [:erts])
     :ok
@@ -162,9 +165,7 @@ defmodule Dialyxir.Plt do
   defp plt_copy(plt, new_plt) do
     info("Copying #{Path.basename(plt)} to #{Path.basename(new_plt)}")
 
-    new_plt
-    |> Path.dirname()
-    |> File.mkdir_p!()
+    create_directory(new_plt)
 
     File.cp!(plt, new_plt)
   end
@@ -251,5 +252,11 @@ defmodule Dialyxir.Plt do
       {:error, reason} ->
         Mix.raise("Could not open #{plt}: #{:file.format_error(reason)}")
     end
+  end
+
+  defp create_directory(filepath) do
+    filepath
+    |> Path.dirname()
+    |> File.mkdir_p!()
   end
 end
