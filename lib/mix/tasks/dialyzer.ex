@@ -11,7 +11,6 @@ defmodule Mix.Tasks.Dialyzer do
     * `--no-compile`       - do not compile even if needed.
     * `--no-check`         - do not perform (quick) check to see if PLT needs update.
     * `--force-check`      - force PLT check also if lock file is unchanged.
-       useful when dealing with local deps.
     * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code
     * `--list-unused-filters` - list unused ignore filters
       useful for CI. do not use with `mix do`.
@@ -161,7 +160,7 @@ defmodule Mix.Tasks.Dialyzer do
     if Mix.Project.get() do
       Project.check_config()
 
-      unless opts[:no_compile], do: Mix.Project.compile([])
+      unless opts[:no_compile], do: Mix.Task.run("compile", [])
 
       _ =
         unless no_check?(opts) do
