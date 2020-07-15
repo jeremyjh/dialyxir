@@ -10,6 +10,7 @@ defmodule Dialyxir.Mixfile do
       description: description(),
       package: package(),
       deps: deps(),
+      aliases: [test: "test --no-start"],
       dialyzer: [
         plt_apps: [:dialyzer, :elixir, :kernel, :mix, :stdlib, :erlex],
         ignore_warnings: ".dialyzer_ignore.exs",
