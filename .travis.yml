@@ -1,11 +1,20 @@
 language: elixir
 elixir:
-  - 1.7.3
-  - 1.8.1
+  - 1.7.4
+  - 1.8.2
+  - 1.9.4
+  - 1.10.4
 otp_release:
   - 20.3
   - 21.3
-  - 22.0
+  - 22.3
+matrix:
+  exclude:
+    - elixir: 1.10.4
+      otp_release: 20.3
+  include:
+    - elixir: 1.10.4
+      otp_release: 23.0
 script:
   - mix test --trace
   - MIX_ENV=prod mix do compile --warnings-as-errors, archive.build, archive.install --force
