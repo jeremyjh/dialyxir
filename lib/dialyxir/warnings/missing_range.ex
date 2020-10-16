@@ -1,4 +1,24 @@
 defmodule Dialyxir.Warnings.MissingRange do
+  @moduledoc """
+  Function spec declares a list of types, but function returns value
+  outside stated range.
+
+  This error only appears with the :overspecs flag.
+
+  ## Example
+
+      defmodule Example do
+        @spec foo(any()) :: :ok
+        def foo(:ok) do
+          :ok
+        end
+
+        def foo(_) do
+          :error
+        end
+      end
+  """
+
   @behaviour Dialyxir.Warning
 
   @impl Dialyxir.Warning
@@ -17,8 +37,8 @@ defmodule Dialyxir.Warnings.MissingRange do
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, extra_ranges, contract_range]) do
     pretty_module = Erlex.pretty_print(module)
-    pretty_contract_range = Erlex.pretty_print_args(contract_range)
-    pretty_extra_ranges = Erlex.pretty_print_contract(extra_ranges)
+    pretty_contract_range = Erlex.pretty_print_type(contract_range)
+    pretty_extra_ranges = Erlex.pretty_print_type(extra_ranges)
 
     """
     The type specification is missing types returned by function.
@@ -29,7 +49,7 @@ defmodule Dialyxir.Warnings.MissingRange do
     Type specification return types:
     #{pretty_contract_range}
 
-    Missing types:
+    Missing from spec:
     #{pretty_extra_ranges}
     """
   end
@@ -37,6 +57,6 @@ defmodule Dialyxir.Warnings.MissingRange do
   @impl Dialyxir.Warning
   @spec explain() :: String.t()
   def explain() do
-    Dialyxir.Warning.default_explain()
+    @moduledoc
   end
 end
