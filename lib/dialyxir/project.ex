@@ -22,9 +22,7 @@ defmodule Dialyxir.Project do
     end
   end
 
-  def plt_file() do
-    plt_path(dialyzer_config()[:plt_file]) || deps_plt()
-  end
+  def plt_file, do: plt_path(dialyzer_config()[:plt_file]) || deps_plt()
 
   defp plt_path(file) when is_binary(file), do: Path.expand(file)
   defp plt_path({:no_warn, file}) when is_binary(file), do: Path.expand(file)
@@ -41,13 +39,9 @@ defmodule Dialyxir.Project do
   end
 
   def cons_apps do
-    # compile & load all deps paths
-    Mix.Tasks.Deps.Loadpaths.run([])
-    # compile & load current project paths
-    Mix.Project.compile([])
-    apps = plt_apps() || plt_add_apps() ++ include_deps()
+    Mix.Task.run("compile", [])
 
-    apps
+    (plt_apps() || plt_add_apps() ++ Enum.flat_map(local_apps(), &direct_children/1))
     |> Enum.sort()
     |> Enum.uniq()
     |> Kernel.--(plt_ignore_apps())
@@ -241,84 +235,34 @@ defmodule Dialyxir.Project do
   end
 
   defp default_paths() do
-    reduce_umbrella_children([], fn paths ->
-      [Mix.Project.compile_path() | paths]
-    end)
+    build_path = Mix.Project.build_path()
+
+    for app <- local_apps() do
+      Path.join([build_path, "lib", Atom.to_string(app), "ebin"])
+    end
   end
 
-  defp plt_apps, do: dialyzer_config()[:plt_apps] |> load_apps()
-  defp plt_add_apps, do: dialyzer_config()[:plt_add_apps] || [] |> load_apps()
+  defp plt_apps, do: dialyzer_config()[:plt_apps]
+  defp plt_add_apps, do: dialyzer_config()[:plt_add_apps] || []
   defp plt_ignore_apps, do: dialyzer_config()[:plt_ignore_apps] || []
 
-  defp load_apps(nil), do: nil
+  defp local_apps() do
+    deps_apps =
+      for {app, scm} <- Mix.Project.deps_scms(),
+          not scm.fetchable?(),
+          do: app
 
-  defp load_apps(apps) do
-    Enum.each(apps, &Application.load/1)
-    apps
-  end
-
-  defp include_deps do
-    method = dialyzer_config()[:plt_add_deps]
-
-    reduce_umbrella_children([], fn deps ->
-      deps ++
-        case method do
-          false ->
-            []
-
-          # compatibility
-          true ->
-            deps_project() ++ deps_app(false)
-
-          :project ->
-            info(
-              "Dialyxir has deprecated plt_add_deps: :project in favor of apps_direct, which includes only runtime dependencies."
-            )
-
-            deps_project() ++ deps_app(false)
-
-          :apps_direct ->
-            deps_app(false)
-
-          :transitive ->
-            info(
-              "Dialyxir has deprecated plt_add_deps: :transitive in favor of app_tree, which includes only runtime dependencies."
-            )
-
-            deps_transitive() ++ deps_app(true)
-
-          _app_tree ->
-            deps_app(true)
-        end
-    end)
-  end
-
-  defp deps_project do
-    Mix.Project.config()[:deps]
-    |> Enum.filter(&env_dep(&1))
-    |> Enum.map(&elem(&1, 0))
-  end
-
-  defp deps_transitive do
-    Mix.Project.deps_paths()
-    |> Map.keys()
-  end
-
-  @spec deps_app(boolean()) :: [atom]
-  defp deps_app(recursive) do
-    app = Mix.Project.config()[:app]
-    deps_app(app, recursive)
-  end
-
-  @spec deps_app(atom(), boolean()) :: [atom]
-  defp deps_app(app, recursive) do
-    with_each =
-      if recursive do
-        &deps_app(&1, true)
+    project_apps =
+      if children = Mix.Project.apps_paths() do
+        Map.keys(children)
       else
-        fn _ -> [] end
+        [Mix.Project.config()[:app]]
       end
 
+    Enum.uniq(project_apps ++ deps_apps) -- plt_ignore_apps()
+  end
+
+  defp direct_children(app) do
     case Application.load(app) do
       :ok ->
         nil
@@ -327,46 +271,10 @@ defmodule Dialyxir.Project do
         nil
 
       {:error, err} ->
-        nil
         error("Error loading #{app}, dependency list may be incomplete.\n #{inspect(err)}")
     end
 
-    case Application.spec(app, :applications) do
-      [] ->
-        []
-
-      nil ->
-        []
-
-      this_apps ->
-        Enum.map(this_apps, with_each)
-        |> List.flatten()
-        |> Enum.concat(this_apps)
-    end
-  end
-
-  defp env_dep(dep) do
-    only_envs = dep_only(dep)
-    only_envs == nil || Mix.env() in List.wrap(only_envs)
-  end
-
-  defp dep_only({_, opts}) when is_list(opts), do: opts[:only]
-  defp dep_only({_, _, opts}) when is_list(opts), do: opts[:only]
-  defp dep_only(_), do: nil
-
-  @spec reduce_umbrella_children(list(), (list() -> list())) :: list()
-  defp reduce_umbrella_children(acc, f) do
-    if Mix.Project.umbrella?() do
-      children = Mix.Dep.Umbrella.loaded()
-
-      Enum.reduce(children, acc, fn child, acc ->
-        Mix.Project.in_project(child.app, child.opts[:path], fn _ ->
-          reduce_umbrella_children(acc, f)
-        end)
-      end)
-    else
-      f.(acc)
-    end
+    List.wrap(Application.spec(app, :applications))
   end
 
   defp dialyzer_config(), do: Mix.Project.config()[:dialyzer]

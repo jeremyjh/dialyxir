@@ -2,7 +2,7 @@ defmodule Dialyxir.ProjectTest do
   alias Dialyxir.Project
 
   use ExUnit.Case
-  import ExUnit.CaptureIO, only: [capture_io: 1, capture_io: 2]
+  import ExUnit.CaptureIO, only: [capture_io: 1]
 
   defp in_project(app, f) when is_atom(app) do
     Mix.Project.in_project(app, "test/fixtures/#{Atom.to_string(app)}", fn _ -> f.() end)
@@ -46,8 +46,7 @@ defmodule Dialyxir.ProjectTest do
     end)
   end
 
-  test "App list for default contains direct and
-        indirect :application dependencies" do
+  test "App list for default contains direct :application dependencies" do
     in_project(:default_apps, fn ->
       apps = Project.cons_apps()
       # direct
@@ -55,12 +54,11 @@ defmodule Dialyxir.ProjectTest do
       # direct
       assert Enum.member?(apps, :public_key)
       # indirect
-      assert Enum.member?(apps, :asn1)
+      refute Enum.member?(apps, :asn1)
     end)
   end
 
-  test "App list for umbrella contains child dependencies
-  indirect :application dependencies" do
+  test "App list for umbrella contains direct child and :application dependencies" do
     in_project(:umbrella, fn ->
       apps = Project.cons_apps()
       # direct
@@ -68,15 +66,14 @@ defmodule Dialyxir.ProjectTest do
       # direct, child1
       assert Enum.member?(apps, :public_key)
       # indirect
-      assert Enum.member?(apps, :asn1)
+      refute Enum.member?(apps, :asn1)
       # direct, child2
       assert Enum.member?(apps, :mix)
     end)
   end
 
   @tag :skip
-  test "App list for umbrella contains all child dependencies
-  when run from child directory" do
+  test "App list for umbrella contains all child dependencies when run from child directory" do
     in_project([:umbrella, :apps, :second_one], fn ->
       apps = Project.cons_apps()
       # direct
@@ -153,13 +150,6 @@ defmodule Dialyxir.ProjectTest do
 
       lines = Project.filter_legacy_warnings(output_list, pattern)
       assert lines == ["project.ex:9 This should still be here"]
-    end)
-  end
-
-  test "Project with non-existent dependency" do
-    in_project(:nonexistent_deps, fn ->
-      out = capture_io(:stderr, &Project.cons_apps/0)
-      assert Regex.match?(~r/Error loading nonexistent, dependency list may be incomplete/, out)
     end)
   end
 
