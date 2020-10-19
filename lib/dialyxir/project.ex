@@ -44,7 +44,7 @@ defmodule Dialyxir.Project do
     # compile & load all deps paths
     Mix.Tasks.Deps.Loadpaths.run([])
     # compile & load current project paths
-    Mix.Project.compile([])
+    Mix.Task.run("compile")
     apps = plt_apps() || plt_add_apps() ++ include_deps()
 
     apps

@@ -161,7 +161,7 @@ defmodule Mix.Tasks.Dialyzer do
     if Mix.Project.get() do
       Project.check_config()
 
-      unless opts[:no_compile], do: Mix.Project.compile([])
+      unless opts[:no_compile], do: Mix.Task.run("compile")
 
       _ =
         unless no_check?(opts) do
