@@ -24,8 +24,8 @@ defmodule Dialyxir.WarningHelpers do
       positions = form_position_string(arg_positions)
 
       """
-      will never return since it differs in arguments with
-      positions #{positions} from the success typing arguments:
+      will never return since the #{positions} arguments differ
+      from the success typing arguments:
 
       #{pretty_signature_args}
       """
