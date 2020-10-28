@@ -83,9 +83,7 @@ defmodule Dialyxir.Project do
 
           case result do
             {:match, _captured} -> true
-            :match -> true
             :nomatch -> false
-            {:error, _err_type} -> false
           end
         end,
         file_exclusions
