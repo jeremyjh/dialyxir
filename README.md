@@ -45,7 +45,7 @@ mix dialyzer
 ### Command line options
 
   * `--no-compile`         - do not compile even if needed.
-  * `--no-check`           - do not perform (quick) check to see if PLT needs updated.
+  * `--no-check`           - do not perform (quick) check to see if PLT needs to be updated.
   * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code
   *  `--format short`      - format the warnings in a compact format.
   *  `--format raw`        - format the warnings in format returned before Dialyzer formatting
