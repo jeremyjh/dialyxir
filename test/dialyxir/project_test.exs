@@ -16,7 +16,13 @@ defmodule Dialyxir.ProjectTest do
 
   test "Default Project PLT File in _build dir" do
     in_project(:default_apps, fn ->
-      assert Regex.match?(~r/_build.*plt/, Project.plt_file())
+      assert Regex.match?(~r/_build\/.*plt/, Project.plt_file())
+    end)
+  end
+
+  test "Can specify a different local PLT path" do
+    in_project(:alt_local_path, fn ->
+      assert Regex.match?(~r/dialyzer\/.*plt/, Project.plt_file())
     end)
   end
 
