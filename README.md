@@ -128,7 +128,7 @@ Running the mix task `dialyzer` by default builds several PLT files:
   * A project environment specific file in _build/env/dialyze_erlang-[OTP Version]_elixir-[Elixir Version]_deps-dev.plt
 
 The core files are simply copied to your project folder when you run `dialyxir` for the first time with a given version of Erlang and Elixir. By default, all
-the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path. You can specify a different location for the project PLT file with the :plt_file keyword - this is deprecated because people were using it with the old `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
+the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path. You can specify a different directory for the project PLT file with the :plt_local_path keyword. You can specify a different filename for the project PLT file with the :plt_file keyword - this is deprecated because people were using it with the old `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
 
 The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries.
 The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`.

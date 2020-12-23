@@ -258,8 +258,10 @@ defmodule Dialyxir.Project do
   defp core_path(), do: dialyzer_config()[:plt_core_path] || Mix.Utils.mix_home()
 
   defp local_plt(name) do
-    Path.join(Mix.Project.build_path(), "dialyxir_" <> name <> ".plt")
+    Path.join(local_path(), "dialyxir_" <> name <> ".plt")
   end
+
+  defp local_path(), do: dialyzer_config()[:plt_local_path] || Mix.Project.build_path()
 
   defp default_paths() do
     reduce_umbrella_children([], fn paths ->
