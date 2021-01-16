@@ -1,8 +1,13 @@
 # Dialyxir
 
-Mix tasks to simplify use of Dialyzer in Elixir projects.
-
 [![Build Status](https://travis-ci.org/jeremyjh/dialyxir.svg?branch=master)](https://travis-ci.org/jeremyjh/dialyxir)
+[![Module Version](https://img.shields.io/hexpm/v/dialyxir.svg)](https://hex.pm/packages/dialyxir)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/dialyxir/)
+[![Total Download](https://img.shields.io/hexpm/dt/dialyxir.svg)](https://hex.pm/packages/dialyxir)
+[![License](https://img.shields.io/hexpm/l/dialyxir.svg)](https://github.com/jeremyjh/dialyxir/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/jeremyjh/dialyxir.svg)](https://github.com/jeremyjh/dialyxir/commits/master)
+
+Mix tasks to simplify use of Dialyzer in Elixir projects.
 
 ## Changes in 1.0
 
@@ -53,10 +58,11 @@ mix dialyzer
   *  `--format dialyzer`   - format the warnings in the original Dialyzer format
   *  `--quiet`             - suppress all informational messages
 
-Warning flags passed to this task are passed on to `:dialyzer`.
+Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
-  e.g.
-    `mix dialyzer --unmatched_returns`
+```console
+mix dialyzer --unmatched_returns
+```
 
 There is information available about the warnings via the explain task - e.g.
 
@@ -69,6 +75,7 @@ If invoked without arguments, `mix dialyzer.explain` will list all the known war
 ## Continuous Integration
 
 To use Dialyzer in CI, you must be aware of several things:
+
 1) Building the PLT file may take a while if a project has many dependencies
 2) The PLT should be cached using the CI caching system
 3) The PLT will need to be rebuilt whenever adding a new Erlang or Elixir version to build matrix
@@ -121,17 +128,18 @@ Usage is straightforward but you should be aware of the available configuration 
 ### PLT
 
 The Persistent Lookup Table (PLT) is basically a cached output of the analysis. This is important because you'd probably stab yourself in the eye with
-a fork if you had to wait for Dialyzer to analyze all the standard library and OTP modules you are using everytime you ran it.
+a fork if you had to wait for Dialyzer to analyze all the standard library and OTP modules you are using every time you ran it.
 Running the mix task `dialyzer` by default builds several PLT files:
-  * A core Erlang file in $MIX_HOME/dialyxir_erlang-[OTP Version].plt
-  * A core Elixir file in $MIX_HOME/dialyxir_erlang-[OTP Version]_elixir-[Elixir Version].plt
-  * A project environment specific file in _build/env/dialyze_erlang-[OTP Version]_elixir-[Elixir Version]_deps-dev.plt
+
+  * A core Erlang file in `$MIX_HOME/dialyxir_erlang-[OTP Version].plt`
+  * A core Elixir file in `$MIX_HOME/dialyxir_erlang-[OTP Version]_elixir-[Elixir Version].plt`
+  * A project environment specific file in `_build/env/dialyze_erlang-[OTP Version]_elixir-[Elixir Version]_deps-dev.plt`
 
 The core files are simply copied to your project folder when you run `dialyxir` for the first time with a given version of Erlang and Elixir. By default, all
-the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a :plt_core_path key with a file path. You can specify a different directory for the project PLT file with the :plt_local_path keyword. You can specify a different filename for the project PLT file with the :plt_file keyword - this is deprecated because people were using it with the old `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
+the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a `:plt_core_path` key with a file path. You can specify a different directory for the project PLT file with the `:plt_local_path keyword`. You can specify a different filename for the project PLT file with the `:plt_file keyword` - this is deprecated because people were using it with the old `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
 
 The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries.
-The apps included by default are `[ :erts, :kernel, :stdlib, :crypto]`.
+The apps included by default are `[:erts, :kernel, :stdlib, :crypto]`.
 
 If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT. Using this option will mean dependencies are not added automatically (see below). If you want to just add an application to the list of defaults and dependencies you can use the `:plt_add_apps` key.
 
@@ -140,8 +148,9 @@ If you want to ignore a specific dependency, you can specify it in the `:plt_ign
 #### Dependencies
 
 OTP application dependencies are (transitively) added to your PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
-  * :apps_direct - Only Direct OTP runtime application dependencies - not the entire tree
-  * :app_tree - Transitive OTP runtime application dependencies e.g. `mix app.tree` (default)
+
+  * `:apps_direct` - Only Direct OTP runtime application dependencies - not the entire tree
+  * `:app_tree` - Transitive OTP runtime application dependencies e.g. `mix app.tree` (default)
 
 
 The example below changes the default to include only direct OTP dependencies, adds another specific dependency, and removes a dependency from the list. This can be helpful if a large dependency tree is creating memory issues and only some of the transitive dependencies are required for analysis.
@@ -168,6 +177,7 @@ Explanations are available for classes of warnings by executing `mix dialyzer.ex
 #### Formats
 
 Dialyxir supports formatting the errors in several different ways:
+
   * Short - By passing `--format short`, the structs and other spec/type information will be dropped from the error message, with a minimal message. This is useful for CI environments. Includes `warning_name ` for use in explanations.
   * Dialyzer - By passing `--format dialyzer`, the messages will be printed in the default Dialyzer format. This format is used in [legacy string matching](#simple-string-matches) ignore files.
   * Raw - By passing `--format raw`, messages will be printed in their form before being pretty printed by Dialyzer or Dialyxir.
@@ -242,7 +252,7 @@ def project do
 end
 ```
 
-This file comes in two formats: `--format dialyzer` string matches (compatbile with <= 0.5.1 ignore files), and the [term format](#elixir-term-format).
+This file comes in two formats: `--format dialyzer` string matches (compatible with `<= 0.5.1` ignore files), and the [term format](#elixir-term-format).
 
 #### Simple String Matches
 

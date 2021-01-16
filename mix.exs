@@ -1,10 +1,13 @@
 defmodule Dialyxir.Mixfile do
   use Mix.Project
 
+  @source_url "https://github.com/jeremyjh/dialyxir"
+  @version "1.0.0"
+
   def project do
     [
       app: :dialyxir,
-      version: "1.0.0",
+      version: @version,
       elixir: ">= 1.6.0",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
@@ -18,10 +21,14 @@ defmodule Dialyxir.Mixfile do
       ],
       # Docs
       name: "Dialyxir",
-      source_url: "https://github.com/jeremyjh/dialyxir",
-      homepage_url: "https://github.com/jeremyjh/dialyxir",
+      homepage_url: @source_url,
       # The main page in the docs
-      docs: [main: "readme", extras: ["README.md"]]
+      docs: [
+        main: "readme",
+        source_url: @source_url,
+        source_ref: @version,
+        extras: ["CHANGELOG.md", "README.md"]
+      ]
     ]
   end
 
@@ -41,7 +48,7 @@ defmodule Dialyxir.Mixfile do
   defp deps do
     [
       {:erlex, ">= 0.2.6"},
-      {:ex_doc, ">= 0.0.0", only: :dev}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
@@ -54,8 +61,11 @@ defmodule Dialyxir.Mixfile do
         "LICENSE"
       ],
       maintainers: ["Jeremy Huffman"],
-      licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/jeremyjh/dialyxir"}
+      licenses: ["Apache-2.0"],
+      links: %{
+        "Changelog" => "https://hexdocs.pm/dialyxir/changelog.html",
+        "GitHub" => @source_url
+      }
     ]
   end
 end

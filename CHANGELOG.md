@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Warning pretty printing and message fixes/improvements.
  - Prevent crash when short_format fails.
  - Ensure path to PLT target directory exists.
- - Bumpe required `erlex` for formatting fix.
+ - Bumped required `erlex` for formatting fix.
 
 ## [1.0.0-rc.7] - 2019-09-21
 

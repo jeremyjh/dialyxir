@@ -1,8 +1,8 @@
 defmodule Mix.Tasks.Dialyzer.Explain do
-  @shortdoc "Display information about dialyzer warnings."
+  @shortdoc "Display information about Dialyzer warnings."
 
   @moduledoc """
-  This task provides background information about dialyzer warnings.
+  This task provides background information about Dialyzer warnings.
   If invoked without any arguments it will list all warning atoms.
   When invoked with the name of a particular warning, it will display
   information regarding it.
