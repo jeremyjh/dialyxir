@@ -6,13 +6,13 @@ defmodule Dialyxir.Warning do
   """
 
   @doc """
-  By expressing the warning that is to be matched on, error handlong
+  By expressing the warning that is to be matched on, error handling
   and dispatching can be avoided in format functions.
   """
   @callback warning() :: atom
 
   @doc """
-  The default documentation when seeing an error wihout the user
+  The default documentation when seeing an error without the user
   otherwise overriding the format.
   """
   @callback format_long([String.t()] | {String.t(), String.t(), String.t()} | String.t()) ::

@@ -8,24 +8,24 @@ defmodule Mix.Tasks.Dialyzer do
 
   ## Command line options
 
-    * `--no-compile`       - do not compile even if needed.
-    * `--no-check`         - do not perform (quick) check to see if PLT needs update.
-    * `--force-check`      - force PLT check also if lock file is unchanged.
-       useful when dealing with local deps.
-    * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code
-    * `--list-unused-filters` - list unused ignore filters
-      useful for CI. do not use with `mix do`.
-    * `--plt`              - only build the required plt(s) and exit.
-    * `--format short`     - format the warnings in a compact format.
-    * `--format raw`       - format the warnings in format returned before Dialyzer formatting
-    * `--format dialyxir`  - format the warnings in a pretty printed format
-    * `--format dialyzer`  - format the warnings in the original Dialyzer format
-    * `--quiet`            - suppress all informational messages
+    * `--no-compile` - do not compile even if needed
+    * `--no-check` - do not perform (quick) check to see if PLT needs update
+    * `--force-check` - force PLT check also if lock file is unchanged useful
+      when dealing with local deps.
+    * `--ignore-exit-status` - display warnings but do not halt the VM or
+      return an exit status code
+    * `--list-unused-filters` - list unused ignore filters useful for CI. do
+      not use with `mix do`.
+    * `--plt` - only build the required PLT(s) and exit
+    * `--format short` - format the warnings in a compact format
+    * `--format raw` - format the warnings in format returned before Dialyzer formatting
+    * `--format dialyxir` - format the warnings in a pretty printed format
+    * `--format dialyzer` - format the warnings in the original Dialyzer format
+    * `--quiet` - suppress all informational messages
 
-  Warning flags passed to this task are passed on to `:dialyzer`.
+  Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
-  e.g.
-  `mix dialyzer --unmatched_returns`
+      mix dialyzer --unmatched_returns
 
   ## Configuration
 
@@ -54,8 +54,8 @@ defmodule Mix.Tasks.Dialyzer do
 
   OTP application dependencies are (transitively) added to your project's PLT by default. The applications added are the same as you would see displayed with the command `mix app.tree`. There is also a `:plt_add_deps` option you can set to control the dependencies added. The following options are supported:
 
-  * :apps_direct - Only Direct OTP runtime application dependencies - not the entire tree
-  * :app_tree - Transitive OTP runtime application dependencies e.g. `mix app.tree` (default)
+  * `:apps_direct` - Only Direct OTP runtime application dependencies - not the entire tree
+  * `:app_tree` - Transitive OTP runtime application dependencies e.g. `mix app.tree` (default)
 
   ```
   def project do
@@ -81,11 +81,11 @@ defmodule Mix.Tasks.Dialyzer do
 
   ### Other Configuration
 
-  * `dialyzer: :plt_file` - Deprecated - specify the plt file name to create and use - default is to create one in the project's current build environmnet (e.g. _build/dev/) specific to the Erlang/Elixir version used. Note that use of this key in version 0.4 or later will produce a deprecation warning - you can silence the warning by providing a pair with key :no_warn e.g. `plt_file: {:no_warn,"filename"}`.
+  * `dialyzer: :plt_file` - Deprecated - specify the PLT file name to create and use - default is to create one in the project's current build environment (e.g. _build/dev/) specific to the Erlang/Elixir version used. Note that use of this key in version 0.4 or later will produce a deprecation warning - you can silence the warning by providing a pair with key :no_warn e.g. `plt_file: {:no_warn,"filename"}`.
 
-  * `dialyzer: :plt_local_path` - specify the plt directory name to create and use - default is the project's current build environmnet (e.g. _build/dev/).
+  * `dialyzer: :plt_local_path` - specify the PLT directory name to create and use - default is the project's current build environment (e.g. `_build/dev/`).
 
-  * `dialyzer: :plt_core_path` - specify an alternative to MIX_HOME to use to store the Erlang and Elixir core files.
+  * `dialyzer: :plt_core_path` - specify an alternative to `MIX_HOME` to use to store the Erlang and Elixir core files.
 
   * `dialyzer: :ignore_warnings` - specify file path to filter well-known warnings.
   """
@@ -98,7 +98,7 @@ defmodule Mix.Tasks.Dialyzer do
   alias Dialyxir.Dialyzer
 
   defmodule Build do
-    @shortdoc "Build the required plt(s) and exit."
+    @shortdoc "Build the required PLT(s) and exit."
 
     @moduledoc """
     This task compiles the mix project and creates a PLT with dependencies if needed.
@@ -106,7 +106,7 @@ defmodule Mix.Tasks.Dialyzer do
 
     ## Command line options
 
-    * `--no-compile`       - do not compile even if needed.
+    * `--no-compile` - do not compile even if needed.
     """
     use Mix.Task
 
@@ -116,14 +116,14 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defmodule Clean do
-    @shortdoc "Delete plt(s) and exit."
+    @shortdoc "Delete PLT(s) and exit."
 
     @moduledoc """
     This task deletes PLT files and hash files.
 
     ## Command line options
 
-    * `--all`       - delete also core PLTs.
+      * `--all` - delete also core PLTs.
     """
     use Mix.Task
 
@@ -361,7 +361,7 @@ defmodule Mix.Tasks.Dialyzer do
       beyond the dialyzer defaults are included. All these properties can be changed in configuration.
       (see `mix help dialyzer`).
 
-      If you no longer use the older Dialyxir in any projects and do not want to see this notice each time you upgrade your Erlang/Elixir distribution, you can delete your old pre-0.4 PLT files. ( rm ~/.dialyxir_core_*.plt )
+      If you no longer use the older Dialyxir in any projects and do not want to see this notice each time you upgrade your Erlang/Elixir distribution, you can delete your old pre-0.4 PLT files. (`rm ~/.dialyxir_core_*.plt`)
       """)
     end
   end

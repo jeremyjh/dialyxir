@@ -153,11 +153,11 @@ defmodule Dialyxir.Formatter do
     warnings_count = Enum.count(warnings)
     filtered_warnings_count = Enum.count(filtered_warnings)
     skipped_count = warnings_count - filtered_warnings_count
-    unnessary_skips_count = count_unnecessary_skips(filter_map)
+    unnecessary_skips_count = count_unnecessary_skips(filter_map)
 
     info(
       "Total errors: #{warnings_count}, Skipped: #{skipped_count}, " <>
-        "Unnecessary Skips: #{unnessary_skips_count}"
+        "Unnecessary Skips: #{unnecessary_skips_count}"
     )
 
     :ok
