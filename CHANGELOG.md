@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## Unreleased changes post [1.1.0]
+
+## [1.1.0] - 2021-02-18
+
+### Changed
+
+### Added
+  - Configuration option to set the project's PLT path: `:plt_local_path`.
+  - Project configuration setting to exclude files based on a regex: `:exclude_files`.
+  - `explain` text for `:missing_range` warning.
+
+### Fixed
+
+  - Fixes and improvements to README and documentation.
+  - Fixed `mix.lock` hash stability. Will cause a recheck of PLTs on first usage in each project.
+
+### Changed
+  - Improved wording of argument mismatch warnings.
+
 ## [1.0.0] - 2020-03-16
 
 ### Changed
