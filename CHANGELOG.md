@@ -8,8 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [1.1.0] - 2021-02-18
 
-### Changed
-
 ### Added
   - Configuration option to set the project's PLT path: `:plt_local_path`.
   - Project configuration setting to exclude files based on a regex: `:exclude_files`.
