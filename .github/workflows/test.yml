@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  check_duplicate_runs:
+    name: Check for duplicate runs
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: always
+          cancel_others: true
+          skip_after_successful_duplicate: true
+          paths_ignore: '["**/README.md", "**/CHANGELOG.md", "**/LICENSE"]'
+          do_not_skip: '["pull_request"]'
+
+  test:
+    name: Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}
+    runs-on: ubuntu-latest
+    needs: check_duplicate_runs
+    if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
+
+    strategy:
+      matrix:
+        elixir:
+        - '1.9.4'
+        - '1.10.4'
+        - '1.11.1'
+        otp:
+        - '21.3'
+        - '22.3'
+        - '23.0'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Elixir
+      uses: erlef/setup-elixir@v1
+      with:
+        elixir-version: ${{ matrix.elixir }}
+        otp-version: ${{ matrix.otp }}
+
+    - name: Restore deps cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          deps
+          _build
+        key: ${{ runner.os }}-deps-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}-git-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-deps-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+          ${{ runner.os }}-deps-${{ matrix.otp }}-${{ matrix.elixir }}
+
+    - name: Install package dependencies
+      run: mix deps.get
+
+    - name: Remove compiled application files
+      run: mix clean
+
+    - name: Compile dependencies
+      run: mix compile
+      env:
+        MIX_ENV: test
+
+    - name: Run unit tests
+      run: mix test --trace
+
+    - name: Check compilation warnings
+      run: mix do compile --warnings-as-errors, archive.build, archive.install --force
+      env:
+        MIX_ENV: prod
+
+    - name: Check source code formatting
+      run: mix format --check-formatted
+
+    - name: Check source code formatting
+      run: mix dialyzer --list-unused-filters
+      env:
+        MIX_ENV: prod
+
+    - name: Run output tests
+      run: mix test
+      env:
+        OUTPUT_TESTS: true
+
+    - name: Get results in short format
+      run: mix dialyzer --format short
+      env:
+        MIX_ENV: prod
+
+    - name: Get results in raw format
+      run: mix dialyzer --format raw
+      env:
+        MIX_ENV: prod
+
+    - name: Get results in dialyzer format
+      run: mix dialyzer --format dialyzer
+      env:
+        MIX_ENV: prod
+
+    - name: Check examples
+      run: mix dialyzer --format short --ignore-exit-status
+      env:
+        MIX_ENV: examples
