@@ -21,6 +21,7 @@ defmodule Mix.Tasks.Dialyzer do
     * `--format raw` - format the warnings in format returned before Dialyzer formatting
     * `--format dialyxir` - format the warnings in a pretty printed format
     * `--format dialyzer` - format the warnings in the original Dialyzer format
+    * `--format ignore_file` - format the warnings to be suitable for adding to Elixir Format ignore file
     * `--quiet` - suppress all informational messages
 
   Warning flags passed to this task are passed on to `:dialyzer` - e.g.

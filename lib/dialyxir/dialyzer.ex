@@ -25,6 +25,9 @@ defmodule Dialyxir.Dialyzer do
             split[:format] == "dialyxir" ->
               :dialyxir
 
+            split[:format] == "ignore_file" ->
+              :ignore_file
+
             split[:format] == "raw" ->
               :raw
 

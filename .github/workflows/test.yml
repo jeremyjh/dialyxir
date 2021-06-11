@@ -108,6 +108,11 @@ jobs:
       env:
         MIX_ENV: prod
 
+    - name: Get results in ignore_file format
+      run: mix dialyzer --format ignore_file
+      env:
+        MIX_ENV: prod
+
     - name: Check examples
       run: mix dialyzer --format short --ignore-exit-status
       env:

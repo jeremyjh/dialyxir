@@ -25,6 +25,7 @@ defmodule Dialyxir.Formatter do
       filtered_warnings
       |> filter_legacy_warnings(filterer)
       |> Enum.map(&format_warning(&1, formatter))
+      |> Enum.uniq()
 
     show_count_skipped(warnings, formatted_warnings, filter_map)
     formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
@@ -71,6 +72,10 @@ defmodule Dialyxir.Formatter do
     string = warning.format_short(arguments)
 
     "#{base_name}:#{line}:#{warning_name} #{string}"
+  end
+
+  defp format_warning({_tag, {file, _line}, {warning_name, _arguments}}, :ignore_file) do
+    ~s({"#{file}", :#{warning_name}},)
   end
 
   defp format_warning(dialyzer_warning = {_tag, {file, line}, message}, :dialyxir) do
