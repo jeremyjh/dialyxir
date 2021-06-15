@@ -56,6 +56,7 @@ mix dialyzer
   *  `--format raw`        - format the warnings in format returned before Dialyzer formatting
   *  `--format dialyxir`   - format the warnings in a pretty printed format
   *  `--format dialyzer`   - format the warnings in the original Dialyzer format
+  *  `--format ignore_file` - format the warnings to be suitable for adding to "Elixir Term Format" ignore file
   *  `--quiet`             - suppress all informational messages
 
 Warning flags passed to this task are passed on to `:dialyzer` - e.g.
@@ -289,8 +290,8 @@ done (warnings were emitted)
 
 #### Elixir Term Format
 
-Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. The file looks like the following, and can match either tuple patterns or an arbitrary Regex
-applied to the *short-description* (`mix dialyzer --format short`):
+Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. Entries for existing warnings can be generated with `mix dialyzer --format ignore_file`. Lines may be either tuples or an arbitrary Regex
+applied to the *short-description* (`mix dialyzer --format short`). The file looks like the following:
 
 ```elixir
 # .dialyzer_ignore.exs

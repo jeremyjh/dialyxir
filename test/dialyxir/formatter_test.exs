@@ -12,12 +12,18 @@ defmodule Dialyxir.FormatterTest do
 
   describe "exs ignore" do
     test "evaluates an ignore file and ignores warnings matching the pattern" do
-      warning =
-        {:warn_return_no_exit, {'a/file.ex', 17}, {:no_return, [:only_normal, :format_long, 1]}}
+      warnings = [
+        {:warn_return_no_exit, {'lib/short_description.ex', 17},
+         {:no_return, [:only_normal, :format_long, 1]}},
+        {:warn_return_no_exit, {'lib/file/warning_type.ex', 18},
+         {:no_return, [:only_normal, :format_long, 1]}},
+        {:warn_return_no_exit, {'lib/file/warning_type/line.ex', 19},
+         {:no_return, [:only_normal, :format_long, 1]}}
+      ]
 
       in_project(:ignore, fn ->
         {:error, remaining, _unused_filters_present} =
-          Formatter.format_and_filter([warning], Project, [], :short)
+          Formatter.format_and_filter(warnings, Project, [], :short)
 
         assert remaining == []
       end)
@@ -114,8 +120,10 @@ defmodule Dialyxir.FormatterTest do
 
     expected_warning = "a/another-file.ex:18"
 
-    expected_unused_filter =
-      "Unused filters:\n{\"a/file.ex:17:no_return Function format_long/1 has no local return.\"}"
+    expected_unused_filter = ~s(Unused filters:
+{"lib/short_description.ex:17:no_return Function format_long/1 has no local return."}
+{"lib/file/warning_type.ex", :no_return, 18}
+{"lib/file/warning_type/line.ex", :no_return, 19})
 
     filter_args = [{:list_unused_filters, true}]
 
@@ -126,7 +134,7 @@ defmodule Dialyxir.FormatterTest do
 
           assert {:error, [warning], {:unused_filters_present, unused}} = result
           assert warning =~ expected_warning
-          assert unused =~ expected_unused_filter
+          assert unused == expected_unused_filter
           # A warning for regex_file.ex was explicitly put into format_and_filter.
           refute unused =~ "regex_file.ex"
         end)
