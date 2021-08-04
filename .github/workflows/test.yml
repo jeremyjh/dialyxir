@@ -90,6 +90,7 @@ jobs:
         MIX_ENV: prod
 
     - name: Check source code formatting
+      if: ${{ matrix.elixir > '1.12.0' && startsWith(matrix.elixir, '1.1') }}
       run: mix format --check-formatted
 
     - name: Check source code formatting
