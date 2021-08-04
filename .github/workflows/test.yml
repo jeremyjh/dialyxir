@@ -30,6 +30,7 @@ jobs:
     if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
 
     strategy:
+      fail-fast: false
       matrix:
         elixir:
         - '1.9.4'
