@@ -36,9 +36,7 @@ defmodule Dialyxir.Warnings.OpaqueMatch do
   def format_short([_pattern, type | _]) do
     pretty_type = Erlex.pretty_print_type(type)
 
-    "Attempted to pattern match against the internal structure of an opaque term of type #{
-      pretty_type
-    }."
+    "Attempted to pattern match against the internal structure of an opaque term of type #{pretty_type}."
   end
 
   @impl Dialyxir.Warning
