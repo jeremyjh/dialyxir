@@ -30,9 +30,7 @@ defmodule Dialyxir.Warnings.FunctionApplicationNoFunction do
     pretty_op = Erlex.pretty_print(op)
     pretty_type = Erlex.pretty_print_type(type)
 
-    "Function application will fail, because #{pretty_op} :: #{pretty_type} is not a function of arity #{
-      arity
-    }."
+    "Function application will fail, because #{pretty_op} :: #{pretty_type} is not a function of arity #{arity}."
   end
 
   @impl Dialyxir.Warning
