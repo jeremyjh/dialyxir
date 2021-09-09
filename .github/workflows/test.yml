@@ -30,22 +30,26 @@ jobs:
     if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
 
     strategy:
+      fail-fast: false
       matrix:
         elixir:
-        - '1.9.4'
         - '1.10.4'
-        - '1.11.1'
+        - '1.11.4'
+        - '1.12.2'
         otp:
-        - '21.3'
         - '22.3'
-        - '23.0'
+        - '23.3'
+        - '24.0'
+        exclude:
+          - elixir: '1.10.4'
+            otp: '24.0'
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
     - name: Set up Elixir
-      uses: erlef/setup-elixir@v1
+      uses: erlef/setup-beam@v1
       with:
         elixir-version: ${{ matrix.elixir }}
         otp-version: ${{ matrix.otp }}
@@ -81,17 +85,8 @@ jobs:
         MIX_ENV: prod
 
     - name: Check source code formatting
+      if: ${{ matrix.elixir > '1.12.0' }}
       run: mix format --check-formatted
-
-    - name: Check source code formatting
-      run: mix dialyzer --list-unused-filters
-      env:
-        MIX_ENV: prod
-
-    - name: Run output tests
-      run: mix test
-      env:
-        OUTPUT_TESTS: true
 
     - name: Get results in short format
       run: mix dialyzer --format short
@@ -112,6 +107,11 @@ jobs:
       run: mix dialyzer --format ignore_file
       env:
         MIX_ENV: prod
+
+    - name: Run output tests
+      run: mix test
+      env:
+        OUTPUT_TESTS: true
 
     - name: Check examples
       run: mix dialyzer --format short --ignore-exit-status
