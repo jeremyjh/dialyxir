@@ -53,7 +53,7 @@ defmodule Dialyxir.FormatterTest do
       end)
     end
 
-    test "lists unnecessary skips as warnings if ignoreing exit status " do
+    test "lists unnecessary skips as warnings if ignoring exit status " do
       warning =
         {:warn_return_no_exit, {'a/regex_file.ex', 17},
          {:no_return, [:only_normal, :format_long, 1]}}
