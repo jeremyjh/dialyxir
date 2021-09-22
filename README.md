@@ -265,7 +265,7 @@ For example, in a project where `mix dialyzer --format dialyzer` outputs:
 
 ```
   Proceeding with analysis...
-config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination withthe ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
+config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination with the ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
 config.ex:79: Guard test is_binary(_@5::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
 config.ex:79: Guard test is_atom(_@6::#{'__exception__':='true', '__struct__':=_, _=>_}) can never succeed
  done in 0m1.32s
@@ -283,7 +283,7 @@ And then run `mix dialyzer` would output:
 
 ```
   Proceeding with analysis...
-config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination withthe ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
+config.ex:64: The call ets:insert('Elixir.MyApp.Config',{'Elixir.MyApp.Config',_}) might have an unintended effect due to a possible race condition caused by its combination with the ets:lookup('Elixir.MyApp.Config','Elixir.MyApp.Config') call in config.ex on line 26
  done in 0m1.32s
 done (warnings were emitted)
 ```
