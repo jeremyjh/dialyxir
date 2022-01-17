@@ -116,7 +116,7 @@ cache:
           otp-version: "24.1" # Define the OTP version
 
       # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
-      # Cache key based on Elixir & Erlang version (also usefull when running in matrix)
+      # Cache key based on Elixir & Erlang version (also useful when running in matrix)
       - name: Restore PLT cache
         uses: actions/cache@v2
         id: plt_cache
