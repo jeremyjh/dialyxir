@@ -51,13 +51,12 @@ mix dialyzer
 
   * `--no-compile`         - do not compile even if needed.
   * `--no-check`           - do not perform (quick) check to see if PLT needs to be updated.
-  * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code
-  *  `--format short`      - format the warnings in a compact format.
-  *  `--format raw`        - format the warnings in format returned before Dialyzer formatting
-  *  `--format dialyxir`   - format the warnings in a pretty printed format
-  *  `--format dialyzer`   - format the warnings in the original Dialyzer format
-  *  `--format ignore_file` - format the warnings to be suitable for adding to "Elixir Term Format" ignore file
-  *  `--quiet`             - suppress all informational messages
+  * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code.
+  *  `--format short`      - format the warnings in a compact format, suitable for ignore file using Elixir term format.
+  *  `--format raw`        - format the warnings in format returned before Dialyzer formatting.
+  *  `--format dialyxir`   - format the warnings in a pretty printed format.
+  *  `--format dialyzer`   - format the warnings in the original Dialyzer format, suitable for ignore file using simple string matches.
+  *  `--quiet`             - suppress all informational messages.
 
 Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
@@ -292,6 +291,8 @@ end
 
 This file comes in two formats: `--format dialyzer` string matches (compatible with `<= 0.5.1` ignore files), and the [term format](#elixir-term-format).
 
+Dialyzer will look for an ignore file using the term format with the name `.dialyzer_ignore.exs` by default if you don't specify something otherwise.
+
 #### Simple String Matches
 
 Any line of dialyzer format output (partially) matching a line in `"dialyzer.ignore-warnings"` is filtered.
@@ -327,8 +328,8 @@ done (warnings were emitted)
 
 #### Elixir Term Format
 
-Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. Entries for existing warnings can be generated with `mix dialyzer --format ignore_file`. Lines may be either tuples or an arbitrary Regex
-applied to the *short-description* (`mix dialyzer --format short`). The file looks like the following:
+Dialyxir also recognizes an Elixir format of the ignore file. If your ignore file is an `exs` file, Dialyxir will evaluate it and process its data structure. A line may be either a tuple or an arbitrary Regex
+applied to the *short-description* format of Dialyzer output (`mix dialyzer --format short`). The file looks like the following:
 
 ```elixir
 # .dialyzer_ignore.exs
@@ -349,6 +350,9 @@ applied to the *short-description* (`mix dialyzer --format short`). The file loo
   ~r/my_file\.ex.*my_function.*no local return/
 ]
 ```
+
+Entries for existing warnings can be generated with `mix dialyzer --format short`. Just remember to put the output in quotes and braces to match the format above.
+
 
 #### List unused Filters
 
