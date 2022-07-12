@@ -47,111 +47,23 @@ defmodule Dialyxir.Formatter do
   end
 
   defp format_warning(warning, :raw) do
-    inspect(warning, limit: :infinity)
+    Dialyxir.Formatter.Raw.format(warning)
   end
 
   defp format_warning(warning, :dialyzer) do
-    # OTP 22 uses indented output, but that's incompatible with dialyzer.ignore-warnings format.
-    # Can be disabled, but OTP 21 and older only accept an atom, so only disable on OTP 22+.
-    opts =
-      if String.to_integer(System.otp_release()) < 22,
-        do: :fullpath,
-        else: [{:filename_opt, :fullpath}, {:indent_opt, false}]
-
-    warning
-    |> :dialyzer.format_warning(opts)
-    |> String.Chars.to_string()
-    |> String.replace_trailing("\n", "")
+    Dialyxir.Formatter.Dialyzer.format(warning)
   end
 
-  defp format_warning({_tag, {file, line}, message}, :short) do
-    {warning_name, arguments} = message
-    base_name = Path.relative_to_cwd(file)
-
-    warning = warning(warning_name)
-    string = warning.format_short(arguments)
-
-    "#{base_name}:#{line}:#{warning_name} #{string}"
+  defp format_warning(warning, :short) do
+    Dialyxir.Formatter.Short.format(warning)
   end
 
-  defp format_warning({_tag, {file, _line}, {warning_name, _arguments}}, :ignore_file) do
-    ~s({"#{file}", :#{warning_name}},)
+  defp format_warning(warning, :ignore_file) do
+    Dialyxir.Formatter.IgnoreFile.format(warning)
   end
 
-  defp format_warning(dialyzer_warning = {_tag, {file, line}, message}, :dialyxir) do
-    {warning_name, arguments} = message
-    base_name = Path.relative_to_cwd(file)
-
-    formatted =
-      try do
-        warning = warning(warning_name)
-        string = warning.format_long(arguments)
-
-        """
-        #{base_name}:#{line}:#{warning_name}
-        #{string}
-        """
-      rescue
-        e ->
-          message = """
-          Unknown error occurred: #{inspect(e)}
-          """
-
-          wrap_error_message(message, dialyzer_warning)
-      catch
-        {:error, :unknown_warning, warning_name} ->
-          message = """
-          Unknown warning:
-          #{inspect(warning_name)}
-          """
-
-          wrap_error_message(message, dialyzer_warning)
-
-        {:error, :lexing, warning} ->
-          message = """
-          Failed to lex warning:
-          #{inspect(warning)}
-          """
-
-          wrap_error_message(message, dialyzer_warning)
-
-        {:error, :parsing, failing_string} ->
-          message = """
-          Failed to parse warning:
-          #{inspect(failing_string)}
-          """
-
-          wrap_error_message(message, dialyzer_warning)
-
-        {:error, :pretty_printing, failing_string} ->
-          message = """
-          Failed to pretty print warning:
-          #{inspect(failing_string)}
-          """
-
-          wrap_error_message(message, dialyzer_warning)
-
-        {:error, :formatting, code} ->
-          message = """
-          Failed to format warning:
-          #{inspect(code)}
-          """
-
-          wrap_error_message(message, dialyzer_warning)
-      end
-
-    formatted <> String.duplicate("_", 80)
-  end
-
-  defp wrap_error_message(message, warning) do
-    """
-    Please file a bug in https://github.com/jeremyjh/dialyxir/issues with this message.
-
-    #{message}
-
-    Legacy warning:
-    #{format_warning(warning, :dialyzer)}
-    """
+  defp format_warning(warning, :dialyxir) do
+    Dialyxir.Formatter.Dialyxir.format(warning)
   end
 
   defp show_count_skipped(warnings, filtered_warnings, filter_map) do
@@ -187,16 +99,6 @@ defmodule Dialyxir.Formatter do
     filter_map.counters
     |> Enum.filter(&FilterMap.unused?/1)
     |> Enum.count()
-  end
-
-  defp warning(warning_name) do
-    warnings = Dialyxir.Warnings.warnings()
-
-    if Map.has_key?(warnings, warning_name) do
-      Map.get(warnings, warning_name)
-    else
-      throw({:error, :unknown_warning, warning_name})
-    end
   end
 
   defp filter_warnings(warnings, filterer, filter_map) do
