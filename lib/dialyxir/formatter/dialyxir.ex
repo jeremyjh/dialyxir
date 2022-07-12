@@ -1,5 +1,9 @@
 defmodule Dialyxir.Formatter.Dialyxir do
   @moduledoc false
+
+  @behaviour Dialyxir.Formatter
+
+  @impl Dialyxir.Formatter
   def format(dialyzer_warning = {_tag, {file, line}, message}) do
     {warning_name, arguments} = message
     base_name = Path.relative_to_cwd(file)

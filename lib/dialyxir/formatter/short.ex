@@ -1,6 +1,9 @@
 defmodule Dialyxir.Formatter.Short do
   @moduledoc false
 
+  @behaviour Dialyxir.Formatter
+
+  @impl Dialyxir.Formatter
   def format({_tag, {file, line}, {warning_name, arguments}}) do
     base_name = Path.relative_to_cwd(file)
 

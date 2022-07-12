@@ -1,6 +1,9 @@
 defmodule Dialyxir.Formatter.Dialyzer do
   @moduledoc false
 
+  @behaviour Dialyxir.Formatter
+
+  @impl Dialyxir.Formatter
   def format(warning) do
     # OTP 22 uses indented output, but that's incompatible with dialyzer.ignore-warnings format.
     # Can be disabled, but OTP 21 and older only accept an atom, so only disable on OTP 22+.
