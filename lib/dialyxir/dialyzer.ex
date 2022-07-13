@@ -25,6 +25,9 @@ defmodule Dialyxir.Dialyzer do
             split[:format] == "dialyxir" ->
               Dialyxir.Formatter.Dialyxir
 
+            split[:format] == "github" ->
+              Dialyxir.Formatter.Github
+
             split[:format] == "ignore_file" ->
               Dialyxir.Formatter.IgnoreFile
 
