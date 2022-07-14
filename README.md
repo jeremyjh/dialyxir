@@ -49,14 +49,16 @@ mix dialyzer
 
 ### Command line options
 
-  * `--no-compile`         - do not compile even if needed.
-  * `--no-check`           - do not perform (quick) check to see if PLT needs to be updated.
-  * `--ignore-exit-status` - display warnings but do not halt the VM or return an exit status code.
-  *  `--format short`      - format the warnings in a compact format, suitable for ignore file using Elixir term format.
-  *  `--format raw`        - format the warnings in format returned before Dialyzer formatting.
-  *  `--format dialyxir`   - format the warnings in a pretty printed format.
-  *  `--format dialyzer`   - format the warnings in the original Dialyzer format, suitable for ignore file using simple string matches.
-  *  `--quiet`             - suppress all informational messages.
+  * `--no-compile`          - do not compile even if needed.
+  * `--no-check`            - do not perform (quick) check to see if PLT needs to be updated.
+  * `--ignore-exit-status`  - display warnings but do not halt the VM or return an exit status code.
+  *  `--format short`       - format the warnings in a compact format, suitable for ignore file using Elixir term format.
+  *  `--format raw`         - format the warnings in format returned before Dialyzer formatting.
+  *  `--format dialyxir`    - format the warnings in a pretty printed format.
+  *  `--format dialyzer`    - format the warnings in the original Dialyzer format, suitable for ignore file using simple string matches.
+  *  `--format github`      - format the warnings in the Github Actions message format.
+  *  `--format ignore_file` - format the warnings to be suitable for adding to Elixir Format ignore file.
+  *  `--quiet`              - suppress all informational messages.
 
 Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
@@ -133,7 +135,7 @@ cache:
         run: mix dialyzer --plt
 
       - name: Run dialyzer
-        run: mix dialyzer
+        run: mix dialyzer --format github
 
 ```
 

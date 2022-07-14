@@ -17,10 +17,11 @@ defmodule Mix.Tasks.Dialyzer do
     * `--list-unused-filters` - list unused ignore filters useful for CI. do
       not use with `mix do`.
     * `--plt` - only build the required PLT(s) and exit
-    * `--format short` - format the warnings in a compact format
-    * `--format raw` - format the warnings in format returned before Dialyzer formatting
-    * `--format dialyxir` - format the warnings in a pretty printed format
-    * `--format dialyzer` - format the warnings in the original Dialyzer format
+    * `--format short`       - format the warnings in a compact format
+    * `--format raw`         - format the warnings in format returned before Dialyzer formatting
+    * `--format dialyxir`    - format the warnings in a pretty printed format
+    * `--format dialyzer`    - format the warnings in the original Dialyzer format
+    * `--format github`      - format the warnings in the Github Actions message format
     * `--format ignore_file` - format the warnings to be suitable for adding to Elixir Format ignore file
     * `--quiet` - suppress all informational messages
 

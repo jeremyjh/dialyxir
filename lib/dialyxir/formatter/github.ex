@@ -10,6 +10,6 @@ defmodule Dialyxir.Formatter.Github do
     warning = warning(warning_name)
     string = warning.format_short(arguments)
 
-    "::error file=#{base_name},line=#{line},title=#{warning_name}::#{string}"
+    "::warning file=#{base_name},line=#{line},title=#{warning_name}::#{string}"
   end
 end
