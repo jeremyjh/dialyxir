@@ -20,25 +20,28 @@ defmodule Dialyxir.Dialyzer do
         formatter =
           cond do
             split[:format] == "dialyzer" ->
-              :dialyzer
+              Dialyxir.Formatter.Dialyzer
 
             split[:format] == "dialyxir" ->
-              :dialyxir
+              Dialyxir.Formatter.Dialyxir
+
+            split[:format] == "github" ->
+              Dialyxir.Formatter.Github
 
             split[:format] == "ignore_file" ->
-              :ignore_file
+              Dialyxir.Formatter.IgnoreFile
 
             split[:format] == "raw" ->
-              :raw
+              Dialyxir.Formatter.Raw
 
             split[:format] == "short" ->
-              :short
+              Dialyxir.Formatter.Short
 
             split[:raw] ->
-              :raw
+              Dialyxir.Formatter.Raw
 
             true ->
-              :dialyxir
+              Dialyxir.Formatter.Dialyxir
           end
 
         info("Starting Dialyzer")

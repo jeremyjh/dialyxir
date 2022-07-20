@@ -4,6 +4,9 @@ defmodule Dialyxir.FormatterTest do
   import ExUnit.CaptureIO, only: [capture_io: 1]
 
   alias Dialyxir.Formatter
+  alias Dialyxir.Formatter.Dialyxir, as: DialyxirFormatter
+  alias Dialyxir.Formatter.Dialyzer, as: DialyzerFormatter
+  alias Dialyxir.Formatter.Short, as: ShortFormatter
   alias Dialyxir.Project
 
   defp in_project(app, f) when is_atom(app) do
@@ -23,7 +26,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         {:error, remaining, _unused_filters_present} =
-          Formatter.format_and_filter(warnings, Project, [], :short)
+          Formatter.format_and_filter(warnings, Project, [], ShortFormatter)
 
         assert remaining == []
       end)
@@ -35,7 +38,9 @@ defmodule Dialyxir.FormatterTest do
          {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
-        {:error, [remaining], _} = Formatter.format_and_filter([warning], Project, [], :short)
+        {:error, [remaining], _} =
+          Formatter.format_and_filter([warning], Project, [], ShortFormatter)
+
         assert remaining =~ ~r/different_file.* no local return/
       end)
     end
@@ -47,7 +52,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         {:error, remaining, _unused_filters_present} =
-          Formatter.format_and_filter([warning], Project, [], :short)
+          Formatter.format_and_filter([warning], Project, [], ShortFormatter)
 
         assert remaining == []
       end)
@@ -127,7 +132,7 @@ defmodule Dialyxir.FormatterTest do
 
     filter_args = [{:list_unused_filters, true}]
 
-    for format <- [:short, :dialyxir, :dialyzer] do
+    for format <- [ShortFormatter, DialyxirFormatter, DialyzerFormatter] do
       in_project(:ignore, fn ->
         capture_io(fn ->
           result = Formatter.format_and_filter(warnings, Project, filter_args, format)
