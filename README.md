@@ -353,7 +353,7 @@ applied to the *short-description* format of Dialyzer output (`mix dialyzer --fo
 ]
 ```
 
-Entries for existing warnings can be generated with `mix dialyzer --format short`. Just remember to put the output in quotes and braces to match the format above.
+Entries for existing warnings can be generated with `mix dialyzer --format ignore_file`.
 
 
 #### List unused Filters
