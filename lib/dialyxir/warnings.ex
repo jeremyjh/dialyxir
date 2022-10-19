@@ -11,6 +11,7 @@ defmodule Dialyxir.Warnings do
                 Dialyxir.Warnings.CallbackArgumentTypeMismatch,
                 Dialyxir.Warnings.CallbackInfoMissing,
                 Dialyxir.Warnings.CallbackMissing,
+                Dialyxir.Warnings.CallbackNotExported,
                 Dialyxir.Warnings.CallbackSpecArgumentTypeMismatch,
                 Dialyxir.Warnings.CallbackSpecTypeMismatch,
                 Dialyxir.Warnings.CallbackTypeMismatch,
