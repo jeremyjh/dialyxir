@@ -40,7 +40,6 @@ defmodule Dialyxir.Warnings do
                 Dialyxir.Warnings.OverlappingContract,
                 Dialyxir.Warnings.PatternMatch,
                 Dialyxir.Warnings.PatternMatchCovered,
-                Dialyxir.Warnings.RaceCondition,
                 Dialyxir.Warnings.RecordConstruction,
                 Dialyxir.Warnings.RecordMatching,
                 Dialyxir.Warnings.UnknownBehaviour,

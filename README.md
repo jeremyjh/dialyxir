@@ -232,7 +232,7 @@ def project do
     app: :my_app,
     version: "0.0.1",
     deps: deps,
-    dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :race_conditions, :underspecs]]
+    dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
   ]
 end
 ```
@@ -249,7 +249,7 @@ def project do
     deps: deps,
     dialyzer: [
       plt_add_apps: [:mnesia],
-      flags: [:unmatched_returns, :error_handling, :race_conditions, :no_opaque],
+      flags: [:unmatched_returns, :error_handling, :no_opaque],
       paths: ["_build/dev/lib/my_app/ebin", "_build/dev/lib/foo/ebin"]
     ]
   ]
