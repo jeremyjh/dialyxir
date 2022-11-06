@@ -386,7 +386,23 @@ defmodule Mix.Tasks.Dialyzer do
     {apps, hash}
   end
 
-  def lock_file() do
-    Mix.Project.config()[:lockfile] |> File.read!()
+  defp lock_file() do
+    lockfile = Mix.Project.config()[:lockfile]
+    read_res = File.read(lockfile)
+
+    case read_res do
+      {:ok, data} ->
+        data
+
+      {:error, :enoent} ->
+        # If there is no lock file, an empty bitstring will do to indicate there is none there
+        <<>>
+
+      {:error, reason} ->
+        raise File.Error,
+          reason: reason,
+          action: "read file",
+          path: lockfile
+    end
   end
 end
