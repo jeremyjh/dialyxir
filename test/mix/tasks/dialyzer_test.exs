@@ -42,6 +42,14 @@ defmodule Mix.Tasks.DialyzerTest do
     end)
   end
 
+  test "Does not crash when running on project without mix.lock" do
+    in_project(:no_lockfile, fn ->
+      fun = fn -> Mix.Tasks.Dialyzer.clean([], &no_delete_plt/4) end
+      capture_io(fun)
+      # does not assert anything, we just need to ensure this doesn't crash.
+    end)
+  end
+
   @tag :output_tests
   test "Informational output is suppressed with --quiet" do
     args = ["dialyzer", "--quiet"]
