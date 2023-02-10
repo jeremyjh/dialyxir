@@ -190,7 +190,7 @@ OTP application dependencies are (transitively) added to your PLT by default. Th
 
   * `:apps_direct` - Only Direct OTP runtime application dependencies - not the entire tree
   * `:app_tree` - Transitive OTP runtime application dependencies e.g. `mix app.tree` (default)
-
+  * `true` - Direct code and runtime application dependencies
 
 The example below changes the default to include only direct OTP dependencies, adds another specific dependency, and removes a dependency from the list. This can be helpful if a large dependency tree is creating memory issues and only some of the transitive dependencies are required for analysis.
 
