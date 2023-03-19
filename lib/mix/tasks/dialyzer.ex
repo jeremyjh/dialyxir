@@ -295,7 +295,10 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp in_child? do
-    String.contains?(Mix.Project.config()[:lockfile], "..")
+    case Project.no_umbrella?() do
+      true -> false
+      false -> String.contains?(Mix.Project.config()[:lockfile], "..")
+    end
   end
 
   defp no_plt? do

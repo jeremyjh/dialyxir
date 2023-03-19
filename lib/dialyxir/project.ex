@@ -109,6 +109,13 @@ defmodule Dialyxir.Project do
     Mix.Project.config()[:dialyzer][:flags] || []
   end
 
+  def no_umbrella? do
+    case dialyzer_config()[:no_umbrella] do
+      true -> true
+      _other -> false
+    end
+  end
+
   defp skip?({file, warning, line}, {file, warning, line, _}), do: true
   defp skip?({file, warning}, {file, warning, _, _}), do: true
   defp skip?({file}, {file, _, _, _}), do: true
