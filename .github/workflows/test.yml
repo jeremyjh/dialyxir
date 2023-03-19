@@ -10,13 +10,14 @@ jobs:
   check_duplicate_runs:
     name: Check for duplicate runs
     continue-on-error: true
-    runs-on: ubuntu20
+    runs-on: ubuntu-20.04
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@master
         with:
+          github_token: ${{ github.token }}
           concurrent_skipping: always
           cancel_others: true
           skip_after_successful_duplicate: true
@@ -25,7 +26,7 @@ jobs:
 
   test:
     name: Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}
-    runs-on: ubuntu20
+    runs-on: ubuntu-20.04
     needs: check_duplicate_runs
     if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
 
