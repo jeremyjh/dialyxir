@@ -10,7 +10,7 @@ jobs:
   check_duplicate_runs:
     name: Check for duplicate runs
     continue-on-error: true
-    runs-on: ubuntu-latest
+    runs-on: ubuntu20
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
@@ -25,7 +25,7 @@ jobs:
 
   test:
     name: Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu20
     needs: check_duplicate_runs
     if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
 
