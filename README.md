@@ -371,3 +371,15 @@ dialyzer: [
 
 This option can also be set on the command line with `--list-unused-filters`. When used without
 `--ignore-exit-status`, this option will result in an error status code.
+
+#### `no_umbrella` flag
+
+Projects with lockfiles at a parent folder are treated as umbrella projects. In some cases however
+you may wish to have the lockfile on a parent folder without having an umbrella. By setting the
+`no_umbrella` flag to `true` your project will be treated as a non umbrella project:
+
+```elixir
+dialyzer: [
+  no_umbrella: true
+]
+```

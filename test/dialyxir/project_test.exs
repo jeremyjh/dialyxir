@@ -184,4 +184,14 @@ defmodule Dialyxir.ProjectTest do
       assert Project.list_unused_filters?(list_unused_filters: nil)
     end)
   end
+
+  test "no_umbrella? works as expected" do
+    in_project(:umbrella, fn ->
+      refute Project.no_umbrella?()
+    end)
+
+    in_project(:no_umbrella, fn ->
+      assert Project.no_umbrella?()
+    end)
+  end
 end
