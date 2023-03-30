@@ -119,7 +119,7 @@ cache:
       # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
       # Cache key based on Elixir & Erlang version (also useful when running in matrix)
       - name: Restore PLT cache
-        uses: actions/cache@v2
+        uses: actions/cache/restore@v3
         id: plt_cache
         with:
           key: |
@@ -133,6 +133,18 @@ cache:
       - name: Create PLTs
         if: steps.plt_cache.outputs.cache-hit != 'true'
         run: mix dialyzer --plt
+        
+      # By default, the GitHub Cache action will only save the cache if all steps in the job succeed,
+      # so we separate the cache restore and save steps in case running dialyzer fails.
+      - name: Save PLT cache
+        uses: actions/cache/save@v3
+        if: steps.plt_cache.outputs.cache-hit != 'true'
+        id: plt_cache_save
+        with:
+          key: |
+            ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt
+          path: |
+            priv/plts
 
       - name: Run dialyzer
         run: mix dialyzer --format github
