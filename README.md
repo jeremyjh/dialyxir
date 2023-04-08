@@ -1,6 +1,5 @@
 # Dialyxir
 
-[![Build Status](https://travis-ci.org/jeremyjh/dialyxir.svg?branch=master)](https://travis-ci.org/jeremyjh/dialyxir)
 [![Module Version](https://img.shields.io/hexpm/v/dialyxir.svg)](https://hex.pm/packages/dialyxir)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/dialyxir/)
 [![Total Download](https://img.shields.io/hexpm/dt/dialyxir.svg)](https://hex.pm/packages/dialyxir)
@@ -9,28 +8,16 @@
 
 Mix tasks to simplify use of Dialyzer in Elixir projects.
 
-## Changes in 1.0
-
-Elixir 1.6 is required, to support the new pretty printing feature. If your
-project is not yet on 1.6, continue to specify 0.5 in your mix deps.
-
-Warning messages have been greatly improved, but are filtered through the legacy formatter to support your existing ignore files. You can optionally use the new Elixir [term format](#elixir-term-format) for ignore files. You may want to use the `--format short` argument in your CI pipelines. There are several formats, also there is a new `explain` feature - for details see CLI [options](#command-line-options).
-
-## Quickstart
-If you are planning to use Dialyzer with an application built with the [Phoenix Framework](http://www.phoenixframework.org/), check out the [Quickstart wiki](https://github.com/jeremyjh/dialyxir/wiki/Phoenix-Dialyxir-Quickstart).
-
 ## Installation
 
 Dialyxir is available on [hex.pm](https://hex.pm/packages/dialyxir).
-
-You can either add it as a dependency in your mix.exs, or install it globally as an archive task.
 
 To add it to a mix project, just add a line like this in your deps function in mix.exs:
 
 ```elixir
 defp deps do
   [
-    {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+    {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
   ]
 end
 ```
@@ -81,26 +68,6 @@ To use Dialyzer in CI, you must be aware of several things:
 1) Building the PLT file may take a while if a project has many dependencies
 2) The PLT should be cached using the CI caching system
 3) The PLT will need to be rebuilt whenever adding a new Erlang or Elixir version to build matrix
-
-### Travis
-
-`.travis.yml`
-```markdown
-language: elixir
-
-elixir:
-  - 1.8
-
-otp_release:
-  - 21.0
-
-script:
-  - mix dialyzer
-
-cache:
-  directories:
-    - priv/plts
-```
 
 ### Github Actions
 
