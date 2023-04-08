@@ -4,8 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## Unreleased changes post [1.2.0]
+## Unreleased changes post [1.3.0]
 
+## [1.3.0] - 2023-04-08
+
+### Added
+  - Elixir 1.15 support.
+  - Support for warning `:callback_not_exported`.
+
+### Changed
+  - Several improvements to documentation, particularly Github CI documentation.
+
+### Removed
+  - Support for `:race_conditions` flag which was [removed from Erlang](https://github.com/erlang/otp/pull/5502).
+
+### Fixed
+  - Crash when `mix.lock` is missing.
 
 ## [1.2.0] - 2022-07-20
 ### Added
