@@ -10,10 +10,12 @@ stages:
   - compile
   - check-elixir-types
 
-# Each example job below uses asdf's .tool-versions file as the cache key.
 # You'll want to cache based on your Erlang/Elixir version.
 
-# An example build job with cache
+# The example jobs below uses asdf's config file as the cache key:
+# https://asdf-vm.com/manage/configuration.html
+
+# An example build job with cache, to prevent dialyzer from needing to compile your project first
 build-dev:
   stage: compile
   cache:
@@ -41,6 +43,7 @@ dialyzer-plt:
         - .tool-versions
       paths:
         - priv/plts
+      # Pull cache at start, push updated cache after completion
       policy: pull-push
   script:
     - mix dialyzer --plt
@@ -55,6 +58,7 @@ dialyzer-check:
         - .tool-versions
       paths:
         - priv/plts
+      # Pull cache at start, don't push cache after completion
       policy: pull
   script:
     - mix dialyzer --format short
