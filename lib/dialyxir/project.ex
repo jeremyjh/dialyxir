@@ -117,7 +117,22 @@ defmodule Dialyxir.Project do
   end
 
   defp skip?({file, warning, line}, {file, warning, line, _}), do: true
-  defp skip?({file, warning}, {file, warning, _, _}), do: true
+
+  defp skip?({file, short_description}, {file, _, _, description})
+       when is_binary(short_description) do
+    # TODO: This is a hack; ideally we'd have access to the preformatted values
+    description =
+      description
+      |> String.split(":")
+      |> Enum.at(2)
+      |> String.split(" ")
+      |> Enum.slice(1..-1)
+      |> Enum.join(" ")
+
+    short_description == description
+  end
+
+  defp skip?({file, warning}, {file, warning, _, _}) when is_atom(warning), do: true
   defp skip?({file}, {file, _, _, _}), do: true
   defp skip?({short_description, warning, line}, {_, warning, line, short_description}), do: true
   defp skip?({short_description, warning}, {_, warning, _, short_description}), do: true

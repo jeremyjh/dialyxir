@@ -7,6 +7,7 @@ defmodule Dialyxir.FormatterTest do
   alias Dialyxir.Formatter.Dialyxir, as: DialyxirFormatter
   alias Dialyxir.Formatter.Dialyzer, as: DialyzerFormatter
   alias Dialyxir.Formatter.Short, as: ShortFormatter
+  alias Dialyxir.Formatter.IgnoreFileStrict, as: IgnoreFileStrictFormatter
   alias Dialyxir.Project
 
   defp in_project(app, f) when is_atom(app) do
@@ -27,6 +28,24 @@ defmodule Dialyxir.FormatterTest do
       in_project(:ignore, fn ->
         {:error, remaining, _unused_filters_present} =
           Formatter.format_and_filter(warnings, Project, [], ShortFormatter)
+
+        assert remaining == []
+      end)
+    end
+
+    test "evaluates an ignore file of the form {file, short_description} and ignores warnings matching the pattern" do
+      warnings = [
+        {:warn_return_no_exit, {'lib/poorly_written_code.ex', 10},
+         {:no_return, [:only_normal, :do_a_thing, 1]}},
+        {:warn_return_no_exit, {'lib/poorly_written_code.ex', 20},
+         {:no_return, [:only_normal, :do_something_else, 2]}},
+        {:warn_return_no_exit, {'lib/poorly_written_code.ex', 30},
+         {:no_return, [:only_normal, :do_many_things, 3]}}
+      ]
+
+      in_project(:ignore_strict, fn ->
+        {:ok, remaining, :no_unused_filters} =
+          Formatter.format_and_filter(warnings, Project, [], IgnoreFileStrictFormatter) |> dbg()
 
         assert remaining == []
       end)
@@ -58,7 +77,7 @@ defmodule Dialyxir.FormatterTest do
       end)
     end
 
-    test "lists unnecessary skips as warnings if ignoring exit status " do
+    test "lists unnecessary skips as warnings if ignoring exit status" do
       warning =
         {:warn_return_no_exit, {'a/regex_file.ex', 17},
          {:no_return, [:only_normal, :format_long, 1]}}

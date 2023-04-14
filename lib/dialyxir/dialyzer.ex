@@ -31,6 +31,9 @@ defmodule Dialyxir.Dialyzer do
             split[:format] == "ignore_file" ->
               Dialyxir.Formatter.IgnoreFile
 
+            split[:format] == "ignore_file_strict" ->
+              Dialyxir.Formatter.IgnoreFileStrict
+
             split[:format] == "raw" ->
               Dialyxir.Formatter.Raw
 
