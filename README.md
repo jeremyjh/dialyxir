@@ -291,7 +291,7 @@ applied to the *short-description* format of Dialyzer output (`mix dialyzer --fo
 ]
 ```
 
-Note that `short_description` contains a few more bits of information than `warning_description` alone.
+_Note that `short_description` contains additional information than `warning_description`._
 
 Entries for existing warnings can be generated with one of the following:
 - `mix dialyzer --format ignore_file`
@@ -306,7 +306,7 @@ lib/something.ex:26:no_return Function update/2 has no local return.
 lib/something.ex:49:no_return Function delete/1 has no local return.
 ```
 
-If you had used `--format ignore_file`, you'd be given a single ignore line for all five warnings:
+If you had used `--format ignore_file`, you'd be given a single file ignore line for all five warnings:
 ```elixir
 # .dialyzer_ignore.exs
 [
@@ -320,11 +320,11 @@ If you had used `--format ignore_file_strict`, you'd be given more granular igno
 # .dialyzer_ignore.exs
 [
   # {file, warning_description}
-  {"lib/something.ex", "no_return Function init/1 has no local return."},
-  {"lib/something.ex", "no_return Function refresh/0 has no local return."},
-  {"lib/something.ex", "no_return Function create/2 has no local return."},
-  {"lib/something.ex", "no_return Function update/2 has no local return."},
-  {"lib/something.ex", "no_return Function delete/1 has no local return."},
+  {"lib/something.ex", "Function init/1 has no local return."},
+  {"lib/something.ex", "Function refresh/0 has no local return."},
+  {"lib/something.ex", "Function create/2 has no local return."},
+  {"lib/something.ex", "Function update/2 has no local return."},
+  {"lib/something.ex", "Function delete/1 has no local return."},
 ]
 ```
 
