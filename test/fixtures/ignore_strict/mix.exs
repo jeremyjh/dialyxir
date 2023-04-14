@@ -1,9 +1,9 @@
-defmodule Ignore.Mixfile do
+defmodule IgnoreStrict.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :ignore,
+      app: :ignore_strict,
       version: "0.1.0",
       dialyzer: [
         ignore_warnings: "ignore_strict_test.exs",
