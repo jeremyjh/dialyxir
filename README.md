@@ -291,7 +291,7 @@ applied to the *short-description* format of Dialyzer output (`mix dialyzer --fo
 ]
 ```
 
-_Note that `short_description` contains additional information than `warning_description`._
+_Note that `short_description` contains additional information that `warning_description` does not._
 
 Entries for existing warnings can be generated with one of the following:
 - `mix dialyzer --format ignore_file`
