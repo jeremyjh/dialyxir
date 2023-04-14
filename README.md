@@ -41,7 +41,7 @@ mix dialyzer
   * `--ignore-exit-status`         - display warnings but do not halt the VM or return an exit status code.
   *  `--format short`              - format the warnings in a compact format, suitable for ignore file using Elixir term format.
   *  `--format raw`                - format the warnings in format returned before Dialyzer formatting.
-  *  `--format dialyxir`           - format the warnings in a pretty printed format.
+  *  `--format dialyxir`           - format the warnings in a pretty printed format. (default)
   *  `--format dialyzer`           - format the warnings in the original Dialyzer format, suitable for ignore file using simple string matches.
   *  `--format github`             - format the warnings in the Github Actions message format.
   *  `--format ignore_file`        - format the warnings in {file, warning} format for Elixir Format ignore file.
@@ -280,6 +280,8 @@ applied to the *short-description* format of Dialyzer output (`mix dialyzer --fo
   {":0:unknown_function Function :erl_types.t_to_string/1 does not exist.", :unknown_function, 0},
   # {file, warning_type, line}
   {"lib/dialyxir/pretty_print.ex", :no_return, 100},
+  # {file, warning_description}
+  {"lib/dialyxir/warning_helpers.ex", "Function :erl_types.t_to_string/1 does not exist."},
   # {file, warning_type}
   {"lib/dialyxir/warning_helpers.ex", :no_return},
   # {file}
@@ -289,8 +291,42 @@ applied to the *short-description* format of Dialyzer output (`mix dialyzer --fo
 ]
 ```
 
-Entries for existing warnings can be generated with `mix dialyzer --format ignore_file``mix dialyzer --format ignore_file_strict`).
+Note that `short_description` contains a few more bits of information than `warning_description` alone.
 
+Entries for existing warnings can be generated with one of the following:
+- `mix dialyzer --format ignore_file`
+- `mix dialyzer --format ignore_file_strict` (recommended)
+
+For example, if `mix dialyzer --format short` gives you a result like:
+```
+lib/something.ex:15:no_return Function init/1 has no local return.
+lib/something.ex:36:no_return Function refresh/0 has no local return.
+lib/something.ex:45:no_return Function create/2 has no local return.
+lib/something.ex:26:no_return Function update/2 has no local return.
+lib/something.ex:49:no_return Function delete/1 has no local return.
+```
+
+If you had used `--format ignore_file`, you'd be given a single ignore line for all five warnings:
+```elixir
+# .dialyzer_ignore.exs
+[
+  # {file, warning_type}
+  {"lib/something.ex", :no_return},
+]
+```
+
+If you had used `--format ignore_file_strict`, you'd be given more granular ignore lines:
+```elixir
+# .dialyzer_ignore.exs
+[
+  # {file, warning_description}
+  {"lib/something.ex", "no_return Function init/1 has no local return."},
+  {"lib/something.ex", "no_return Function refresh/0 has no local return."},
+  {"lib/something.ex", "no_return Function create/2 has no local return."},
+  {"lib/something.ex", "no_return Function update/2 has no local return."},
+  {"lib/something.ex", "no_return Function delete/1 has no local return."},
+]
+```
 
 #### List unused Filters
 
