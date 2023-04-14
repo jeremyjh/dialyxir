@@ -45,7 +45,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore_strict, fn ->
         {:ok, remaining, :no_unused_filters} =
-          Formatter.format_and_filter(warnings, Project, [], IgnoreFileStrictFormatter) |> dbg()
+          Formatter.format_and_filter(warnings, Project, [], IgnoreFileStrictFormatter)
 
         assert remaining == []
       end)
