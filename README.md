@@ -89,6 +89,7 @@ end
 
 ### Example CI Configs
 
+- [CircleCI](./docs/circleci.md)
 - [GitHub Actions](./docs/github_actions.md)
 - [GitLab CI](./docs/gitlab_ci.md)
 
