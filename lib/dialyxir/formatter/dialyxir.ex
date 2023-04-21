@@ -1,6 +1,8 @@
 defmodule Dialyxir.Formatter.Dialyxir do
   @moduledoc false
 
+  alias Dialyxir.Formatter.Utils
+
   @behaviour Dialyxir.Formatter
 
   @impl Dialyxir.Formatter
@@ -10,7 +12,7 @@ defmodule Dialyxir.Formatter.Dialyxir do
 
     formatted =
       try do
-        warning = warning(warning_name)
+        warning = Utils.warning(warning_name)
         string = warning.format_long(arguments)
 
         """
@@ -78,15 +80,5 @@ defmodule Dialyxir.Formatter.Dialyxir do
     Legacy warning:
     #{Dialyxir.Formatter.Dialyzer.format(warning)}
     """
-  end
-
-  defp warning(warning_name) do
-    warnings = Dialyxir.Warnings.warnings()
-
-    if Map.has_key?(warnings, warning_name) do
-      Map.get(warnings, warning_name)
-    else
-      throw({:error, :unknown_warning, warning_name})
-    end
   end
 end

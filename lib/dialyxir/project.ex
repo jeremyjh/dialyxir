@@ -3,6 +3,8 @@ defmodule Dialyxir.Project do
   import Dialyxir.Output, only: [info: 1, error: 1]
 
   alias Dialyxir.FilterMap
+  alias Dialyxir.Formatter.Short
+  alias Dialyxir.Formatter.Utils
 
   def plts_list(deps, include_project \\ true, exclude_core \\ false) do
     elixir_apps = [:elixir]
@@ -116,24 +118,40 @@ defmodule Dialyxir.Project do
     end
   end
 
-  defp skip?({file, warning, line}, {file, warning, line, _}), do: true
-  defp skip?({file, warning}, {file, warning, _, _}), do: true
-  defp skip?({file}, {file, _, _, _}), do: true
-  defp skip?({short_description, warning, line}, {_, warning, line, short_description}), do: true
-  defp skip?({short_description, warning}, {_, warning, _, short_description}), do: true
-  defp skip?({short_description}, {_, _, _, short_description}), do: true
+  defp skip?({file, warning, line}, {file, warning, line, _, _}), do: true
 
-  defp skip?(%Regex{} = pattern, {_, _, _, short_description}) do
+  defp skip?({file, warning_description}, {file, _, _, _, warning_description})
+       when is_binary(warning_description),
+       do: true
+
+  defp skip?({file, warning}, {file, warning, _, _, _}) when is_atom(warning), do: true
+  defp skip?({file}, {file, _, _, _, _}), do: true
+
+  defp skip?({short_description, warning, line}, {_, warning, line, short_description, _}),
+    do: true
+
+  defp skip?({short_description, warning}, {_, warning, _, short_description, _}), do: true
+  defp skip?({short_description}, {_, _, _, short_description, _}), do: true
+
+  defp skip?(%Regex{} = pattern, {_, _, _, short_description, _}) do
     Regex.match?(pattern, short_description)
   end
 
   defp skip?(_, _), do: false
 
-  def filter_warning?({file, warning, line, short_description}, filter_map = %FilterMap{}) do
+  def filter_warning?(
+        {_, {file, line}, {warning_type, args}} = warning,
+        filter_map = %FilterMap{}
+      ) do
+    short_description = Short.format(warning)
+    warning_description = Utils.warning(warning_type).format_short(args)
+
     {matching_filters, _non_matching_filters} =
       filter_map
       |> FilterMap.filters()
-      |> Enum.split_with(&skip?(&1, {file, warning, line, short_description}))
+      |> Enum.split_with(
+        &skip?(&1, {to_string(file), warning_type, line, short_description, warning_description})
+      )
 
     {not Enum.empty?(matching_filters), matching_filters}
   end

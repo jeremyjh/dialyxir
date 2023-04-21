@@ -95,14 +95,11 @@ defmodule Dialyxir.Formatter do
     {warnings, filter_map}
   end
 
-  defp filter_warning(filterer, warning = {_, {file, line}, {warning_type, _}}, filter_map) do
+  defp filter_warning(filterer, {_, {_file, _line}, {warning_type, _args}} = warning, filter_map) do
     if Map.has_key?(Dialyxir.Warnings.warnings(), warning_type) do
       {skip?, matching_filters} =
         try do
-          filterer.filter_warning?(
-            {to_string(file), warning_type, line, Dialyxir.Formatter.Short.format(warning)},
-            filter_map
-          )
+          filterer.filter_warning?(warning, filter_map)
         rescue
           _ ->
             {false, []}
