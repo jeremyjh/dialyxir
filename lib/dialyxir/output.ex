@@ -8,6 +8,9 @@ defmodule Dialyxir.Output do
   def info(""), do: :ok
   def info(text), do: Mix.shell().info(text)
 
+  def warning(""), do: :ok
+  def warning(text), do: Mix.shell().info(color(text, :yellow))
+
   def error(""), do: :ok
   def error(text), do: Mix.shell().error(text)
 end

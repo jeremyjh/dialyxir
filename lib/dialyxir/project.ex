@@ -1,6 +1,6 @@
 defmodule Dialyxir.Project do
   @moduledoc false
-  import Dialyxir.Output, only: [info: 1, error: 1]
+  import Dialyxir.Output
 
   alias Dialyxir.FilterMap
   alias Dialyxir.Formatter.Short
@@ -34,7 +34,7 @@ defmodule Dialyxir.Project do
 
   def check_config do
     if is_binary(dialyzer_config()[:plt_file]) do
-      info("""
+      warning("""
       Notice: :plt_file is deprecated as Dialyxir now uses project-private PLT files by default.
       If you want to use this setting without seeing this warning, provide it in a pair
       with the :no_warn key e.g. `dialyzer: plt_file: {:no_warn, "~/mypltfile"}`
@@ -316,10 +316,14 @@ defmodule Dialyxir.Project do
 
           # compatibility
           true ->
+            warning(
+              "Dialyxir has deprecated plt_add_deps: true in favor of apps_direct, which includes only runtime dependencies."
+            )
+
             deps_project() ++ deps_app(false)
 
           :project ->
-            info(
+            warning(
               "Dialyxir has deprecated plt_add_deps: :project in favor of apps_direct, which includes only runtime dependencies."
             )
 
@@ -329,7 +333,7 @@ defmodule Dialyxir.Project do
             deps_app(false)
 
           :transitive ->
-            info(
+            warning(
               "Dialyxir has deprecated plt_add_deps: :transitive in favor of app_tree, which includes only runtime dependencies."
             )
 
