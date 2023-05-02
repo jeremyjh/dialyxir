@@ -175,6 +175,13 @@ defmodule Dialyxir.ProjectTest do
     end)
   end
 
+  test "Deprecation warning on use of plt_add_deps: true" do
+    in_project(:plt_add_deps_deprecations, fn ->
+      out = capture_io(&Project.cons_apps/0)
+      assert Regex.match?(~r/.*deprecated.*plt_add_deps.*/, out)
+    end)
+  end
+
   test "list_unused_filters? works as intended" do
     assert Project.list_unused_filters?(list_unused_filters: true)
     refute Project.list_unused_filters?(list_unused_filters: nil)
