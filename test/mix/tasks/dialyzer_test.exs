@@ -57,4 +57,14 @@ defmodule Mix.Tasks.DialyzerTest do
     {result, 0} = System.cmd("mix", args, env: env)
     assert result == ""
   end
+
+  @tag :output_tests
+  test "Only final result is printed with --quiet-with-result" do
+    args = ["dialyzer", "--quiet-with-result"]
+    env = [{"MIX_ENV", "prod"}]
+    {result, 0} = System.cmd("mix", args, env: env)
+
+    assert result =~
+             ~r/Total errors: ., Skipped: ., Unnecessary Skips: .\ndone \(passed successfully\)\n/
+  end
 end

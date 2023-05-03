@@ -1,5 +1,5 @@
 defmodule Dialyxir.Dialyzer do
-  import Dialyxir.Output, only: [color: 2, info: 1]
+  import Dialyxir.Output
   alias String.Chars
   alias Dialyxir.Formatter
   alias Dialyxir.Project
@@ -10,12 +10,15 @@ defmodule Dialyxir.Dialyzer do
       :raw,
       :format,
       :list_unused_filters,
-      :ignore_exit_status
+      :ignore_exit_status,
+      :quiet_with_result
     ]
 
     def run(args, filterer) do
       try do
         {split, args} = Keyword.split(args, @dialyxir_args)
+
+        quiet_with_result? = split[:quiet_with_result]
 
         formatter =
           cond do
@@ -59,7 +62,13 @@ defmodule Dialyxir.Dialyzer do
 
         filter_map_args = FilterMap.to_args(split)
 
-        case Formatter.format_and_filter(result, filterer, filter_map_args, formatter) do
+        case Formatter.format_and_filter(
+               result,
+               filterer,
+               filter_map_args,
+               formatter,
+               quiet_with_result?
+             ) do
           {:ok, formatted_warnings, :no_unused_filters} ->
             {:ok, {formatted_time_elapsed, formatted_warnings, ""}}
 
