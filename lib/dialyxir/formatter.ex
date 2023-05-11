@@ -5,7 +5,7 @@ defmodule Dialyxir.Formatter do
   Wrapper around normal Dialyzer warning messages that provides
   example output for error messages.
   """
-  import Dialyxir.Output, only: [info: 1]
+  import Dialyxir.Output
 
   alias Dialyxir.FilterMap
 
@@ -21,8 +21,16 @@ defmodule Dialyxir.Formatter do
     "done in #{minutes}m#{seconds}s"
   end
 
-  @spec format_and_filter([tuple], module, Keyword.t(), t()) :: tuple
-  def format_and_filter(warnings, filterer, filter_map_args, formatter) do
+  @spec format_and_filter([tuple], module, Keyword.t(), t(), boolean()) :: tuple
+  def format_and_filter(
+        warnings,
+        filterer,
+        filter_map_args,
+        formatter,
+        quiet_with_result? \\ false
+      )
+
+  def format_and_filter(warnings, filterer, filter_map_args, formatter, quiet_with_result?) do
     filter_map = filterer.filter_map(filter_map_args)
 
     {filtered_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
@@ -33,7 +41,7 @@ defmodule Dialyxir.Formatter do
       |> Enum.map(&formatter.format/1)
       |> Enum.uniq()
 
-    show_count_skipped(warnings, formatted_warnings, filter_map)
+    show_count_skipped(warnings, formatted_warnings, filter_map, quiet_with_result?)
     formatted_unnecessary_skips = format_unnecessary_skips(filter_map)
 
     result(formatted_warnings, filter_map, formatted_unnecessary_skips)
@@ -52,16 +60,22 @@ defmodule Dialyxir.Formatter do
     end
   end
 
-  defp show_count_skipped(warnings, filtered_warnings, filter_map) do
+  defp show_count_skipped(warnings, filtered_warnings, filter_map, quiet_with_result?) do
     warnings_count = Enum.count(warnings)
     filtered_warnings_count = Enum.count(filtered_warnings)
     skipped_count = warnings_count - filtered_warnings_count
     unnecessary_skips_count = count_unnecessary_skips(filter_map)
 
-    info(
-      "Total errors: #{warnings_count}, Skipped: #{skipped_count}, " <>
-        "Unnecessary Skips: #{unnecessary_skips_count}"
-    )
+    message =
+      "Total errors: #{warnings_count}, Skipped: #{skipped_count}, Unnecessary Skips: #{unnecessary_skips_count}"
+
+    if quiet_with_result? do
+      Mix.shell(Mix.Shell.IO)
+      info(message)
+      Mix.shell(Mix.Shell.Quiet)
+    else
+      info(message)
+    end
 
     :ok
   end

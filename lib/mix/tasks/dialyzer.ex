@@ -24,6 +24,7 @@ defmodule Mix.Tasks.Dialyzer do
     * `--format github`      - format the warnings in the Github Actions message format
     * `--format ignore_file` - format the warnings to be suitable for adding to Elixir Format ignore file
     * `--quiet` - suppress all informational messages
+    * `--quiet-with-result` - suppress all informational messages except for the final result message
 
   Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
@@ -94,7 +95,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   use Mix.Task
   import System, only: [user_home!: 0]
-  import Dialyxir.Output, only: [info: 1, error: 1]
+  import Dialyxir.Output
   alias Dialyxir.Project
   alias Dialyxir.Plt
   alias Dialyxir.Dialyzer
@@ -150,6 +151,7 @@ defmodule Mix.Tasks.Dialyzer do
                      no_compile: :boolean,
                      plt: :boolean,
                      quiet: :boolean,
+                     quiet_with_result: :boolean,
                      raw: :boolean,
                      format: :string
                    )
@@ -157,7 +159,7 @@ defmodule Mix.Tasks.Dialyzer do
   def run(args) do
     {opts, _, dargs} = OptionParser.parse(args, strict: @command_options)
     original_shell = Mix.shell()
-    if opts[:quiet], do: Mix.shell(Mix.Shell.Quiet)
+    if opts[:quiet] || opts[:quiet_with_result], do: Mix.shell(Mix.Shell.Quiet)
     opts = Keyword.delete(opts, :quiet)
     check_dialyzer()
     compatibility_notice()
@@ -265,12 +267,31 @@ defmodule Mix.Tasks.Dialyzer do
       {:format, opts[:format]},
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
-      {:ignore_exit_status, opts[:ignore_exit_status]}
+      {:ignore_exit_status, opts[:ignore_exit_status]},
+      {:quiet_with_result, opts[:quiet_with_result]}
     ]
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
-    report = if status == :ok, do: &info/1, else: &error/1
+
+    quiet_with_result? = opts[:quiet_with_result]
+
+    report =
+      cond do
+        status == :ok && quiet_with_result? ->
+          fn text ->
+            Mix.shell(Mix.Shell.IO)
+            info(text)
+            Mix.shell(Mix.Shell.Quiet)
+          end
+
+        status == :ok ->
+          &info/1
+
+        true ->
+          &error/1
+      end
+
     Enum.each(result, report)
 
     unless exit_status == 0 || opts[:ignore_exit_status] do
