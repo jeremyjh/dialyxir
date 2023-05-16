@@ -14,8 +14,7 @@ jobs:
 
       # Compile steps omitted for simplicity
 
-      # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
-      # Cache key based on Elixir & Erlang version (also useful when running in matrix)
+      # Cache key based on Erlang/Elixir version and the mix.lock hash
       - run:
           name: "Save Elixir and Erlang version for PLT caching"
           command: echo "$ELIXIR_VERSION $ERLANG_VERSION" > .elixir_otp_version
@@ -23,7 +22,7 @@ jobs:
       - restore_cache:
           name: "Restore PLT cache"
           keys:
-            - {{ arch }}-{{ checksum ".elixir_otp_version" }}-plt
+            - plt-{{ arch }}-{{ checksum ".elixir_otp_version" }}-{{ checksum "mix.lock" }}
 
       - run:
           name: "Create PLTs"
@@ -31,7 +30,7 @@ jobs:
 
       - save_cache:
           name: "Save PLT cache"
-          key: {{ arch }}-{{ checksum ".elixir_otp_version" }}-plt
+          key: plt-{{ arch }}-{{ checksum ".elixir_otp_version" }}-{{ checksum "mix.lock" }}
           paths: "priv/plts"
 
       - run:

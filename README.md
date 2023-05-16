@@ -66,9 +66,10 @@ If invoked without arguments, `mix dialyzer.explain` will list all the known war
 
 To use Dialyzer in CI, you must be aware of several things:
 
-1. Building the PLT file may take a while if a project has many dependencies
-2. The PLT should be cached using the CI caching system
-3. The PLT will need to be rebuilt whenever adding a new Erlang or Elixir version to your build matrix
+1. Building the project-level PLT file may take a while if a project has many dependencies.
+2. The project-level PLT should be cached using the CI caching system.
+  1. Optional: The core Erlang/Elixir PLT could also be cached in CI.
+3. The PLT will need to be rebuilt whenever adding a new Erlang or Elixir version to your build.
 
 ```elixir
 # mix.exs
@@ -76,7 +77,14 @@ def project do
   [
     ...
     dialyzer: [
-      plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+      # Put the project-level PLT in the priv/ directory (instead of the default _build/ location)
+      plt_file: {:no_warn, "priv/plts/project.plt"}
+
+      # The above is equivalent to:
+      # plt_local_path: "priv/plts/project.plt"
+
+      # You could also put the core Erlang/Elixir PLT into the priv/ directory like so:
+      # plt_core_path: "priv/plts/core.plt"
     ]
   ]
 end
@@ -107,15 +115,15 @@ The Persistent Lookup Table (PLT) is basically a cached output of the analysis. 
 a fork if you had to wait for Dialyzer to analyze all the standard library and OTP modules you are using every time you ran it.
 Running the mix task `dialyzer` by default builds several PLT files:
 
-  * A core Erlang file in `$MIX_HOME/dialyxir_erlang-[OTP Version].plt`
-  * A core Elixir file in `$MIX_HOME/dialyxir_erlang-[OTP Version]_elixir-[Elixir Version].plt`
-  * A project environment specific file in `_build/env/dialyze_erlang-[OTP Version]_elixir-[Elixir Version]_deps-dev.plt`
+  * A core Erlang file in `$MIX_HOME/dialyxir_erlang-$OTP_VERSION.plt`
+  * A core Elixir file in `$MIX_HOME/dialyxir_erlang-$OTP_VERSION-$ELIXIR_VERSION.plt`
+  * A project environment specific file in `_build/$MIX_ENV/dialyze_erlang-$OTP_VERSION_elixir-$ELIXIR_VERSION_deps-$MIX_ENV.plt`
 
-The core files are simply copied to your project folder when you run `dialyxir` for the first time with a given version of Erlang and Elixir. By default, all
-the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a `:plt_core_path` key with a file path. You can specify a different directory for the project PLT file with the `:plt_local_path keyword`. You can specify a different filename for the project PLT file with the `:plt_file keyword` - this is deprecated because people were using it with the old `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
+The core files are simply copied to your project folder when you run `dialyxir` for the first time with a given version of Erlang and Elixir. By default, all the modules in the project PLT are checked against your dependencies to be sure they are up to date. If you do not want to use MIX_HOME to store your core Erlang and Elixir files, you can provide a `:plt_core_path` key with a file path. You can specify a different directory for the project PLT file with the `:plt_local_path` keyword.
 
-The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries.
-The apps included by default are `[:erts, :kernel, :stdlib, :crypto]`.
+You can also specify a different filename for the project PLT file with the `:plt_file` keyword option. This is deprecated for local use, but fine to use in CI. The reason for the local deprecation is that people were using it with older versions of `dialyxir` to have project-specific PLTs, which are now the default. To silence the deprecation warning in CI, specify this value as `plt_file: {:no_warn, "/myproject/mypltfile"}`.
+
+The core PLTs include a basic set of OTP applications, as well as all of the Elixir standard libraries. The apps included by default are `[:erts, :kernel, :stdlib, :crypto]`.
 
 If you don't want to include the default apps you can specify a `:plt_apps` key and list there only the apps you want in the PLT. Using this option will mean dependencies are not added automatically (see below). If you want to just add an application to the list of defaults and dependencies you can use the `:plt_add_apps` key.
 

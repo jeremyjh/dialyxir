@@ -21,8 +21,8 @@ build-dev:
   cache:
     - key:
       files:
-        - mix.lock
         - .tool-versions
+        - mix.lock
       paths:
         - deps/
         - _build/dev
@@ -41,6 +41,7 @@ dialyzer-plt:
     - key:
       files:
         - .tool-versions
+        - mix.lock
       paths:
         - priv/plts
       # Pull cache at start, push updated cache after completion
@@ -56,6 +57,7 @@ dialyzer-check:
     - key:
       files:
         - .tool-versions
+        - mix.lock
       paths:
         - priv/plts
       # Pull cache at start, don't push cache after completion
