@@ -9,19 +9,18 @@ steps:
     id: beam
     uses: erlef/setup-beam@v1
     with:
-      elixir-version: "1.12.3" # Define the Elixir version
       otp-version: "24.1" # Define the OTP version
+      elixir-version: "1.12.3" # Define the Elixir version
 
-   # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
-   # Cache key based on Elixir & Erlang version (also useful when running in matrix)
+   # Cache key based on Erlang/Elixir version and the mix.lock hash
   - name: Restore PLT cache
     id: plt_cache
     uses: actions/cache/restore@v3
     with:
       key: |
-        ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt
+        plt-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('**/mix.lock') }}
       restore-keys: |
-        ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt
+        plt-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
       path: |
         priv/plts
 
@@ -38,7 +37,7 @@ steps:
     if: steps.plt_cache.outputs.cache-hit != 'true'
     with:
       key: |
-        ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt
+        plt-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('**/mix.lock') }}
       path: |
         priv/plts
 
