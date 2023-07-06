@@ -383,18 +383,14 @@ defmodule Dialyxir.Project do
         error("Error loading #{app}, dependency list may be incomplete.\n #{inspect(err)}")
     end
 
-    case Application.spec(app, :applications) do
-      [] ->
-        []
+    this_apps =
+      (Application.spec(app, :applications) || []) --
+        (Application.spec(app, :optional_applications) || [])
 
-      nil ->
-        []
-
-      this_apps ->
-        Enum.map(this_apps, with_each)
-        |> List.flatten()
-        |> Enum.concat(this_apps)
-    end
+    this_apps
+    |> Enum.map(with_each)
+    |> List.flatten()
+    |> Enum.concat(this_apps)
   end
 
   defp env_dep(dep) do
