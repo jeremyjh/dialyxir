@@ -339,28 +339,34 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp check_dialyzer do
-    if not Code.ensure_loaded?(:dialyzer) do
-      error("""
-      DEPENDENCY MISSING
-      ------------------------
-      If you are reading this message, then Elixir and Erlang are installed but the
-      Erlang Dialyzer is not available. Probably this is because you installed Erlang
-      with your OS package manager and the Dialyzer package is separate.
+  if Version.match?(System.version(), ">= 1.15.0") do
+    defp check_dialyzer do
+      Mix.ensure_application!(:dialyzer)
+    end
+  else
+    defp check_dialyzer do
+      if not Code.ensure_loaded?(:dialyzer) do
+        error("""
+        DEPENDENCY MISSING
+        ------------------------
+        If you are reading this message, then Elixir and Erlang are installed but the
+        Erlang Dialyzer is not available. Probably this is because you installed Erlang
+        with your OS package manager and the Dialyzer package is separate.
 
-      On Debian/Ubuntu:
+        On Debian/Ubuntu:
 
-        `apt-get install erlang-dialyzer`
+          `apt-get install erlang-dialyzer`
 
-      Fedora:
+        Fedora:
 
-         `yum install erlang-dialyzer`
+          `yum install erlang-dialyzer`
 
-      Arch and Homebrew include Dialyzer in their base erlang packages. Please report a Github
-      issue to add or correct distribution-specific information.
-      """)
+        Arch and Homebrew include Dialyzer in their base erlang packages. Please report a Github
+        issue to add or correct distribution-specific information.
+        """)
 
-      :erlang.halt(3)
+        :erlang.halt(3)
+      end
     end
   end
 
