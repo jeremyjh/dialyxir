@@ -4,6 +4,7 @@ defmodule FirstOne.Mixfile do
   def project do
     [
       app: :first_one,
+      prune_code_paths: false,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",

@@ -2,7 +2,13 @@ defmodule DirectApps.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :direct_apps, version: "0.1.0", deps: deps(), dialyzer: [plt_add_deps: :apps_direct]]
+    [
+      app: :direct_apps,
+      prune_code_paths: false,
+      version: "0.1.0",
+      deps: deps(),
+      dialyzer: [plt_add_deps: :apps_direct]
+    ]
   end
 
   def application do

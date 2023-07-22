@@ -2,7 +2,12 @@ defmodule NonexistentDeps.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :nonexistent_deps, version: "0.1.0", deps: deps()]
+    [
+      app: :nonexistent_deps,
+      prune_code_paths: false,
+      version: "0.1.0",
+      deps: deps()
+    ]
   end
 
   def application do

@@ -5,6 +5,7 @@ defmodule IgnoreApps.Mixfile do
     [
       app: :ignore_apps,
       version: "0.1.0",
+      prune_code_paths: false,
       deps: deps(),
       dialyzer: [
         plt_ignore_apps: [:logger]
