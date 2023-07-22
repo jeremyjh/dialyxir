@@ -63,7 +63,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp app_info(app) do
-    app_file = Atom.to_charlist(app) ++ '.app'
+    app_file = Atom.to_charlist(app) ++ ~c".app"
 
     case :code.where_is_file(app_file) do
       :non_existing ->
@@ -111,7 +111,7 @@ defmodule Dialyxir.Plt do
   end
 
   defp resolve_module(module, beams) do
-    beam = Atom.to_charlist(module) ++ '.beam'
+    beam = Atom.to_charlist(module) ++ ~c".beam"
 
     case :code.where_is_file(beam) do
       path when is_list(path) ->

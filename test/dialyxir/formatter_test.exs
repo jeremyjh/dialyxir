@@ -17,11 +17,11 @@ defmodule Dialyxir.FormatterTest do
   describe "exs ignore" do
     test "evaluates an ignore file and ignores warnings matching the pattern" do
       warnings = [
-        {:warn_return_no_exit, {'lib/short_description.ex', 17},
+        {:warn_return_no_exit, {~c"lib/short_description.ex", 17},
          {:no_return, [:only_normal, :format_long, 1]}},
-        {:warn_return_no_exit, {'lib/file/warning_type.ex', 18},
+        {:warn_return_no_exit, {~c"lib/file/warning_type.ex", 18},
          {:no_return, [:only_normal, :format_long, 1]}},
-        {:warn_return_no_exit, {'lib/file/warning_type/line.ex', 19},
+        {:warn_return_no_exit, {~c"lib/file/warning_type/line.ex", 19},
          {:no_return, [:only_normal, :format_long, 1]}}
       ]
 
@@ -35,11 +35,11 @@ defmodule Dialyxir.FormatterTest do
 
     test "evaluates an ignore file of the form {file, short_description} and ignores warnings matching the pattern" do
       warnings = [
-        {:warn_return_no_exit, {'lib/poorly_written_code.ex', 10},
+        {:warn_return_no_exit, {~c"lib/poorly_written_code.ex", 10},
          {:no_return, [:only_normal, :do_a_thing, 1]}},
-        {:warn_return_no_exit, {'lib/poorly_written_code.ex', 20},
+        {:warn_return_no_exit, {~c"lib/poorly_written_code.ex", 20},
          {:no_return, [:only_normal, :do_something_else, 2]}},
-        {:warn_return_no_exit, {'lib/poorly_written_code.ex', 30},
+        {:warn_return_no_exit, {~c"lib/poorly_written_code.ex", 30},
          {:no_return, [:only_normal, :do_many_things, 3]}}
       ]
 
@@ -53,7 +53,7 @@ defmodule Dialyxir.FormatterTest do
 
     test "does not filter lines not matching the pattern" do
       warning =
-        {:warn_return_no_exit, {'a/different_file.ex', 17},
+        {:warn_return_no_exit, {~c"a/different_file.ex", 17},
          {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
@@ -66,7 +66,7 @@ defmodule Dialyxir.FormatterTest do
 
     test "can filter by regex" do
       warning =
-        {:warn_return_no_exit, {'a/regex_file.ex', 17},
+        {:warn_return_no_exit, {~c"a/regex_file.ex", 17},
          {:no_return, [:only_normal, :format_long, 1]}}
 
       in_project(:ignore, fn ->
@@ -79,7 +79,7 @@ defmodule Dialyxir.FormatterTest do
 
     test "lists unnecessary skips as warnings if ignoring exit status" do
       warning =
-        {:warn_return_no_exit, {'a/regex_file.ex', 17},
+        {:warn_return_no_exit, {~c"a/regex_file.ex", 17},
          {:no_return, [:only_normal, :format_long, 1]}}
 
       filter_args = [{:ignore_exit_status, true}]
@@ -94,7 +94,7 @@ defmodule Dialyxir.FormatterTest do
 
     test "error on unnecessary skips without ignore_exit_status" do
       warning =
-        {:warn_return_no_exit, {'a/regex_file.ex', 17},
+        {:warn_return_no_exit, {~c"a/regex_file.ex", 17},
          {:no_return, [:only_normal, :format_long, 1]}}
 
       filter_args = [{:ignore_exit_status, false}]
@@ -109,7 +109,7 @@ defmodule Dialyxir.FormatterTest do
 
     test "overwrite ':list_unused_filters_present'" do
       warning =
-        {:warn_return_no_exit, {'a/regex_file.ex', 17},
+        {:warn_return_no_exit, {~c"a/regex_file.ex", 17},
          {:no_return, [:only_normal, :format_long, 1]}}
 
       filter_args = [{:list_unused_filters, false}]
@@ -126,7 +126,7 @@ defmodule Dialyxir.FormatterTest do
   describe "simple string ignore" do
     test "evaluates an ignore file and ignores warnings matching the pattern" do
       warning =
-        {:warn_matching, {'a/file.ex', 17}, {:pattern_match, ['pattern \'ok\'', '\'error\'']}}
+        {:warn_matching, {~c"a/file.ex", 17}, {:pattern_match, [~c"pattern 'ok'", ~c"'error'"]}}
 
       in_project(:ignore_string, fn ->
         assert Formatter.format_and_filter([warning], Project, [], :dialyzer) ==
@@ -137,9 +137,9 @@ defmodule Dialyxir.FormatterTest do
 
   test "listing unused filter behaves the same for different formats" do
     warnings = [
-      {:warn_return_no_exit, {'a/regex_file.ex', 17},
+      {:warn_return_no_exit, {~c"a/regex_file.ex", 17},
        {:no_return, [:only_normal, :format_long, 1]}},
-      {:warn_return_no_exit, {'a/another-file.ex', 18}, {:unknown_type, {:M, :F, :A}}}
+      {:warn_return_no_exit, {~c"a/another-file.ex", 18}, {:unknown_type, {:M, :F, :A}}}
     ]
 
     expected_warning = "a/another-file.ex:18"
