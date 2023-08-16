@@ -362,38 +362,84 @@ defmodule Dialyxir.Project do
     deps_app(app, recursive)
   end
 
-  @spec deps_app(atom(), boolean()) :: [atom]
-  defp deps_app(app, recursive) do
-    with_each =
-      if recursive do
-        &deps_app(&1, true)
-      else
-        fn _ -> [] end
+  if System.version() |> Version.parse!() |> then(&(&1.major >= 1 and &1.minor >= 15)) do
+    @spec deps_app(atom(), boolean()) :: [atom()]
+    defp deps_app(app, recursive) do
+      case do_load_app(app) do
+        :ok ->
+          with_each =
+            if recursive do
+              &deps_app(&1, true)
+            else
+              fn _ -> [] end
+            end
+
+          # Identify the optional applications which can't be loaded and thus not available
+          missing_apps =
+            Application.spec(app, :optional_applications)
+            |> List.wrap()
+            |> Enum.reject(&(do_load_app(&1) == :ok))
+
+          # Remove the optional applications which are not available from all the applications
+          required_apps =
+            Application.spec(app, :applications)
+            |> List.wrap()
+            |> Enum.reject(&(&1 in missing_apps))
+
+          required_apps |> Stream.flat_map(&with_each.(&1)) |> Enum.concat(required_apps)
+
+        {:error, err} ->
+          error("Error loading #{app}, dependency list may be incomplete.\n #{inspect(err)}")
+
+          []
+      end
+    end
+  else
+    @spec deps_app(atom(), boolean()) :: [atom()]
+    defp deps_app(app, recursive) do
+      with_each =
+        if recursive do
+          &deps_app(&1, true)
+        else
+          fn _ -> [] end
+        end
+
+      case do_load_app(app) do
+        :ok ->
+          nil
+
+        {:error, err} ->
+          error("Error loading #{app}, dependency list may be incomplete.\n #{inspect(err)}")
+
+          nil
       end
 
+      case Application.spec(app, :applications) do
+        [] ->
+          []
+
+        nil ->
+          []
+
+        this_apps ->
+          Enum.map(this_apps, with_each)
+          |> List.flatten()
+          |> Enum.concat(this_apps)
+      end
+    end
+  end
+
+  @spec do_load_app(atom()) :: :ok | {:error, term()}
+  defp do_load_app(app) do
     case Application.load(app) do
       :ok ->
-        nil
+        :ok
 
       {:error, {:already_loaded, _}} ->
-        nil
+        :ok
 
       {:error, err} ->
-        nil
-        error("Error loading #{app}, dependency list may be incomplete.\n #{inspect(err)}")
-    end
-
-    case Application.spec(app, :applications) do
-      [] ->
-        []
-
-      nil ->
-        []
-
-      this_apps ->
-        Enum.map(this_apps, with_each)
-        |> List.flatten()
-        |> Enum.concat(this_apps)
+        {:error, err}
     end
   end
 
