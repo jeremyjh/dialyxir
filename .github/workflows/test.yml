@@ -37,14 +37,28 @@ jobs:
         - '1.12.3'
         - '1.13.4'
         - '1.14.3'
+        - '1.15.4'
         otp:
         - '23.3'
         - '24.3'
         - '25.3'
+        - '26.0'
 
         exclude:
           - elixir: '1.12.3'
             otp: '25.3'
+
+          - elixir: '1.12.3'
+            otp: '26.0'
+
+          - elixir: '1.13.4'
+            otp: '26.0'
+
+          - elixir: '1.14.3'
+            otp: '26.0'
+
+          - elixir: '1.15.4'
+            otp: '23.3'
 
     steps:
     - name: Checkout
@@ -87,7 +101,7 @@ jobs:
         MIX_ENV: prod
 
     - name: Check source code formatting
-      if: ${{ matrix.elixir > '1.12.0' }}
+      if: ${{ matrix.elixir > '1.15.0' }}
       run: mix format --check-formatted
 
     - name: Get results in short format

@@ -5,13 +5,17 @@ defmodule Dialyxir.ProjectTest do
   import ExUnit.CaptureIO, only: [capture_io: 1, capture_io: 2]
 
   defp in_project(app, f) when is_atom(app) do
-    Mix.Project.in_project(app, "test/fixtures/#{Atom.to_string(app)}", fn _ -> f.() end)
+    in_project(app, "test/fixtures/#{Atom.to_string(app)}", f)
   end
 
   defp in_project(apps, f) when is_list(apps) do
     path = Enum.map_join(apps, "/", &Atom.to_string/1)
     app = List.last(apps)
-    Mix.Project.in_project(app, "test/fixtures/#{path}", fn _ -> f.() end)
+    in_project(app, "test/fixtures/#{path}", f)
+  end
+
+  defp in_project(app, path, f) do
+    Mix.Project.in_project(app, path, fn _ -> f.() end)
   end
 
   test "Default Project PLT File in _build dir" do

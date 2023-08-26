@@ -4,6 +4,7 @@ defmodule NoUmbrella.Mixfile do
   def project do
     [
       app: :no_umbrella,
+      prune_code_paths: false,
       version: "0.1.0",
       lockfile: "../mix.lock",
       elixir: "~> 1.3",
