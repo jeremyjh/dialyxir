@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## Unreleased changes post [1.3.0]
+Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
+
+## Unreleased changes post [1.4.0]
+
+## [1.4.0] - 2023-08-27
+
+### Added
+  - --quiet-with-result flag.
+
+### Changed
+  - (docs) Improved caching behaviour in example templates.
+
+### Fixed
+  - Erroneous "DEPENDENCY MISSING" message in Elixir 1.15.
+  - Handle transitive optional dependencies in Elixir 1.15.
 
 ## [1.3.0] - 2023-04-08
 

@@ -16,9 +16,8 @@ defmodule Dialyxir.PltTest do
       assert Plt.check(plts, &absname_plt/4) == :ok
     end
 
-    assert capture_io(fun) ==
-             "==> dialyxir\n" <>
-               "Looking up modules in dialyxir_erlang-20.3.plt\n" <>
+    assert capture_io(fun) =~
+             "Looking up modules in dialyxir_erlang-20.3.plt\n" <>
                "Looking up modules in dialyxir_erlang-20.3_elixir-1.6.2_deps-dev.plt\n" <>
                "/var/dialyxir_erlang-20.3_elixir-1.6.2_deps-dev.plt\n" <>
                "/var/dialyxir_erlang-20.3.plt\n"
