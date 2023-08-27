@@ -130,6 +130,6 @@ jobs:
         OUTPUT_TESTS: true
 
     - name: Check examples
-      run: mix dialyzer --format short --ignore-exit-status
+      run: mix compile 2> /dev/null  && mix dialyzer --format short --ignore-exit-status
       env:
         MIX_ENV: examples
