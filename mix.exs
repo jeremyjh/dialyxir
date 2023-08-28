@@ -8,7 +8,7 @@ defmodule Dialyxir.Mixfile do
     [
       app: :dialyxir,
       version: @version,
-      elixir: ">= 1.6.0",
+      elixir: ">= 1.12.0",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
