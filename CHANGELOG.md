@@ -8,6 +8,9 @@ Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased changes post [1.4.0]
 
+## [1.4.1] - 2023-08-30
+  - Bump minimum required Elixir version to 1.12.
+
 ## [1.4.0] - 2023-08-27
 
 ### Added

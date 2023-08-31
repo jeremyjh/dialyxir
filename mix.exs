@@ -2,7 +2,7 @@ defmodule Dialyxir.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/jeremyjh/dialyxir"
-  @version "1.4.0"
+  @version "1.4.1"
 
   def project do
     [
