@@ -458,7 +458,7 @@ defmodule Dialyxir.Project do
     end
   end
 
-  if System.version() |> Version.parse!() |> then(&(&1.major >= 1 and &1.minor >= 15)) do
+  if System.version() |> Version.parse!() |> (&(&1.major >= 1 and &1.minor >= 15)).() do
     defp app_dep_specs(app) do
       # Values returned by :optional_applications are also in :applications.
       dependencies = Application.spec(app, :applications) || []
