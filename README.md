@@ -17,7 +17,7 @@ To add it to a mix project, just add a line like this in your deps function in m
 ```elixir
 defp deps do
   [
-    {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
+    {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
   ]
 end
 ```
