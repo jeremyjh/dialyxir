@@ -2,13 +2,13 @@ defmodule Dialyxir.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/jeremyjh/dialyxir"
-  @version "1.4.1"
+  @version "1.4.2"
 
   def project do
     [
       app: :dialyxir,
       version: @version,
-      elixir: ">= 1.12.0",
+      elixir: ">= 1.6.0",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
