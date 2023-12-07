@@ -41,6 +41,7 @@ defmodule Dialyxir.Warnings do
                 Dialyxir.Warnings.PatternMatch,
                 Dialyxir.Warnings.PatternMatchCovered,
                 Dialyxir.Warnings.RecordConstruction,
+                Dialyxir.Warnings.RecordMatch,
                 Dialyxir.Warnings.RecordMatching,
                 Dialyxir.Warnings.UnknownBehaviour,
                 Dialyxir.Warnings.UnknownFunction,
