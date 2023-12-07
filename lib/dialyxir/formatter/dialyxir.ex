@@ -6,7 +6,7 @@ defmodule Dialyxir.Formatter.Dialyxir do
   @behaviour Dialyxir.Formatter
 
   @impl Dialyxir.Formatter
-  def format(dialyzer_warning = {_tag, {file, line}, message}) do
+  def format(dialyzer_warning = {_tag, {file, location}, message}) do
     {warning_name, arguments} = message
     base_name = Path.relative_to_cwd(file)
 
@@ -16,7 +16,7 @@ defmodule Dialyxir.Formatter.Dialyxir do
         string = warning.format_long(arguments)
 
         """
-        #{base_name}:#{line}:#{warning_name}
+        #{base_name}:#{Utils.format_location(location)}:#{warning_name}
         #{string}
         """
       rescue

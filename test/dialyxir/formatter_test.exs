@@ -14,6 +14,46 @@ defmodule Dialyxir.FormatterTest do
     Mix.Project.in_project(app, "test/fixtures/#{Atom.to_string(app)}", fn _ -> f.() end)
   end
 
+  describe "formats dialyzer warning" do
+    if System.otp_release() >= "24" do
+      for {formatter, message} <- %{
+            Formatter.Dialyxir =>
+              "lib/file/warning_type/line.ex:19:4:no_return\nFunction format_long/1 has no local return.",
+            Formatter.Dialyzer =>
+              "lib/file/warning_type/line.ex:19:4: Function format_long/1 has no local return",
+            Formatter.Github =>
+              "::warning file=lib/file/warning_type/line.ex,line=19,col=4,title=no_return::Function format_long/1 has no local return.",
+            Formatter.IgnoreFileStrict =>
+              ~s|{"lib/file/warning_type/line.ex", "Function format_long/1 has no local return."},|,
+            Formatter.IgnoreFile => ~s|{"lib/file/warning_type/line.ex", :no_return},|,
+            # TODO: Remove if once only Elixir ~> 1.15 is supported
+            Formatter.Raw =>
+              if Version.match?(System.version(), "<= 1.15.0") do
+                ~s|{:warn_return_no_exit, {'lib/file/warning_type/line.ex', {19, 4}}, {:no_return, [:only_normal, :format_long, 1]}}|
+              else
+                ~s|{:warn_return_no_exit, {~c"lib/file/warning_type/line.ex", {19, 4}}, {:no_return, [:only_normal, :format_long, 1]}}|
+              end,
+            Formatter.Short =>
+              "lib/file/warning_type/line.ex:19:4:no_return Function format_long/1 has no local return."
+          } do
+        test "file location including column for #{formatter} formatter" do
+          assert {:warn, [message], _unused_filters} =
+                   Formatter.format_and_filter(
+                     [
+                       {:warn_return_no_exit, {~c"lib/file/warning_type/line.ex", {19, 4}},
+                        {:no_return, [:only_normal, :format_long, 1]}}
+                     ],
+                     Project,
+                     [],
+                     unquote(formatter)
+                   )
+
+          assert message =~ unquote(message)
+        end
+      end
+    end
+  end
+
   describe "exs ignore" do
     test "evaluates an ignore file and ignores warnings matching the pattern" do
       warnings = [
