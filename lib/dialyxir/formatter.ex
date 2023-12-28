@@ -9,7 +9,8 @@ defmodule Dialyxir.Formatter do
 
   alias Dialyxir.FilterMap
 
-  @type warning() :: {tag :: term(), {file :: Path.t(), line :: pos_integer()}, {atom(), list()}}
+  @type warning() ::
+          {tag :: term(), {file :: Path.t(), location :: :erl_anno.location()}, {atom(), list()}}
 
   @type t() :: module()
 

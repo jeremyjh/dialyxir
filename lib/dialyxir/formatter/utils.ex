@@ -8,4 +8,10 @@ defmodule Dialyxir.Formatter.Utils do
       throw({:error, :unknown_warning, warning_name})
     end
   end
+
+  @doc false
+  @spec format_location(:erl_anno.location()) :: String.t()
+  def format_location(location)
+  def format_location({line, column}), do: "#{line}:#{column}"
+  def format_location(line), do: "#{line}"
 end

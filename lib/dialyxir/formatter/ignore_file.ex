@@ -4,7 +4,7 @@ defmodule Dialyxir.Formatter.IgnoreFile do
   @behaviour Dialyxir.Formatter
 
   @impl Dialyxir.Formatter
-  def format({_tag, {file, _line}, {warning_name, _arguments}}) do
+  def format({_tag, {file, _location}, {warning_name, _arguments}}) do
     ~s({"#{file}", :#{warning_name}},)
   end
 end

@@ -6,7 +6,7 @@ defmodule Dialyxir.Formatter.IgnoreFileStrict do
   @behaviour Dialyxir.Formatter
 
   @impl Dialyxir.Formatter
-  def format({_tag, {file, _line}, {warning_name, arguments}}) do
+  def format({_tag, {file, _location}, {warning_name, arguments}}) do
     warning = Utils.warning(warning_name)
     string = warning.format_short(arguments)
 
