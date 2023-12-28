@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
-## Unreleased changes post [1.4.0]
+## Unreleased changes post [1.4.4]
+
+## [1.4.3] - 2023-12-28
+  ### Fixed
+  - Warnings with line & column.
+  - Formatting of `:record_match` warning.
 
 ## [1.4.2] - 2023-10-21
 
