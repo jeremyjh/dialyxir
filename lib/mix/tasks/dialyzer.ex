@@ -154,7 +154,7 @@ defmodule Mix.Tasks.Dialyzer do
                      quiet: :boolean,
                      quiet_with_result: :boolean,
                      raw: :boolean,
-                     format: :string
+                     format: [:string, :keep]
                    )
 
   def run(args) do
@@ -265,7 +265,7 @@ defmodule Mix.Tasks.Dialyzer do
       {:init_plt, String.to_charlist(Project.plt_file())},
       {:files, Project.dialyzer_files()},
       {:warnings, dialyzer_warnings(dargs)},
-      {:format, opts[:format]},
+      {:format, Keyword.get_values(opts, :format)},
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
       {:ignore_exit_status, opts[:ignore_exit_status]},

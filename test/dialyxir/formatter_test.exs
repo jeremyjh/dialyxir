@@ -6,6 +6,7 @@ defmodule Dialyxir.FormatterTest do
   alias Dialyxir.Formatter
   alias Dialyxir.Formatter.Dialyxir, as: DialyxirFormatter
   alias Dialyxir.Formatter.Dialyzer, as: DialyzerFormatter
+  alias Dialyxir.Formatter.Github, as: GithubFormatter
   alias Dialyxir.Formatter.Short, as: ShortFormatter
   alias Dialyxir.Formatter.IgnoreFileStrict, as: IgnoreFileStrictFormatter
   alias Dialyxir.Project
@@ -45,7 +46,7 @@ defmodule Dialyxir.FormatterTest do
                      ],
                      Project,
                      [],
-                     unquote(formatter)
+                     [unquote(formatter)]
                    )
 
           assert message =~ unquote(message)
@@ -67,7 +68,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         {:error, remaining, _unused_filters_present} =
-          Formatter.format_and_filter(warnings, Project, [], ShortFormatter)
+          Formatter.format_and_filter(warnings, Project, [], [ShortFormatter])
 
         assert remaining == []
       end)
@@ -85,7 +86,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore_strict, fn ->
         {:ok, remaining, :no_unused_filters} =
-          Formatter.format_and_filter(warnings, Project, [], IgnoreFileStrictFormatter)
+          Formatter.format_and_filter(warnings, Project, [], [IgnoreFileStrictFormatter])
 
         assert remaining == []
       end)
@@ -98,7 +99,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         {:error, [remaining], _} =
-          Formatter.format_and_filter([warning], Project, [], ShortFormatter)
+          Formatter.format_and_filter([warning], Project, [], [ShortFormatter])
 
         assert remaining =~ ~r/different_file.* no local return/
       end)
@@ -111,7 +112,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         {:error, remaining, _unused_filters_present} =
-          Formatter.format_and_filter([warning], Project, [], ShortFormatter)
+          Formatter.format_and_filter([warning], Project, [], [ShortFormatter])
 
         assert remaining == []
       end)
@@ -126,7 +127,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         assert {:warn, [], {:unused_filters_present, warning}} =
-                 Formatter.format_and_filter([warning], Project, filter_args, :dialyxir)
+                 Formatter.format_and_filter([warning], Project, filter_args, [:dialyxir])
 
         assert warning =~ "Unused filters:"
       end)
@@ -141,7 +142,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         {:error, [], {:unused_filters_present, error}} =
-          Formatter.format_and_filter([warning], Project, filter_args, :dialyxir)
+          Formatter.format_and_filter([warning], Project, filter_args, [:dialyxir])
 
         assert error =~ "Unused filters:"
       end)
@@ -156,7 +157,7 @@ defmodule Dialyxir.FormatterTest do
 
       in_project(:ignore, fn ->
         assert {:warn, [], {:unused_filters_present, warning}} =
-                 Formatter.format_and_filter([warning], Project, filter_args, :dialyxir)
+                 Formatter.format_and_filter([warning], Project, filter_args, [:dialyxir])
 
         refute warning =~ "Unused filters:"
       end)
@@ -169,8 +170,24 @@ defmodule Dialyxir.FormatterTest do
         {:warn_matching, {~c"a/file.ex", 17}, {:pattern_match, [~c"pattern 'ok'", ~c"'error'"]}}
 
       in_project(:ignore_string, fn ->
-        assert Formatter.format_and_filter([warning], Project, [], :dialyzer) ==
+        assert Formatter.format_and_filter([warning], Project, [], [:dialyzer]) ==
                  {:ok, [], :no_unused_filters}
+      end)
+    end
+  end
+
+  describe "multiple formatters" do
+    test "short and github" do
+      warning =
+        {:warn_return_no_exit, {~c"a/different_file.ex", 17},
+         {:no_return, [:only_normal, :format_long, 1]}}
+
+      in_project(:ignore, fn ->
+        {:error, [short_formatted, github_formatted], _} =
+          Formatter.format_and_filter([warning], Project, [], [ShortFormatter, GithubFormatter])
+
+        assert short_formatted =~ ~r/different_file.* no local return/
+        assert github_formatted =~ ~r/^::warning file=a\/different_file\.ex.* no local return/
       end)
     end
   end
@@ -194,7 +211,7 @@ defmodule Dialyxir.FormatterTest do
     for format <- [ShortFormatter, DialyxirFormatter, DialyzerFormatter] do
       in_project(:ignore, fn ->
         capture_io(fn ->
-          result = Formatter.format_and_filter(warnings, Project, filter_args, format)
+          result = Formatter.format_and_filter(warnings, Project, filter_args, [format])
 
           assert {:error, [warning], {:unused_filters_present, unused}} = result
           assert warning =~ expected_warning
