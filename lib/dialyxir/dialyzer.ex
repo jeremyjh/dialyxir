@@ -1,5 +1,6 @@
 defmodule Dialyxir.Dialyzer do
   import Dialyxir.Output
+  require Logger
   alias String.Chars
   alias Dialyxir.Formatter
   alias Dialyxir.Project
@@ -14,40 +15,25 @@ defmodule Dialyxir.Dialyzer do
       :quiet_with_result
     ]
 
+    @default_formatter Dialyxir.Formatter.Dialyxir
+
     def run(args, filterer) do
       try do
         {split, args} = Keyword.split(args, @dialyxir_args)
 
         quiet_with_result? = split[:quiet_with_result]
 
-        formatter =
-          cond do
-            split[:format] == "dialyzer" ->
-              Dialyxir.Formatter.Dialyzer
+        raw_formatters =
+          if split[:raw] do
+            Enum.uniq(split[:format] ++ ["raw"])
+          else
+            split[:format]
+          end
 
-            split[:format] == "dialyxir" ->
-              Dialyxir.Formatter.Dialyxir
-
-            split[:format] == "github" ->
-              Dialyxir.Formatter.Github
-
-            split[:format] == "ignore_file" ->
-              Dialyxir.Formatter.IgnoreFile
-
-            split[:format] == "ignore_file_strict" ->
-              Dialyxir.Formatter.IgnoreFileStrict
-
-            split[:format] == "raw" ->
-              Dialyxir.Formatter.Raw
-
-            split[:format] == "short" ->
-              Dialyxir.Formatter.Short
-
-            split[:raw] ->
-              Dialyxir.Formatter.Raw
-
-            true ->
-              Dialyxir.Formatter.Dialyxir
+        formatters =
+          case raw_formatters do
+            [] -> [@default_formatter]
+            raw_formatters -> Enum.map(raw_formatters, &parse_formatter/1)
           end
 
         info("Starting Dialyzer")
@@ -66,7 +52,7 @@ defmodule Dialyxir.Dialyzer do
                result,
                filterer,
                filter_map_args,
-               formatter,
+               formatters,
                quiet_with_result?
              ) do
           {:ok, formatted_warnings, :no_unused_filters} ->
@@ -82,6 +68,19 @@ defmodule Dialyxir.Dialyzer do
         {:dialyzer_error, msg} ->
           {:error, ":dialyzer.run error: " <> Chars.to_string(msg)}
       end
+    end
+
+    defp parse_formatter("dialyzer"), do: Dialyxir.Formatter.Dialyzer
+    defp parse_formatter("dialyxir"), do: Dialyxir.Formatter.Dialyxir
+    defp parse_formatter("github"), do: Dialyxir.Formatter.Github
+    defp parse_formatter("ignore_file"), do: Dialyxir.Formatter.IgnoreFile
+    defp parse_formatter("ignore_file_string"), do: Dialyxir.Formatter.IgnoreFileStrict
+    defp parse_formatter("raw"), do: Dialyxir.Formatter.Raw
+    defp parse_formatter("short"), do: Dialyxir.Formatter.Short
+
+    defp parse_formatter(unknown) do
+      Logger.warning("Unrecognized formatter #{unknown} received. Falling back to default.")
+      @default_formatter
     end
   end
 

@@ -22,7 +22,7 @@ defmodule Dialyxir.Formatter do
     "done in #{minutes}m#{seconds}s"
   end
 
-  @spec format_and_filter([tuple], module, Keyword.t(), t(), boolean()) :: tuple
+  @spec format_and_filter([tuple], module, Keyword.t(), [t()], boolean()) :: tuple
   def format_and_filter(
         warnings,
         filterer,
@@ -31,7 +31,7 @@ defmodule Dialyxir.Formatter do
         quiet_with_result? \\ false
       )
 
-  def format_and_filter(warnings, filterer, filter_map_args, formatter, quiet_with_result?) do
+  def format_and_filter(warnings, filterer, filter_map_args, formatters, quiet_with_result?) do
     filter_map = filterer.filter_map(filter_map_args)
 
     {filtered_warnings, filter_map} = filter_warnings(warnings, filterer, filter_map)
@@ -39,7 +39,9 @@ defmodule Dialyxir.Formatter do
     formatted_warnings =
       filtered_warnings
       |> filter_legacy_warnings(filterer)
-      |> Enum.map(&formatter.format/1)
+      |> Enum.flat_map(fn legacy_warning ->
+        Enum.map(formatters, & &1.format(legacy_warning))
+      end)
       |> Enum.uniq()
 
     show_count_skipped(warnings, formatted_warnings, filter_map, quiet_with_result?)
