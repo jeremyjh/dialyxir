@@ -1,6 +1,5 @@
 defmodule Dialyxir.Dialyzer do
   import Dialyxir.Output
-  require Logger
   alias String.Chars
   alias Dialyxir.Formatter
   alias Dialyxir.Project
@@ -79,7 +78,11 @@ defmodule Dialyxir.Dialyzer do
     defp parse_formatter("short"), do: Dialyxir.Formatter.Short
 
     defp parse_formatter(unknown) do
-      Logger.warning("Unrecognized formatter #{unknown} received. Falling back to default.")
+      warning("""
+      Unrecognized formatter #{unknown} received. \
+      Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_string, raw, and short. \
+      Falling back to dialyxir.
+      """)
       @default_formatter
     end
   end
