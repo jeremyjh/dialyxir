@@ -83,6 +83,7 @@ defmodule Dialyxir.Dialyzer do
       Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_string, raw, and short. \
       Falling back to dialyxir.
       """)
+
       @default_formatter
     end
   end
