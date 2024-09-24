@@ -32,6 +32,10 @@ defmodule Dialyxir.Warnings.InvalidContract do
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
   def format_long([module, function, arity, signature]) do
+    format_long([module, function, arity, nil, signature])
+  end
+
+  def format_long([module, function, arity, _args, signature | _]) do
     pretty_module = Erlex.pretty_print(module)
     pretty_signature = Erlex.pretty_print_contract(signature)
 
