@@ -67,4 +67,14 @@ defmodule Mix.Tasks.DialyzerTest do
     assert result =~
              ~r/Total errors: ., Skipped: ., Unnecessary Skips: .\ndone \(passed successfully\)\n/
   end
+
+  @tag :output_tests
+  test "Warning is printed when unknown format is requested" do
+    args = ["dialyzer", "--format", "foo"]
+    env = [{"MIX_ENV", "prod"}]
+    {result, 0} = System.cmd("mix", args, env: env)
+
+    assert result =~
+             "Unrecognized formatter foo received. Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_string, raw, and short. Falling back to dialyxir."
+  end
 end

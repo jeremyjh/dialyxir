@@ -42,7 +42,10 @@ steps:
         priv/plts
 
   - name: Run dialyzer
-    run: mix dialyzer --format github
+    # Two formats are included for ease of debugging and it is lightly recommended to use both, see https://github.com/jeremyjh/dialyxir/issues/530 for reasoning
+    # --format github is helpful to print the warnings in a way that GitHub understands and can place on the /files page of a PR
+    # --format dialyxir allows the raw GitHub actions logs to be useful because they have the full warning printed
+    run: mix dialyzer --format github --format dialyxir
 
 # ...
 ```

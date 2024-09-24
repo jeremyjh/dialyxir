@@ -17,13 +17,14 @@ defmodule Mix.Tasks.Dialyzer do
     * `--list-unused-filters` - list unused ignore filters useful for CI. do
       not use with `mix do`.
     * `--plt` - only build the required PLT(s) and exit
-    * `--format short`       - format the warnings in a compact format
-    * `--format raw`         - format the warnings in format returned before Dialyzer formatting
-    * `--format dialyxir`    - format the warnings in a pretty printed format
-    * `--format dialyzer`    - format the warnings in the original Dialyzer format
-    * `--format github`      - format the warnings in the Github Actions message format
-    * `--format ignore_file` - format the warnings in {file, warning} format for Elixir Format ignore file
-    * `--format ignore_file_strict` - format the warnings in {file, short_description} format for Elixir Format ignore file.
+    * `--format <name>`        - Specify the format for the warnings, can be specified multiple times to print warnings multiple times in different output formats. Defaults to `dialyxir`.
+      * `--format short`       - format the warnings in a compact format, suitable for ignore file using Elixir term format.
+      * `--format raw`         - format the warnings in format returned before Dialyzer formatting
+      * `--format dialyxir`    - format the warnings in a pretty printed format (default)
+      * `--format dialyzer`    - format the warnings in the original Dialyzer format
+      * `--format github`      - format the warnings in the Github Actions message format
+      * `--format ignore_file` - format the warnings in {file, warning} format for Elixir Format ignore file
+      * `--format ignore_file_strict` - format the warnings in {file, short_description} format for Elixir Format ignore file.
     * `--quiet` - suppress all informational messages
     * `--quiet-with-result` - suppress all informational messages except for the final result message
 
@@ -154,7 +155,7 @@ defmodule Mix.Tasks.Dialyzer do
                      quiet: :boolean,
                      quiet_with_result: :boolean,
                      raw: :boolean,
-                     format: :string
+                     format: [:string, :keep]
                    )
 
   def run(args) do
@@ -265,7 +266,7 @@ defmodule Mix.Tasks.Dialyzer do
       {:init_plt, String.to_charlist(Project.plt_file())},
       {:files, Project.dialyzer_files()},
       {:warnings, dialyzer_warnings(dargs)},
-      {:format, opts[:format]},
+      {:format, Keyword.get_values(opts, :format)},
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
       {:ignore_exit_status, opts[:ignore_exit_status]},
