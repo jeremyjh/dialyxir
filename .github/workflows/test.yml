@@ -34,31 +34,58 @@ jobs:
       fail-fast: false
       matrix:
         elixir:
-        - '1.12.3'
-        - '1.13.4'
-        - '1.14.3'
-        - '1.15.7'
+        - 1.12.3
+        - 1.13.4
+        - 1.14.3
+        - 1.15.7
+        - 1.16.3
+        - 1.17.2
         otp:
-        - '23.3'
-        - '24.3'
-        - '25.3'
-        - '26.1'
+        - 23.3
+        - 24.3
+        - 25.3
+        - 26.1
+        - 27.0
 
         exclude:
-          - elixir: '1.12.3'
-            otp: '25.3'
+          - elixir: 1.12.3
+            otp: 25.3
 
-          - elixir: '1.12.3'
-            otp: '26.1'
+          - elixir: 1.12.3
+            otp: 26.1
 
-          - elixir: '1.13.4'
-            otp: '26.1'
+          - elixir: 1.12.3
+            otp: 27.0
 
-          - elixir: '1.14.3'
-            otp: '26.1'
+          - elixir: 1.13.4
+            otp: 26.1
 
-          - elixir: '1.15.7'
-            otp: '23.3'
+          - elixir: 1.13.4
+            otp: 27.0
+
+          - elixir: 1.14.3
+            otp: 26.1
+
+          - elixir: 1.14.3
+            otp: 27.0
+
+          - elixir: 1.15.7
+            otp: 23.3
+
+          - elixir: 1.15.7
+            otp: 27.0
+
+          - elixir: 1.16.3
+            otp: 23.3
+
+          - elixir: 1.16.3
+            otp: 27.0
+
+          - elixir: 1.17.2
+            otp: 23.3
+
+          - elixir: 1.17.2
+            otp: 24.3
 
     steps:
     - name: Checkout
@@ -71,7 +98,7 @@ jobs:
         otp-version: ${{ matrix.otp }}
 
     - name: Restore deps cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           deps
@@ -101,7 +128,7 @@ jobs:
         MIX_ENV: prod
 
     - name: Check source code formatting
-      if: ${{ matrix.elixir > '1.15.0' }}
+      if: ${{ matrix.elixir == '1.17.2' && matrix.otp == '27.0' }}
       run: mix format --check-formatted
 
     - name: Get results in short format
