@@ -16,14 +16,21 @@ defmodule Dialyxir.FilterMap do
       unused_filters_as_errors?: list_unused_filters? && !ignore_exit_status?
     }
 
-    {ignore, _} =
-      ignore_file
-      |> File.read!()
-      |> Code.eval_string()
+    cond do
+      File.exists?(ignore_file) &&
+          match?(%{size: size} when size > 0, File.stat!(ignore_file)) ->
+        {ignore, _} =
+          ignore_file
+          |> File.read!()
+          |> Code.eval_string()
 
-    Enum.reduce(ignore, filter_map, fn skip, filter_map ->
-      put_in(filter_map.counters[skip], 0)
-    end)
+        Enum.reduce(ignore, filter_map, fn skip, filter_map ->
+          put_in(filter_map.counters[skip], 0)
+        end)
+
+      true ->
+        filter_map
+    end
   end
 
   @doc """
