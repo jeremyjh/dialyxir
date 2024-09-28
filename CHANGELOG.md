@@ -6,7 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
-## Unreleased changes post [1.4.4]
+## [1.4.4] - 2024-09-28
+
+   ### Fixed
+   - Invalid contract formatting failed on OTP 26 & later.
+   - Empty ignore files are ignored.
+   - Several improvements and corrections to documentation.
+
+   ### Changed
+   - Updated Erlex minimum version to 0.27, bringing in several fixes and improvements.
+
+   ### Added
+   - Multiple formatters can be used in the same invocation.
 
 ## [1.4.3] - 2023-12-28
   ### Fixed
