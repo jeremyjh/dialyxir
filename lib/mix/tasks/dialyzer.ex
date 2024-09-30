@@ -187,8 +187,14 @@ defmodule Mix.Tasks.Dialyzer do
           No :ignore_warnings opt specified in mix.exs. Using default: #{default}.
           """)
 
-        ignore_warnings && File.exists?(ignore_warnings) &&
+        !ignore_warnings && File.exists?(default) &&
             match?(%{size: size} when size == 0, File.stat!(default)) ->
+          info("""
+          No :ignore_warnings opt specified in mix.exs. Using default, but file is empty.
+          """)
+
+        ignore_warnings && File.exists?(ignore_warnings) &&
+            match?(%{size: size} when size == 0, File.stat!(ignore_warnings)) ->
           info("""
           :ignore_warnings opt specified in mix.exs: #{ignore_warnings}, but file is empty.
           """)
