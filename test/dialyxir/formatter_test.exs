@@ -92,6 +92,27 @@ defmodule Dialyxir.FormatterTest do
       end)
     end
 
+    test "ignores an empty default ignore file" do
+      in_project(:ignore_default_empty, fn ->
+        {:ok, remaining,  :no_unused_filters} =
+          Formatter.format_and_filter([], Project, [], [IgnoreFileStrictFormatter])
+
+        assert Project.dialyzer_ignore_warnings() == nil
+        assert remaining == []
+      end)
+    end
+
+    test "ignores an empty ignore file specified in mix" do
+      in_project(:ignore_empty, fn ->
+        {:ok, remaining,  :no_unused_filters} =
+          Formatter.format_and_filter([], Project, [], [IgnoreFileStrictFormatter])
+
+        assert Project.dialyzer_ignore_warnings() == "ignore_empty_test.exs"
+        assert remaining == []
+      end)
+    end
+
+
     test "does not filter lines not matching the pattern" do
       warning =
         {:warn_return_no_exit, {~c"a/different_file.ex", 17},
