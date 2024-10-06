@@ -75,6 +75,6 @@ defmodule Mix.Tasks.DialyzerTest do
     {result, 0} = System.cmd("mix", args, env: env)
 
     assert result =~
-             "Unrecognized formatter foo received. Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_string, raw, and short. Falling back to dialyxir."
+             "Unrecognized formatter foo received. Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_strict, raw, and short. Falling back to dialyxir."
   end
 end
