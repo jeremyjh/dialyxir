@@ -73,14 +73,14 @@ defmodule Dialyxir.Dialyzer do
     defp parse_formatter("dialyxir"), do: Dialyxir.Formatter.Dialyxir
     defp parse_formatter("github"), do: Dialyxir.Formatter.Github
     defp parse_formatter("ignore_file"), do: Dialyxir.Formatter.IgnoreFile
-    defp parse_formatter("ignore_file_string"), do: Dialyxir.Formatter.IgnoreFileStrict
+    defp parse_formatter("ignore_file_strict"), do: Dialyxir.Formatter.IgnoreFileStrict
     defp parse_formatter("raw"), do: Dialyxir.Formatter.Raw
     defp parse_formatter("short"), do: Dialyxir.Formatter.Short
 
     defp parse_formatter(unknown) do
       warning("""
       Unrecognized formatter #{unknown} received. \
-      Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_string, raw, and short. \
+      Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_strict, raw, and short. \
       Falling back to dialyxir.
       """)
 
