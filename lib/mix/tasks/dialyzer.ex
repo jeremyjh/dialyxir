@@ -182,15 +182,21 @@ defmodule Mix.Tasks.Dialyzer do
       ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
 
       cond do
-        !ignore_warnings && File.exists?(default) ->
+        !ignore_warnings && File.exists?(default) &&
+            match?(%{size: size} when size == 0, File.stat!(default)) ->
           info("""
-          No :ignore_warnings opt specified in mix.exs. Using default: #{default}.
+          No :ignore_warnings opt specified in mix.exs. Using default, but file is empty.
           """)
 
         ignore_warnings && File.exists?(ignore_warnings) &&
-            match?(%{size: size} when size == 0, File.stat!(default)) ->
+            match?(%{size: size} when size == 0, File.stat!(ignore_warnings)) ->
           info("""
           :ignore_warnings opt specified in mix.exs: #{ignore_warnings}, but file is empty.
+          """)
+
+        !ignore_warnings && File.exists?(default) ->
+          info("""
+          No :ignore_warnings opt specified in mix.exs. Using default: #{default}.
           """)
 
         ignore_warnings && File.exists?(ignore_warnings) ->
