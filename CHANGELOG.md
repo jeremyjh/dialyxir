@@ -8,6 +8,9 @@ Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased changes post [1.4.4]
 
+   ### Fixed
+   - Crash when default ignore file missing and custom file specified
+
 ## [1.4.3] - 2023-12-28
   ### Fixed
   - Warnings with line & column.

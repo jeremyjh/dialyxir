@@ -188,7 +188,7 @@ defmodule Mix.Tasks.Dialyzer do
           """)
 
         ignore_warnings && File.exists?(ignore_warnings) &&
-            match?(%{size: size} when size == 0, File.stat!(default)) ->
+            match?(%{size: size} when size == 0, File.stat!(ignore_warnings)) ->
           info("""
           :ignore_warnings opt specified in mix.exs: #{ignore_warnings}, but file is empty.
           """)

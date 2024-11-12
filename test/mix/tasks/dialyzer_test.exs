@@ -77,4 +77,30 @@ defmodule Mix.Tasks.DialyzerTest do
     assert result =~
              "Unrecognized formatter foo received. Known formatters are dialyzer, dialyxir, github, ignore_file, ignore_file_strict, raw, and short. Falling back to dialyxir."
   end
+
+  test "task runs when custom ignore file provided and exists" do
+    in_project(:ignore, fn ->
+      fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status"]) end
+
+      assert capture_io(fun) =~ "ignore_warnings: ignore_test.exs"
+    end)
+  end
+
+  test "task runs when custom ignore file provided and does not exist" do
+    in_project(:ignore_custom_missing, fn ->
+      fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status"]) end
+
+      assert capture_io(fun) =~
+               ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file does not exist"
+    end)
+  end
+
+  test "task runs when custom ignore file provided and it is empty" do
+    in_project(:ignore_custom_empty, fn ->
+      fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status"]) end
+
+      assert capture_io(fun) =~
+               ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file is empty"
+    end)
+  end
 end
