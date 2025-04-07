@@ -35,9 +35,10 @@ defmodule Dialyxir.Warnings.InvalidContract do
     format_long([module, function, arity, nil, signature])
   end
 
-  def format_long([module, function, arity, _args, signature | _]) do
+  def format_long([module, function, arity, _args, spec, success_typing]) do
     pretty_module = Erlex.pretty_print(module)
-    pretty_signature = Erlex.pretty_print_contract(signature)
+    pretty_success_typing = Erlex.pretty_print_contract(success_typing)
+    pretty_spec = Erlex.pretty_print_contract(spec)
 
     """
     The @spec for the function does not match the success typing of the function.
@@ -46,7 +47,10 @@ defmodule Dialyxir.Warnings.InvalidContract do
     #{pretty_module}.#{function}/#{arity}
 
     Success typing:
-    @spec #{function}#{pretty_signature}
+    #{pretty_success_typing}
+
+    But the spec is:
+    #{pretty_spec}
     """
   end
 
