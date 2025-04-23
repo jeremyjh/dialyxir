@@ -41,7 +41,7 @@ mix dialyzer
   * `--no-check`                    - do not perform (quick) check to see if PLT needs to be updated.
   * `--ignore-exit-status`          - display warnings but do not halt the VM or return an exit status code.
   * `--list-unused-filters`         - list unused ignore filters useful for CI. do not use with `mix do`.
-  * `--plt` - only build the requir ed PLT(s) and exit.
+  * `--plt`                         - only build the required PLT(s) and exit.
   * `--format <name>`               - Specify the format for the warnings, can be specified multiple times to print warnings multiple times in different output formats. Defaults to `dialyxir`.
     * `--format short`              - format the warnings in a compact format, suitable for ignore file using Elixir term format.
     * `--format raw`                - format the warnings in format returned before Dialyzer formatting.
