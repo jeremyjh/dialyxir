@@ -51,6 +51,11 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
     """
   end
 
+  # OTP 28+ format (5 arguments)
+  def format_long([module, function, args, expected_triples, _additional_type_info]) do
+    format_long([module, function, args, expected_triples])
+  end
+
   # We know which positions N are to blame;
   # the list of triples will never be empty.
   defp form_expected_without_opaque([{position, type, type_string}]) do
