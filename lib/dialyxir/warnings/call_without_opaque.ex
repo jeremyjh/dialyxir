@@ -51,6 +51,21 @@ defmodule Dialyxir.Warnings.CallWithoutOpaque do
     """
   end
 
+  # OTP 28+ format (5 arguments)
+  def format_long([module, function, args, expected_triples, _additional_type_info]) do
+    expected = form_expected_without_opaque(expected_triples)
+    pretty_module = Erlex.pretty_print(module)
+    pretty_args = Erlex.pretty_print_args(args)
+
+    """
+    Function call without opaqueness type mismatch.
+
+    Call does not have expected #{expected}.
+
+    #{pretty_module}.#{function}#{pretty_args}
+    """
+  end
+
   # We know which positions N are to blame;
   # the list of triples will never be empty.
   defp form_expected_without_opaque([{position, type, type_string}]) do
