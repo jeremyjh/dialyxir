@@ -10,7 +10,7 @@ jobs:
   check_duplicate_runs:
     name: Check for duplicate runs
     continue-on-error: true
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
@@ -26,7 +26,7 @@ jobs:
 
   test:
     name: Elixir ${{matrix.elixir}} / OTP ${{matrix.otp}}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: check_duplicate_runs
     if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
 
@@ -34,58 +34,24 @@ jobs:
       fail-fast: false
       matrix:
         elixir:
-        - 1.12.3
-        - 1.13.4
-        - 1.14.3
+        - 1.14.5
         - 1.15.7
         - 1.16.3
         - 1.17.2
+        - 1.18.4
         otp:
-        - 23.3
-        - 24.3
-        - 25.3
         - 26.1
         - 27.0
 
         exclude:
-          - elixir: 1.12.3
-            otp: 25.3
-
-          - elixir: 1.12.3
-            otp: 26.1
-
-          - elixir: 1.12.3
+          - elixir: 1.14.5
             otp: 27.0
-
-          - elixir: 1.13.4
-            otp: 26.1
-
-          - elixir: 1.13.4
-            otp: 27.0
-
-          - elixir: 1.14.3
-            otp: 26.1
-
-          - elixir: 1.14.3
-            otp: 27.0
-
-          - elixir: 1.15.7
-            otp: 23.3
 
           - elixir: 1.15.7
             otp: 27.0
 
           - elixir: 1.16.3
-            otp: 23.3
-
-          - elixir: 1.16.3
             otp: 27.0
-
-          - elixir: 1.17.2
-            otp: 23.3
-
-          - elixir: 1.17.2
-            otp: 24.3
 
     steps:
     - name: Checkout
@@ -128,7 +94,7 @@ jobs:
         MIX_ENV: prod
 
     - name: Check source code formatting
-      if: ${{ matrix.elixir == '1.17.2' && matrix.otp == '27.0' }}
+      if: ${{ matrix.elixir >= '1.17.2' && matrix.otp >= '27.0' }}
       run: mix format --check-formatted
 
     - name: Get results in short format
