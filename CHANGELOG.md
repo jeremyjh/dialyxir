@@ -9,20 +9,21 @@ Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 ## Unreleased changes post [1.4.6]
 
 ## [1.4.6] - 2025-08-09
-### Fixed
-- `CallWithoutOpaque` function clause error on OTP-28
-- `invalid_contract` warning showed spec twice instead of success typing
 
-### Changed
-- Update `ex_doc` to the latest version for an improved UI
+  ### Fixed
+  - `CallWithoutOpaque` function clause error on OTP-28
+  - `invalid_contract` warning showed spec twice instead of success typing
 
-### Docs
-- Add a note about the `:unknown` flag to the "Default Flags" section in the README
-- Fix dead hex doc links by including CI config docs in `mix.exs`'s `:docs`
-- Fix a typo in the README
+  ### Changed
+  - Update `ex_doc` to the latest version for an improved UI
 
-### CI
-- Update the Ubuntu version used in CI to 24.04
+  ### Docs
+  - Add a note about the `:unknown` flag to the "Default Flags" section in the README
+  - Fix dead hex doc links by including CI config docs in `mix.exs`'s `:docs`
+  - Fix a typo in the README
+
+  ### CI
+  - Update the Ubuntu version used in CI to 24.04
 
 ## [1.4.5] - 2024-11-17
 
