@@ -2,7 +2,7 @@ defmodule Dialyxir.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/jeremyjh/dialyxir"
-  @version "1.4.5"
+  @version "1.4.6"
 
   def project do
     [
@@ -27,7 +27,14 @@ defmodule Dialyxir.Mixfile do
         main: "readme",
         source_url: @source_url,
         source_ref: @version,
-        extras: ["CHANGELOG.md", "README.md"]
+        groups_for_extras: ["CI Configs": ~r{docs/.?}],
+        extras: [
+          "CHANGELOG.md",
+          "README.md",
+          "docs/circleci.md",
+          "docs/github_actions.md",
+          "docs/gitlab_ci.md"
+        ]
       ]
     ]
   end
