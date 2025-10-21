@@ -22,17 +22,16 @@ defmodule Dialyxir.Dialyzer do
 
         quiet_with_result? = split[:quiet_with_result]
 
-        raw_formatters =
+        formatters =
           if split[:raw] do
             Enum.uniq([split[:format], "raw"])
           else
             [split[:format]]
           end
-
-        formatters =
-          case raw_formatters do
+          |> Enum.filter(& &1)
+          |> case do
             [] -> [@default_formatter]
-            raw_formatters -> Enum.map(raw_formatters, &parse_formatter/1)
+            f -> Enum.map(f, &parse_formatter/1)
           end
 
         info("Starting Dialyzer")
