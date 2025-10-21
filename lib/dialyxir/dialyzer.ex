@@ -24,14 +24,14 @@ defmodule Dialyxir.Dialyzer do
 
         raw_formatters =
           if split[:raw] do
-            Enum.uniq(split[:format] ++ ["raw"])
+            Enum.uniq([split[:format], "raw"])
           else
-            split[:format]
+            [split[:format]]
           end
 
         formatters =
           case raw_formatters do
-            nil -> [@default_formatter]
+            [] -> [@default_formatter]
             raw_formatters -> Enum.map(raw_formatters, &parse_formatter/1)
           end
 
