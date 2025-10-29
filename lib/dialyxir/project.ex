@@ -114,6 +114,10 @@ defmodule Dialyxir.Project do
     Mix.Project.config()[:dialyzer][:flags] || []
   end
 
+  def dialyzer_incremental do
+    dialyzer_config()[:incremental] || false
+  end
+
   def no_umbrella? do
     case dialyzer_config()[:no_umbrella] do
       true -> true

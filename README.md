@@ -40,6 +40,7 @@ mix dialyzer
   * `--no-compile`                  - do not compile even if needed.
   * `--no-check`                    - do not perform (quick) check to see if PLT needs to be updated.
   * `--ignore-exit-status`          - display warnings but do not halt the VM or return an exit status code.
+  * `--incremental`                 - enable incremental mode (requires OTP 26+). Overrides the `incremental` setting in mix.exs if present.
   * `--list-unused-filters`         - list unused ignore filters useful for CI. do not use with `mix do`.
   * `--plt`                         - only build the required PLT(s) and exit.
   * `--format <name>`               - Specify the format for the warnings, can be specified multiple times to print warnings multiple times in different output formats. Defaults to `dialyxir`.
@@ -103,9 +104,25 @@ end
 
 ### Example CI Configs
 
+**Standard Mode:**
 - [CircleCI](./docs/circleci.md)
 - [GitHub Actions](./docs/github_actions.md)
 - [GitLab CI](./docs/gitlab_ci.md)
+
+**Incremental Mode (OTP 26+):**
+- [CircleCI with Incremental Mode](./docs/circleci_incremental.md)
+- [GitHub Actions with Incremental Mode](./docs/github_actions_incremental.md)
+- [GitLab CI with Incremental Mode](./docs/gitlab_ci_incremental.md)
+
+### Incremental Mode in CI
+
+Incremental mode (OTP 26+) can significantly speed up Dialyzer runs in CI by only analyzing changed files. Key considerations:
+
+- **Cache Strategy**: Incremental mode uses Dialyzer's internal cache in `_build` instead of separate PLT files
+- **Performance**: 50-95% faster on subsequent runs depending on changes
+- **Setup**: Simpler than standard mode - no separate PLT building step needed
+
+See the [GitHub Actions Incremental Mode guide](./docs/github_actions_incremental.md) for detailed setup instructions.
 
 ## With Explaining Stuff
 
@@ -211,6 +228,35 @@ def project do
   ]
 end
 ```
+
+### Incremental Mode
+
+Dialyxir supports Dialyzer's incremental analysis mode (available in OTP 26+). When enabled, Dialyzer will reuse previous analysis results and only analyze changed modules, significantly speeding up subsequent runs.
+
+You can enable incremental mode in two ways:
+
+**1. Via mix.exs configuration:**
+
+```elixir
+def project do
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [incremental: true]
+  ]
+end
+```
+
+**2. Via command line flag:**
+
+```bash
+mix dialyzer --incremental
+```
+
+The `--incremental` flag overrides the mix.exs setting, allowing you to test incremental mode without modifying your configuration.
+
+**Note:** Incremental mode requires OTP 26 or later. Incremental PLT files are separate from standard PLTs and are managed by Dialyzer itself. If you're running OTP < 26, dialyxir will halt with an error explaining how to proceed.
 
 ### Ignore Warnings
 #### Dialyxir defaults
