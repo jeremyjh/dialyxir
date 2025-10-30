@@ -118,11 +118,23 @@ end
 
 Incremental mode (OTP 26+) can significantly speed up Dialyzer runs in CI by only analyzing changed files. Key considerations:
 
-- **Cache Strategy**: Incremental mode uses Dialyzer's internal cache in `_build` instead of separate PLT files
+- **Cache strategy**: Incremental mode stores its analysis state in `_build/<MIX_ENV>` (typically `_build/test`). Cache this directory alongside `deps/` to realize the speedups on subsequent runs.
 - **Performance**: 50-95% faster on subsequent runs depending on changes
 - **Setup**: Simpler than standard mode - no separate PLT building step needed
 
-See the [GitHub Actions Incremental Mode guide](./docs/github_actions_incremental.md) for detailed setup instructions.
+Recommended paths to cache:
+
+- Local development: `deps/`, `_build/dev`
+- CI (test runs): `deps/`, `_build/test`
+- Umbrella projects follow the same convention (cache per MIX_ENV)
+
+Cache key guidance (avoid stale or cross-branch caches): include OS, OTP, Elixir, and branch in the key, and prefer a restore-keys chain that progressively drops branch and then lockfile. Lockfile-only keys are insufficient because code changes won’t rotate the cache.
+
+See the platform guides for examples and keys:
+
+- [GitHub Actions with Incremental Mode](./docs/github_actions_incremental.md)
+- [CircleCI with Incremental Mode](./docs/circleci_incremental.md)
+- [GitLab CI with Incremental Mode](./docs/gitlab_ci_incremental.md)
 
 ## With Explaining Stuff
 

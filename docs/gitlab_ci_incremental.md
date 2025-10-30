@@ -1,6 +1,6 @@
 # GitLab CI with Incremental Mode
 
-Incremental mode requires **OTP 26+** and caches Dialyzer's state in `_build` instead of separate PLT files.
+Incremental mode requires **OTP 26+** and stores Dialyzer's analysis state in `_build/<MIX_ENV>` (typically `_build/test`). Cache this directory alongside `deps/`.
 
 ```yaml
 image: elixir:1.16-otp-26
@@ -18,7 +18,7 @@ build-dev:
           - mix.lock
       paths:
         - deps/
-        - _build/dev
+        - _build/test
       policy: pull-push
   script:
     - mix do deps.get, compile
@@ -34,9 +34,18 @@ dialyzer-check:
           - mix.lock
           - "**/*.ex"
       paths:
-        - _build
+        - _build/test
       policy: pull-push
   script:
     - mix dialyzer --format short
+  # Optional: use a branch-aware cache key to avoid cross-branch pollution
+  variables:
+    GIT_STRATEGY: fetch
+
+## Cache key strategy
+
+- Paths: cache `deps/` and `_build/test`.
+- Keys: include `.tool-versions`, `mix.lock`, and branch (e.g., `key: "dialyzer-${CI_COMMIT_REF_SLUG}"`).
+- Use `policy: pull-push` so caches update on every run and capture incremental analysis.
 ```
 

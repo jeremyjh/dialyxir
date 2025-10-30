@@ -1,6 +1,6 @@
 # GitHub Actions with Incremental Mode
 
-Incremental mode requires **OTP 26+** and caches Dialyzer's state in `_build` instead of separate PLT files.
+Incremental mode requires **OTP 26+** and stores Dialyzer's analysis state in `_build/<MIX_ENV>` (typically `_build/test`). Cache this directory alongside `deps/` to realize incremental speedups.
 
 ```yaml
 name: CI
@@ -37,13 +37,13 @@ jobs:
       - name: Install dependencies
         run: mix deps.get
       
-      - name: Restore build cache
+      - name: Restore build cache (incremental state)
         uses: actions/cache@v4
         with:
-          path: _build
-          key: dialyzer-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('**/mix.lock') }}-${{ hashFiles('**/*.ex') }}
+          path: _build/test
+          key: dialyzer-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ github.ref_name }}-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
-            dialyzer-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('**/mix.lock') }}-
+            dialyzer-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ github.ref_name }}-
             dialyzer-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
       
       - name: Compile
@@ -51,5 +51,11 @@ jobs:
       
       - name: Run Dialyzer
         run: mix dialyzer --format github
+
+## Cache key strategy
+
+- Paths: cache `deps/` and `_build/test`.
+- Keys: include OS, OTP, Elixir, and branch; fall back by dropping branch, then lockfile.
+- To refresh stale caches, consider saving on every run (e.g. with `github.run_number`) or cleaning on retries.
 ```
 
