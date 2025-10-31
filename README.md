@@ -1,5 +1,6 @@
 # Dialyxir
 
+
 [![CI](https://github.com/jeremyjh/dialyxir/actions/workflows/test.yml/badge.svg)](https://github.com/jeremyjh/dialyxir/actions/workflows/test.yml)
 [![Module Version](https://img.shields.io/hexpm/v/dialyxir.svg)](https://hex.pm/packages/dialyxir)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/dialyxir/)
