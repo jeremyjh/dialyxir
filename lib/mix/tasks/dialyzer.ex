@@ -385,7 +385,7 @@ defmodule Mix.Tasks.Dialyzer do
         - Don't use the --incremental flag
       """)
 
-      :erlang.halt(3)
+      System.halt(3)
     end
 
     true
