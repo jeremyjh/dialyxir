@@ -11,6 +11,7 @@ defmodule Dialyxir.Dialyzer do
       :format,
       :list_unused_filters,
       :ignore_exit_status,
+      :incremental,
       :quiet_with_result
     ]
 

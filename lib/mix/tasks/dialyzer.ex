@@ -155,6 +155,7 @@ defmodule Mix.Tasks.Dialyzer do
                      quiet: :boolean,
                      quiet_with_result: :boolean,
                      raw: :boolean,
+                     incremental: :boolean,
                      format: [:string, :keep]
                    )
 
@@ -276,7 +277,8 @@ defmodule Mix.Tasks.Dialyzer do
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
       {:ignore_exit_status, opts[:ignore_exit_status]},
-      {:quiet_with_result, opts[:quiet_with_result]}
+      {:quiet_with_result, opts[:quiet_with_result]},
+      {:incremental, resolve_incremental(opts[:incremental])}
     ]
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
@@ -344,6 +346,28 @@ defmodule Mix.Tasks.Dialyzer do
 
     unless rc == 0 do
       info("Error building parent PLT, process returned code: #{rc}\n#{out}")
+    end
+  end
+
+  defp resolve_incremental(nil), do: resolve_incremental(Project.dialyzer_incremental())
+  defp resolve_incremental(false), do: false
+
+  defp resolve_incremental(true) do
+    otp_version = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_version < 26 do
+      error("""
+      INCREMENTAL MODE NOT SUPPORTED
+      ------------------------
+      Incremental mode requires OTP 26 or later. Current OTP version: #{otp_version}
+      To use incremental mode, upgrade to OTP 26 or later.
+      To run Dialyzer without incremental mode:
+        - Remove 'incremental: true' from your mix.exs dialyzer config, OR
+        - Don't use the --incremental flag
+      """)
+      false
+    else
+      true
     end
   end
 
