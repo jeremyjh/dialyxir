@@ -365,6 +365,7 @@ defmodule Mix.Tasks.Dialyzer do
         - Remove 'incremental: true' from your mix.exs dialyzer config, OR
         - Don't use the --incremental flag
       """)
+
       false
     else
       true
