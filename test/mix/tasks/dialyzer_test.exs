@@ -135,13 +135,13 @@ defmodule Mix.Tasks.DialyzerTest do
       in_project(:incremental, fn ->
         # On OTP < 26, the process should halt with exit code 3
         assert_raise SystemExit, fn ->
-          Mix.Tasks.Dialyzer.run(["--ignore-exit-status"])
+          Mix.Tasks.Dialyzer.run(["--incremental"])
         end
       end)
     else
       # On OTP 26+, just verify no crash occurs
       in_project(:incremental, fn ->
-        fun = fn -> Mix.Tasks.Dialyzer.run(["--plt"]) end
+        fun = fn -> Mix.Tasks.Dialyzer.run(["--incremental"]) end
         capture_io(fun)
         # If we get here without crashing, the test passes
         assert true
