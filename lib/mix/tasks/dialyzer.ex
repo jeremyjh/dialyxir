@@ -366,7 +366,7 @@ defmodule Mix.Tasks.Dialyzer do
         - Don't use the --incremental flag
       """)
 
-      false
+      System.halt(3)
     else
       true
     end

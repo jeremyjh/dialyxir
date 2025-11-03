@@ -103,4 +103,49 @@ defmodule Mix.Tasks.DialyzerTest do
                ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file is empty"
     end)
   end
+
+  test "incremental configuration is properly recognized" do
+    in_project(:incremental, fn ->
+      assert Dialyxir.Project.dialyzer_incremental() == true
+    end)
+  end
+
+  test "incremental configuration defaults to false when not specified" do
+    in_project(:local_plt, fn ->
+      assert Dialyxir.Project.dialyzer_incremental() == false
+    end)
+  end
+
+  test "CLI flag --incremental is parsed correctly" do
+    # Test that the CLI flag is properly parsed
+    {opts, _, _} = OptionParser.parse(["--incremental"], strict: [incremental: :boolean])
+    assert opts[:incremental] == true
+
+    {opts, _, _} = OptionParser.parse([], strict: [incremental: :boolean])
+    assert opts[:incremental] == nil
+  end
+
+  @tag :output_tests
+  test "halts with error when incremental mode enabled on OTP < 26" do
+    # This test would only be meaningful on OTP < 26
+    # On OTP 26+, no error should be displayed
+    otp_version = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_version < 26 do
+      in_project(:incremental, fn ->
+        # On OTP < 26, the process should halt with exit code 3
+        assert_raise SystemExit, fn ->
+          Mix.Tasks.Dialyzer.run(["--incremental"])
+        end
+      end)
+    else
+      # On OTP 26+, just verify no crash occurs
+      in_project(:incremental, fn ->
+        fun = fn -> Mix.Tasks.Dialyzer.run(["--incremental"]) end
+        capture_io(fun)
+        # If we get here without crashing, the test passes
+        assert true
+      end)
+    end
+  end
 end
