@@ -32,8 +32,11 @@ defmodule Dialyxir.Mixfile do
           "CHANGELOG.md",
           "README.md",
           "docs/circleci.md",
+          "docs/circleci_incremental.md",
           "docs/github_actions.md",
-          "docs/gitlab_ci.md"
+          "docs/github_actions_incremental.md",
+          "docs/gitlab_ci.md",
+          "docs/gitlab_ci_incremental.md"
         ]
       ]
     ]

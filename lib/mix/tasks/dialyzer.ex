@@ -14,6 +14,8 @@ defmodule Mix.Tasks.Dialyzer do
       when dealing with local deps.
     * `--ignore-exit-status` - display warnings but do not halt the VM or
       return an exit status code
+    * `--incremental` - enable incremental mode (requires OTP 26+). Overrides
+      the `incremental` setting in mix.exs if present.
     * `--list-unused-filters` - list unused ignore filters useful for CI. do
       not use with `mix do`.
     * `--plt` - only build the required PLT(s) and exit
@@ -93,6 +95,21 @@ defmodule Mix.Tasks.Dialyzer do
   * `dialyzer: :plt_core_path` - specify an alternative to `MIX_HOME` to use to store the Erlang and Elixir core files.
 
   * `dialyzer: :ignore_warnings` - specify file path to filter well-known warnings.
+
+  ### Incremental Mode
+
+  * `dialyzer: :incremental` - enable Dialyzer's incremental analysis mode (requires OTP 26+). When set to `true`, Dialyzer will reuse previous analysis results and only analyze changed modules, significantly speeding up subsequent runs. Note that incremental PLT files are separate from standard PLTs and are managed by Dialyzer itself.
+
+  ```elixir
+  def project do
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [incremental: true]
+    ]
+  end
+  ```
   """
 
   use Mix.Task
@@ -148,6 +165,7 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options Keyword.merge(@old_options,
                      force_check: :boolean,
                      ignore_exit_status: :boolean,
+                     incremental: :boolean,
                      list_unused_filters: :boolean,
                      no_check: :boolean,
                      no_compile: :boolean,
@@ -276,7 +294,8 @@ defmodule Mix.Tasks.Dialyzer do
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
       {:ignore_exit_status, opts[:ignore_exit_status]},
-      {:quiet_with_result, opts[:quiet_with_result]}
+      {:quiet_with_result, opts[:quiet_with_result]},
+      {:incremental, resolve_incremental(opts[:incremental])}
     ]
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
@@ -345,6 +364,31 @@ defmodule Mix.Tasks.Dialyzer do
     unless rc == 0 do
       info("Error building parent PLT, process returned code: #{rc}\n#{out}")
     end
+  end
+
+  defp resolve_incremental(nil), do: resolve_incremental(Project.dialyzer_incremental())
+  defp resolve_incremental(false), do: false
+
+  defp resolve_incremental(true) do
+    otp_version = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_version < 26 do
+      error("""
+      INCREMENTAL MODE NOT SUPPORTED
+      ------------------------
+      Incremental mode requires OTP 26 or later. Current OTP version: #{otp_version}
+
+      To use incremental mode, upgrade to OTP 26 or later.
+
+      To run Dialyzer without incremental mode:
+        - Remove 'incremental: true' from your mix.exs dialyzer config, OR
+        - Don't use the --incremental flag
+      """)
+
+      System.halt(3)
+    end
+
+    true
   end
 
   if Version.match?(System.version(), ">= 1.15.0") do
