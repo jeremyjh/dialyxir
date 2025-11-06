@@ -10,6 +10,10 @@ Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
 ## [1.4.7] - 2025-11-05
 
+  ### Changed
+
+  - Bump Erlex to 0.2.8, fixes #574.
+  
 ## [1.4.6] - 2025-08-09
 
   ### Fixed
