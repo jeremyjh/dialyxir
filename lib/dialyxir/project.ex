@@ -143,11 +143,17 @@ defmodule Dialyxir.Project do
   defp skip?(_, _), do: false
 
   def filter_warning?(
-        {_, {file, line}, {warning_type, args}} = warning,
+        {_, {file, line_col}, {warning_type, args}} = warning,
         filter_map = %FilterMap{}
       ) do
     short_description = Short.format(warning)
     warning_description = Utils.warning(warning_type).format_short(args)
+
+    line =
+      case line_col do
+        {line, _} -> line
+        _ -> line_col
+      end
 
     {matching_filters, _non_matching_filters} =
       filter_map
