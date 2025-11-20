@@ -134,6 +134,7 @@ defmodule Mix.Tasks.DialyzerTest do
       parent = self()
 
       Application.put_env(:dialyxir, :dialyzer_module, DialyzerStub)
+
       Application.put_env(:dialyxir, :plt_check_fun, fn force_check? ->
         send(parent, {:plt_check_called, force_check?})
         :ok
