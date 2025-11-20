@@ -217,7 +217,15 @@ end
 
 Dialyxir supports Dialyzer's incremental analysis mode (available in OTP 26+). When enabled, Dialyzer will reuse previous analysis results and only analyze changed modules, significantly speeding up subsequent runs.
 
-When incremental mode is active Dialyxir skips its traditional PLT bootstrap (`mix dialyzer --plt`) and lets Dialyzer's incremental pipeline build and maintain the PLT files itself. Your first `mix dialyzer --incremental` run will therefore create the incremental PLT artifacts automatically; later runs reuse those files without re-copying the classic PLT.
+**How PLTs work with incremental mode:**
+
+- **Core PLTs** (Erlang/Elixir standard libraries) are always classic PLTs stored in `$MIX_HOME` and shared across all projects. These are not affected by incremental mode.
+- **Project PLT** (your dependencies and code) can be either classic or incremental:
+  - **Classic mode** (default): Uses `dialyxir_erlang-{version}_elixir-{version}_deps-{env}.plt`
+  - **Incremental mode**: Uses `dialyxir_erlang-{version}_elixir-{version}_deps-{env}_incremental.plt` (or a custom path)
+  - Both PLT types can coexist, allowing you to switch between modes without rebuilding
+
+When incremental mode is active, Dialyxir skips its traditional PLT bootstrap (`mix dialyzer --plt`) for the project PLT and lets Dialyzer's incremental pipeline build and maintain the incremental PLT itself. Your first `mix dialyzer --incremental` run will create the incremental PLT automatically; later runs reuse those files.
 
 You can enable incremental mode in two ways:
 
@@ -242,7 +250,20 @@ mix dialyzer --incremental
 
 The `--incremental` flag overrides the mix.exs setting, allowing you to test incremental mode without modifying your configuration.
 
-**Note:** Incremental mode requires OTP 26 or later. Incremental PLT files live alongside the classic PLTs in `priv/plts` and are managed by Dialyzer itself. If you're running OTP < 26, dialyxir will halt with an error explaining how to proceed.
+**Custom incremental PLT path:**
+
+You can optionally specify a custom path for the incremental PLT:
+
+```elixir
+dialyzer: [
+  incremental: true,
+  plt_incremental_file: "_build/dev/my_incremental.plt"
+]
+```
+
+If `plt_incremental_file` is not specified, Dialyxir automatically appends `_incremental` to the base PLT filename.
+
+**Note:** Incremental mode requires OTP 26 or later. If you're running OTP < 26, dialyxir will halt with an error explaining how to proceed.
 
 **CI tip:** cache `priv/plts` exactly as you would for classic PLTs. The same cache entries now include Dialyzer's incremental metadata, so restoring that directory before `mix dialyzer --incremental` preserves the speedups across builds.
 

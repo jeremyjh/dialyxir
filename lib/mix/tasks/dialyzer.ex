@@ -202,6 +202,12 @@ defmodule Mix.Tasks.Dialyzer do
         skip_plt_check? ->
           info("Incremental mode enabled; skipping PLT check step")
 
+        incremental? && opts[:plt] ->
+          info("""
+          Incremental mode is enabled. The --plt flag builds classic PLTs, but incremental mode uses PLTs managed by Dialyzer itself.
+          Skipping classic PLT build. Run 'mix dialyzer --incremental' to let Dialyzer create its incremental PLT.
+          """)
+
         true ->
           info("Finding suitable PLTs")
           force_check? = Keyword.get(opts, :force_check, false)
@@ -305,7 +311,7 @@ defmodule Mix.Tasks.Dialyzer do
 
     args = [
       {:check_plt, opts[:force_check] || false},
-      {:init_plt, String.to_charlist(Project.plt_file())},
+      {:init_plt, String.to_charlist(Project.plt_file(incremental?))},
       {:files, Project.dialyzer_files()},
       {:warnings, dialyzer_warnings(dargs)},
       {:format, Keyword.get_values(opts, :format)},

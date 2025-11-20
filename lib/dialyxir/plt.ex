@@ -241,9 +241,18 @@ defmodule Dialyxir.Plt do
     info("Looking up modules in #{Path.basename(plt)}")
 
     case plt_info(plt) do
-      {:ok, info} ->
+      {:ok, info} when is_list(info) ->
         Keyword.fetch!(info, :files)
         |> Enum.reduce(MapSet.new(), &MapSet.put(&2, Path.expand(&1)))
+
+      {:ok, {:incremental, _modules}} ->
+        # Incremental PLTs are managed by Dialyzer itself and have a different structure
+        # Return nil to indicate we can't enumerate files from incremental PLTs
+        nil
+
+      {:incremental, _info} ->
+        # Handle direct incremental return (shouldn't happen but being defensive)
+        nil
 
       {:error, :no_such_file} ->
         nil
