@@ -250,10 +250,6 @@ defmodule Dialyxir.Plt do
         # Return nil to indicate we can't enumerate files from incremental PLTs
         nil
 
-      {:incremental, _info} ->
-        # Handle direct incremental return (shouldn't happen but being defensive)
-        nil
-
       {:error, :no_such_file} ->
         nil
 
