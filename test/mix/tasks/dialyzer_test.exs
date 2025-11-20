@@ -103,4 +103,25 @@ defmodule Mix.Tasks.DialyzerTest do
                ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file is empty"
     end)
   end
+
+  test "incremental configuration is properly recognized" do
+    in_project(:incremental, fn ->
+      assert Dialyxir.Project.dialyzer_incremental() == true
+    end)
+  end
+
+  test "incremental configuration defaults to false when not specified" do
+    in_project(:local_plt, fn ->
+      assert Dialyxir.Project.dialyzer_incremental() == false
+    end)
+  end
+
+  test "CLI flag --incremental is parsed correctly" do
+    # Test that the CLI flag is properly parsed
+    {opts, _, _} = OptionParser.parse(["--incremental"], strict: [incremental: :boolean])
+    assert opts[:incremental] == true
+
+    {opts, _, _} = OptionParser.parse([], strict: [incremental: :boolean])
+    assert opts[:incremental] == nil
+  end
 end
