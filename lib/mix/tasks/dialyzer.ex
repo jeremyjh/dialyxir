@@ -187,14 +187,26 @@ defmodule Mix.Tasks.Dialyzer do
     if Mix.Project.get() do
       Project.check_config()
 
+      incremental? = resolve_incremental(opts[:incremental])
+      opts = Keyword.put(opts, :incremental, incremental?)
+
       unless opts[:no_compile], do: Mix.Task.run("compile")
 
-      _ =
-        unless no_check?(opts) do
+      no_check = no_check?(opts)
+      skip_plt_check? = incremental? && !opts[:plt]
+
+      cond do
+        no_check ->
+          :ok
+
+        skip_plt_check? ->
+          info("Incremental mode enabled; skipping PLT check step")
+
+        true ->
           info("Finding suitable PLTs")
           force_check? = Keyword.get(opts, :force_check, false)
-          check_plt(force_check?)
-        end
+          plt_check_fun().(force_check?)
+      end
 
       default = Dialyxir.Project.default_ignore_warnings()
       ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
@@ -272,6 +284,10 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
+  defp plt_check_fun do
+    Application.get_env(:dialyxir, :plt_check_fun, &check_plt/1)
+  end
+
   defp check_plt(force_check?) do
     info("Checking PLT...")
     {apps, hash} = dependency_hash()
@@ -285,6 +301,8 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp run_dialyzer(opts, dargs) do
+    incremental? = Keyword.get(opts, :incremental, false)
+
     args = [
       {:check_plt, opts[:force_check] || false},
       {:init_plt, String.to_charlist(Project.plt_file())},
@@ -295,7 +313,7 @@ defmodule Mix.Tasks.Dialyzer do
       {:list_unused_filters, opts[:list_unused_filters]},
       {:ignore_exit_status, opts[:ignore_exit_status]},
       {:quiet_with_result, opts[:quiet_with_result]},
-      {:incremental, resolve_incremental(opts[:incremental])}
+      {:incremental, incremental?}
     ]
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)

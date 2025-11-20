@@ -217,6 +217,8 @@ end
 
 Dialyxir supports Dialyzer's incremental analysis mode (available in OTP 26+). When enabled, Dialyzer will reuse previous analysis results and only analyze changed modules, significantly speeding up subsequent runs.
 
+When incremental mode is active Dialyxir skips its traditional PLT bootstrap (`mix dialyzer --plt`) and lets Dialyzer's incremental pipeline build and maintain the PLT files itself. Your first `mix dialyzer --incremental` run will therefore create the incremental PLT artifacts automatically; later runs reuse those files without re-copying the classic PLT.
+
 You can enable incremental mode in two ways:
 
 **1. Via mix.exs configuration:**
@@ -240,7 +242,9 @@ mix dialyzer --incremental
 
 The `--incremental` flag overrides the mix.exs setting, allowing you to test incremental mode without modifying your configuration.
 
-**Note:** Incremental mode requires OTP 26 or later. Incremental PLT files are separate from standard PLTs and are managed by Dialyzer itself. If you're running OTP < 26, dialyxir will halt with an error explaining how to proceed.
+**Note:** Incremental mode requires OTP 26 or later. Incremental PLT files live alongside the classic PLTs in `priv/plts` and are managed by Dialyzer itself. If you're running OTP < 26, dialyxir will halt with an error explaining how to proceed.
+
+**CI tip:** cache `priv/plts` exactly as you would for classic PLTs. The same cache entries now include Dialyzer's incremental metadata, so restoring that directory before `mix dialyzer --incremental` preserves the speedups across builds.
 
 ### Ignore Warnings
 #### Dialyxir defaults

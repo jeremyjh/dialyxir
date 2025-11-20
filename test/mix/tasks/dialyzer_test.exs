@@ -3,6 +3,10 @@ defmodule Mix.Tasks.DialyzerTest do
 
   import ExUnit.CaptureIO, only: [capture_io: 1]
 
+  defmodule DialyzerStub do
+    def run(_args), do: []
+  end
+
   defp in_project(app, f) when is_atom(app) do
     Mix.Project.in_project(app, "test/fixtures/#{Atom.to_string(app)}", fn _ -> f.() end)
   end
@@ -123,5 +127,30 @@ defmodule Mix.Tasks.DialyzerTest do
 
     {opts, _, _} = OptionParser.parse([], strict: [incremental: :boolean])
     assert opts[:incremental] == nil
+  end
+
+  test "PLT check is skipped when incremental mode is enabled" do
+    in_project(:incremental, fn ->
+      parent = self()
+
+      Application.put_env(:dialyxir, :dialyzer_module, DialyzerStub)
+      Application.put_env(:dialyxir, :plt_check_fun, fn force_check? ->
+        send(parent, {:plt_check_called, force_check?})
+        :ok
+      end)
+
+      on_exit(fn ->
+        Application.delete_env(:dialyxir, :dialyzer_module)
+        Application.delete_env(:dialyxir, :plt_check_fun)
+      end)
+
+      output =
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run(["--incremental", "--no-compile", "--ignore-exit-status"])
+        end)
+
+      assert output =~ "Incremental mode enabled; skipping PLT check step"
+      refute_receive {:plt_check_called, _}
+    end)
   end
 end

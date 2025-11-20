@@ -37,3 +37,5 @@ jobs:
           name: "Run dialyzer"
           command: mix dialyzer
 ```
+
+> **Incremental mode tip:** Switch the final step to `mix dialyzer --incremental` to enable OTP 26's incremental pipeline. You can keep the same cache definition—Dialyzer stores its incremental PLT metadata inside `priv/plts`, so restoring that directory before the run preserves the incremental speedups.
