@@ -205,4 +205,67 @@ defmodule Dialyxir.ProjectTest do
       assert Project.no_umbrella?()
     end)
   end
+
+  describe "plt_file with incremental mode" do
+    test "plt_file(false) returns normal PLT path (backward compatibility)" do
+      in_project(:default_apps, fn ->
+        classic_plt = Project.plt_file(false)
+        assert Regex.match?(~r/_build\/.*plt/, classic_plt)
+        refute String.contains?(classic_plt, "_incremental")
+      end)
+    end
+
+    test "plt_file() defaults to false (backward compatibility)" do
+      in_project(:default_apps, fn ->
+        classic_plt = Project.plt_file()
+        incremental_plt = Project.plt_file(false)
+        assert classic_plt == incremental_plt
+      end)
+    end
+
+    test "plt_file(true) without config appends _incremental suffix" do
+      in_project(:incremental, fn ->
+        classic_plt = Project.plt_file(false)
+        incremental_plt = Project.plt_file(true)
+
+        assert String.contains?(incremental_plt, "_incremental.plt")
+        assert incremental_plt == String.replace_suffix(classic_plt, ".plt", "_incremental.plt")
+      end)
+    end
+
+    test "plt_file(true) with custom plt_incremental_file uses custom path" do
+      in_project(:incremental_custom_plt, fn ->
+        incremental_plt = Project.plt_file(true)
+
+        assert String.contains?(incremental_plt, "custom_incremental.plt")
+        assert Path.expand("custom_incremental.plt") == incremental_plt
+      end)
+    end
+
+    test "classic and incremental PLTs have different paths and can coexist" do
+      in_project(:incremental, fn ->
+        classic_plt = Project.plt_file(false)
+        incremental_plt = Project.plt_file(true)
+
+        assert classic_plt != incremental_plt
+        assert String.contains?(incremental_plt, "_incremental.plt")
+        refute String.contains?(classic_plt, "_incremental.plt")
+      end)
+    end
+
+    test "plt_file(true) with plt_incremental_file: {:no_warn, file} format" do
+      in_project(:incremental_no_warn, fn ->
+        incremental_plt = Project.plt_file(true)
+        assert String.contains?(incremental_plt, "incremental_no_warn.plt")
+      end)
+    end
+
+    test "plt_file(true) with custom plt_incremental_file respects absolute paths" do
+      in_project(:incremental_absolute_path, fn ->
+        incremental_plt = Project.plt_file(true)
+        expected_path = Path.expand("_build/test/absolute_incremental.plt")
+        assert incremental_plt == expected_path
+      end)
+    end
+  end
 end

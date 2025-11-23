@@ -14,6 +14,17 @@ defmodule Mix.Tasks.Dialyzer do
       when dealing with local deps.
     * `--ignore-exit-status` - display warnings but do not halt the VM or
       return an exit status code
+    * `--incremental` - enable incremental mode (requires OTP 26+). Overrides
+      the `incremental` setting in mix.exs if present.
+    * `--apps <app1,app2,...>` - specify applications to analyze (requires --incremental).
+      Multiple apps can be comma-separated or the flag can be used multiple times.
+      By default, warnings are reported for all applications in `--apps`. If `--warning-apps` is
+      also specified, only those applications will have warnings reported. Applications in `--apps`
+      but not in `--warning-apps` are still analyzed (to provide context) but warnings are not reported.
+    * `--warning-apps <app1,app2,...>` - specify applications to emit warnings for (requires --incremental).
+      Multiple apps can be comma-separated or the flag can be used multiple times.
+      When specified, only these applications will have warnings reported. All applications in
+      `--apps` are still analyzed, but warnings are only emitted for applications listed here.
     * `--list-unused-filters` - list unused ignore filters useful for CI. do
       not use with `mix do`.
     * `--plt` - only build the required PLT(s) and exit
@@ -93,6 +104,35 @@ defmodule Mix.Tasks.Dialyzer do
   * `dialyzer: :plt_core_path` - specify an alternative to `MIX_HOME` to use to store the Erlang and Elixir core files.
 
   * `dialyzer: :ignore_warnings` - specify file path to filter well-known warnings.
+
+  ### Incremental Mode
+
+  * `dialyzer: :incremental` - enable Dialyzer's incremental analysis mode (requires OTP 26+). When set to `true`, Dialyzer will reuse previous analysis results and only analyze changed modules, significantly speeding up subsequent runs. Note that incremental PLT files are separate from standard PLTs and are managed by Dialyzer itself.
+
+  * `dialyzer: :apps` - list of applications to analyze (requires incremental: true). All applications
+    listed here will be analyzed. By default, warnings are reported for all applications in `apps`.
+    If `warning_apps` is also specified, only those applications will have warnings reported.
+    Applications in `apps` but not in `warning_apps` are still analyzed (to provide context for
+    the analysis) but warnings will not be reported for them.
+
+  * `dialyzer: :warning_apps` - list of applications to emit warnings for (requires incremental: true).
+    When specified, only these applications will have warnings reported. All applications in `apps`
+    are still analyzed, but warnings are only emitted for applications listed in `warning_apps`.
+
+  ```elixir
+  def project do
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [
+        incremental: true,
+        apps: [:my_app, :my_dep],
+        warning_apps: [:my_app]
+      ]
+    ]
+  end
+  ```
   """
 
   use Mix.Task
@@ -148,6 +188,7 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options Keyword.merge(@old_options,
                      force_check: :boolean,
                      ignore_exit_status: :boolean,
+                     incremental: :boolean,
                      list_unused_filters: :boolean,
                      no_check: :boolean,
                      no_compile: :boolean,
@@ -155,7 +196,9 @@ defmodule Mix.Tasks.Dialyzer do
                      quiet: :boolean,
                      quiet_with_result: :boolean,
                      raw: :boolean,
-                     format: [:string, :keep]
+                     format: [:string, :keep],
+                     apps: :keep,
+                     warning_apps: :keep
                    )
 
   def run(args) do
@@ -169,14 +212,49 @@ defmodule Mix.Tasks.Dialyzer do
     if Mix.Project.get() do
       Project.check_config()
 
+      incremental? = resolve_incremental(opts[:incremental])
+      opts = Keyword.put(opts, :incremental, incremental?)
+
+      apps = parse_apps_list(opts, :apps)
+      warning_apps = parse_apps_list(opts, :warning_apps)
+
+      # Validate that apps/warning_apps are only used with incremental
+      if (apps != [] || warning_apps != []) && !incremental? do
+        error("""
+        --apps and --warning-apps can only be used with --incremental
+        """)
+      end
+
+      # Merge CLI values with config values (CLI takes precedence)
+      config_apps = Dialyxir.Project.dialyzer_apps()
+      config_warning_apps = Dialyxir.Project.dialyzer_warning_apps()
+
+      final_apps = if apps == [], do: config_apps, else: apps
+      final_warning_apps = if warning_apps == [], do: config_warning_apps, else: warning_apps
+
       unless opts[:no_compile], do: Mix.Task.run("compile")
 
-      _ =
-        unless no_check?(opts) do
+      no_check = no_check?(opts)
+      skip_plt_check? = incremental? && !opts[:plt]
+
+      cond do
+        no_check ->
+          :ok
+
+        skip_plt_check? ->
+          info("Incremental mode enabled; skipping PLT check step")
+
+        incremental? && opts[:plt] ->
+          info("""
+          Incremental mode is enabled. The --plt flag builds classic PLTs, but incremental mode uses PLTs managed by Dialyzer itself.
+          Skipping classic PLT build. Run 'mix dialyzer --incremental' to let Dialyzer create its incremental PLT.
+          """)
+
+        true ->
           info("Finding suitable PLTs")
           force_check? = Keyword.get(opts, :force_check, false)
-          check_plt(force_check?)
-        end
+          plt_check_fun().(force_check?)
+      end
 
       default = Dialyxir.Project.default_ignore_warnings()
       ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
@@ -210,7 +288,7 @@ defmodule Mix.Tasks.Dialyzer do
       end
 
       warn_old_options(opts)
-      unless opts[:plt], do: run_dialyzer(opts, dargs)
+      unless opts[:plt], do: run_dialyzer(opts, dargs, final_apps, final_warning_apps)
     else
       info("No mix project found - checking core PLTs...")
       Project.plts_list([], false) |> Plt.check()
@@ -254,6 +332,10 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
+  defp plt_check_fun do
+    Application.get_env(:dialyxir, :plt_check_fun, &check_plt/1)
+  end
+
   defp check_plt(force_check?) do
     info("Checking PLT...")
     {apps, hash} = dependency_hash()
@@ -266,18 +348,26 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp run_dialyzer(opts, dargs) do
+  defp run_dialyzer(opts, dargs, apps \\ [], warning_apps \\ []) do
+    incremental? = Keyword.get(opts, :incremental, false)
+
     args = [
       {:check_plt, opts[:force_check] || false},
-      {:init_plt, String.to_charlist(Project.plt_file())},
-      {:files, Project.dialyzer_files()},
+      {:init_plt, String.to_charlist(Project.plt_file(incremental?))},
       {:warnings, dialyzer_warnings(dargs)},
       {:format, Keyword.get_values(opts, :format)},
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
       {:ignore_exit_status, opts[:ignore_exit_status]},
-      {:quiet_with_result, opts[:quiet_with_result]}
+      {:quiet_with_result, opts[:quiet_with_result]},
+      {:incremental, incremental?}
     ]
+
+    args =
+      args
+      |> maybe_put_apps(apps)
+      |> maybe_put_warning_apps(warning_apps)
+      |> maybe_put_files(apps)
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
@@ -306,6 +396,26 @@ defmodule Mix.Tasks.Dialyzer do
       error("Halting VM with exit status #{exit_status}")
       System.halt(exit_status)
     end
+  end
+
+  defp maybe_put_apps(opts, []), do: opts
+  defp maybe_put_apps(opts, apps),
+    do: Keyword.put(opts, :apps, Enum.map(apps, &String.to_charlist(Atom.to_string(&1))))
+
+  defp maybe_put_warning_apps(opts, []), do: opts
+  defp maybe_put_warning_apps(opts, apps),
+    do: Keyword.put(opts, :warning_apps, Enum.map(apps, &String.to_charlist(Atom.to_string(&1))))
+
+  defp maybe_put_files(args, []), do: [{:files, Project.dialyzer_files()} | args]
+  defp maybe_put_files(args, _apps), do: args
+
+  defp parse_apps_list(opts, key) do
+    opts
+    |> Keyword.get_values(key)
+    |> Enum.flat_map(&String.split(&1, ","))
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.to_atom/1)
   end
 
   defp dialyzer_warnings(dargs) do
@@ -345,6 +455,31 @@ defmodule Mix.Tasks.Dialyzer do
     unless rc == 0 do
       info("Error building parent PLT, process returned code: #{rc}\n#{out}")
     end
+  end
+
+  defp resolve_incremental(nil), do: resolve_incremental(Project.dialyzer_incremental())
+  defp resolve_incremental(false), do: false
+
+  defp resolve_incremental(true) do
+    otp_version = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_version < 26 do
+      error("""
+      INCREMENTAL MODE NOT SUPPORTED
+      ------------------------
+      Incremental mode requires OTP 26 or later. Current OTP version: #{otp_version}
+
+      To use incremental mode, upgrade to OTP 26 or later.
+
+      To run Dialyzer without incremental mode:
+        - Remove 'incremental: true' from your mix.exs dialyzer config, OR
+        - Don't use the --incremental flag
+      """)
+
+      :erlang.halt(3)
+    end
+
+    true
   end
 
   if Version.match?(System.version(), ">= 1.15.0") do

@@ -27,8 +27,41 @@ defmodule Dialyxir.Project do
     end
   end
 
-  def plt_file() do
-    plt_path(dialyzer_config()[:plt_file]) || deps_plt()
+  def plt_file(incremental? \\ false) do
+    if incremental? do
+      plt_incremental_file()
+    else
+      plt_path(dialyzer_config()[:plt_file]) || deps_plt()
+    end
+  end
+
+  defp plt_incremental_file do
+    config = dialyzer_config()
+
+    case config[:plt_incremental_file] do
+      nil ->
+        # When there is no explicit config, append _incremental suffix to base PLT filename
+        base_plt = plt_path(config[:plt_file]) || deps_plt()
+        add_incremental_suffix(base_plt)
+
+      file when is_binary(file) ->
+        plt_path(file)
+
+      {:no_warn, file} when is_binary(file) ->
+        plt_path({:no_warn, file})
+
+      _ ->
+        base_plt = plt_path(config[:plt_file]) || deps_plt()
+        add_incremental_suffix(base_plt)
+    end
+  end
+
+  defp add_incremental_suffix(plt_path) do
+    if String.ends_with?(plt_path, ".plt") do
+      String.replace_suffix(plt_path, ".plt", "_incremental.plt")
+    else
+      plt_path <> "_incremental"
+    end
   end
 
   defp plt_path(file) when is_binary(file), do: Path.expand(file)
@@ -112,6 +145,18 @@ defmodule Dialyxir.Project do
 
   def dialyzer_flags do
     Mix.Project.config()[:dialyzer][:flags] || []
+  end
+
+  def dialyzer_incremental do
+    dialyzer_config()[:incremental] || false
+  end
+
+  def dialyzer_apps do
+    dialyzer_config()[:apps] || []
+  end
+
+  def dialyzer_warning_apps do
+    dialyzer_config()[:warning_apps] || []
   end
 
   def no_umbrella? do

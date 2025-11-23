@@ -11,7 +11,8 @@ defmodule Dialyxir.Dialyzer do
       :format,
       :list_unused_filters,
       :ignore_exit_status,
-      :quiet_with_result
+      :quiet_with_result,
+      :incremental
     ]
 
     @default_formatter Dialyxir.Formatter.Dialyxir
@@ -19,6 +20,7 @@ defmodule Dialyxir.Dialyzer do
     def run(args, filterer) do
       try do
         {split, args} = Keyword.split(args, @dialyxir_args)
+        args = maybe_enable_incremental(args, split[:incremental])
 
         quiet_with_result? = split[:quiet_with_result]
 
@@ -41,7 +43,8 @@ defmodule Dialyxir.Dialyzer do
         |> inspect(label: "dialyzer args", pretty: true, limit: 8)
         |> info
 
-        {duration_us, result} = :timer.tc(&:dialyzer.run/1, [args])
+        dialyzer_module = Application.get_env(:dialyxir, :dialyzer_module, :dialyzer)
+        {duration_us, result} = :timer.tc(dialyzer_module, :run, [args])
 
         formatted_time_elapsed = Formatter.formatted_time(duration_us)
 
@@ -68,6 +71,12 @@ defmodule Dialyxir.Dialyzer do
           {:error, ":dialyzer.run error: " <> Chars.to_string(msg)}
       end
     end
+
+    defp maybe_enable_incremental(args, true) do
+      Keyword.put_new(args, :analysis_type, :incremental)
+    end
+
+    defp maybe_enable_incremental(args, _), do: args
 
     defp parse_formatter("dialyzer"), do: Dialyxir.Formatter.Dialyzer
     defp parse_formatter("dialyxir"), do: Dialyxir.Formatter.Dialyxir
