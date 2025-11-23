@@ -263,6 +263,47 @@ dialyzer: [
 
 If `plt_incremental_file` is not specified, Dialyxir automatically appends `_incremental` to the base PLT filename.
 
+**Analyzing specific applications:**
+
+When using incremental mode, you can specify which applications to analyze using the `apps` and `warning_apps` options. This allows you to analyze entire applications, which can be more efficient for large codebases.
+
+**How `apps` and `warning_apps` work:**
+
+- `apps` specifies which applications to analyze. All applications listed here will be analyzed.
+- `warning_apps` (optional) controls which applications will emit warnings:
+  - If `warning_apps` is **not** specified, warnings are reported for all applications in `apps`.
+  - If `warning_apps` **is** specified, only those applications will have warnings reported.
+  - Applications in `apps` but not in `warning_apps` are still analyzed (to provide context for the analysis), but warnings will not be reported for them.
+
+This is useful when you want to include dependencies in the analysis (so Dialyzer can find discrepancies in how you use them), but only see warnings for your own code.
+
+**Via mix.exs configuration:**
+
+```elixir
+def project do
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [
+      incremental: true,
+      apps: [:my_app, :my_dep],
+      warning_apps: [:my_app]
+    ]
+  ]
+end
+```
+
+**Via command line flags:**
+
+```bash
+mix dialyzer --incremental \
+  --apps elixir,kernel,stdlib,my_app \
+  --warning-apps my_app
+```
+
+Both `apps` and `warning_apps` require `--incremental` to be enabled.
+
 **Note:** Incremental mode requires OTP 26 or later. If you're running OTP < 26, dialyxir will halt with an error explaining how to proceed.
 
 **CI tip:** cache `priv/plts` exactly as you would for classic PLTs. The same cache entries now include Dialyzer's incremental metadata, so restoring that directory before `mix dialyzer --incremental` preserves the speedups across builds.

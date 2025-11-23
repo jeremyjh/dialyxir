@@ -7,6 +7,14 @@ defmodule Mix.Tasks.DialyzerTest do
     def run(_args), do: []
   end
 
+  defmodule DialyzerArgsCapture do
+    def run(args) do
+      parent = Application.get_env(:dialyxir, :test_parent)
+      if parent, do: send(parent, {:dialyzer_args, args})
+      []
+    end
+  end
+
   defp in_project(app, f) when is_atom(app) do
     Mix.Project.in_project(app, "test/fixtures/#{Atom.to_string(app)}", fn _ -> f.() end)
   end
@@ -153,5 +161,325 @@ defmodule Mix.Tasks.DialyzerTest do
       assert output =~ "Incremental mode enabled; skipping PLT check step"
       refute_receive {:plt_check_called, _}
     end)
+  end
+
+  describe "apps and warning_apps" do
+    test "CLI flag --apps is parsed correctly" do
+      {opts, _, _} =
+        OptionParser.parse(
+          ["--apps", "my_app,other_app"],
+          strict: [apps: :keep]
+        )
+
+      assert Keyword.get_values(opts, :apps) == ["my_app,other_app"]
+    end
+
+    test "CLI flag --apps with multiple invocations is parsed correctly" do
+      {opts, _, _} =
+        OptionParser.parse(
+          ["--apps", "my_app", "--apps", "other_app"],
+          strict: [apps: :keep]
+        )
+
+      assert Keyword.get_values(opts, :apps) == ["my_app", "other_app"]
+    end
+
+    test "CLI flag --warning-apps is parsed correctly" do
+      {opts, _, _} =
+        OptionParser.parse(
+          ["--warning-apps", "my_app"],
+          strict: [warning_apps: :keep]
+        )
+
+      assert Keyword.get_values(opts, :warning_apps) == ["my_app"]
+    end
+
+    test "apps configuration is properly recognized" do
+      in_project(:apps_config, fn ->
+        assert Dialyxir.Project.dialyzer_apps() == [:apps_config, :kernel]
+      end)
+    end
+
+    test "warning_apps configuration is properly recognized" do
+      in_project(:apps_warning_apps_config, fn ->
+        assert Dialyxir.Project.dialyzer_warning_apps() == [:apps_warning_apps_config]
+      end)
+    end
+
+    test "apps configuration defaults to empty list when not configured" do
+      in_project(:local_plt, fn ->
+        assert Dialyxir.Project.dialyzer_apps() == []
+      end)
+    end
+
+    test "warning_apps configuration defaults to empty list when not configured" do
+      in_project(:local_plt, fn ->
+        assert Dialyxir.Project.dialyzer_warning_apps() == []
+      end)
+    end
+
+    test "error when --apps used without --incremental" do
+      in_project(:local_plt, fn ->
+        output =
+          capture_io(fn ->
+            try do
+              Mix.Tasks.Dialyzer.run([
+                "--apps",
+                "my_app",
+                "--no-compile",
+                "--ignore-exit-status"
+              ])
+            catch
+              :exit, _ -> :ok
+            end
+          end)
+
+        assert output =~ "--apps and --warning-apps can only be used with --incremental"
+      end)
+    end
+
+    test "error when --warning-apps used without --incremental" do
+      in_project(:local_plt, fn ->
+        output =
+          capture_io(fn ->
+            try do
+              Mix.Tasks.Dialyzer.run([
+                "--warning-apps",
+                "my_app",
+                "--no-compile",
+                "--ignore-exit-status"
+              ])
+            catch
+              :exit, _ -> :ok
+            end
+          end)
+
+        assert output =~ "--apps and --warning-apps can only be used with --incremental"
+      end)
+    end
+
+    test "apps option is passed to Dialyzer when provided via CLI" do
+      in_project(:incremental, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--apps",
+            "my_app",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        assert Keyword.has_key?(args, :apps)
+        assert Keyword.get(args, :apps) == [['my_app']]
+        refute Keyword.has_key?(args, :files)
+      end)
+    end
+
+    test "apps option is passed to Dialyzer when provided via config" do
+      in_project(:apps_config, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        assert Keyword.has_key?(args, :apps)
+        apps = Keyword.get(args, :apps)
+        assert length(apps) == 2
+        assert ['apps_config'] in apps
+        assert ['kernel'] in apps
+        refute Keyword.has_key?(args, :files)
+      end)
+    end
+
+    test "warning_apps option is passed to Dialyzer when provided" do
+      in_project(:apps_warning_apps_config, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        assert Keyword.has_key?(args, :warning_apps)
+        warning_apps = Keyword.get(args, :warning_apps)
+        assert [['apps_warning_apps_config']] == warning_apps
+      end)
+    end
+
+    test "both apps and warning_apps can be used together" do
+      in_project(:apps_warning_apps_config, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        assert Keyword.has_key?(args, :apps)
+        assert Keyword.has_key?(args, :warning_apps)
+        refute Keyword.has_key?(args, :files)
+      end)
+    end
+
+    test "CLI apps values override config values" do
+      in_project(:apps_config, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--apps",
+            "cli_app",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        assert Keyword.get(args, :apps) == [['cli_app']]
+      end)
+    end
+
+    test "CLI warning_apps values override config values" do
+      in_project(:apps_warning_apps_config, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--warning-apps",
+            "cli_warning_app",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        assert Keyword.get(args, :warning_apps) == [['cli_warning_app']]
+      end)
+    end
+
+    test "files option is included when apps is not provided" do
+      in_project(:incremental, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        assert Keyword.has_key?(args, :files)
+        refute Keyword.has_key?(args, :apps)
+      end)
+    end
+
+    test "apps with comma-separated values are parsed correctly" do
+      in_project(:incremental, fn ->
+        parent = self()
+
+        Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
+        Application.put_env(:dialyxir, :test_parent, parent)
+
+        on_exit(fn ->
+          Application.delete_env(:dialyxir, :dialyzer_module)
+          Application.delete_env(:dialyxir, :test_parent)
+        end)
+
+        capture_io(fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--incremental",
+            "--apps",
+            "my_app,other_app,third_app",
+            "--no-compile",
+            "--ignore-exit-status"
+          ])
+        end)
+
+        assert_receive {:dialyzer_args, args}
+        apps = Keyword.get(args, :apps)
+        assert length(apps) == 3
+        assert ['my_app'] in apps
+        assert ['other_app'] in apps
+        assert ['third_app'] in apps
+      end)
+    end
   end
 end

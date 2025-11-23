@@ -151,6 +151,14 @@ defmodule Dialyxir.Project do
     dialyzer_config()[:incremental] || false
   end
 
+  def dialyzer_apps do
+    dialyzer_config()[:apps] || []
+  end
+
+  def dialyzer_warning_apps do
+    dialyzer_config()[:warning_apps] || []
+  end
+
   def no_umbrella? do
     case dialyzer_config()[:no_umbrella] do
       true -> true
