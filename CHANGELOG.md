@@ -6,8 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
-## Unreleased changes post [1.4.6]
+## Unreleased changes post [1.4.7]
 
+## [1.4.7] - 2025-11-05
+
+  ### Changed
+
+  - Bump Erlex to 0.2.8, fixes #574.
+  
 ## [1.4.6] - 2025-08-09
 
   ### Fixed

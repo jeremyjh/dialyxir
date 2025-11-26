@@ -14,6 +14,16 @@ defmodule Mix.Tasks.Dialyzer do
       when dealing with local deps.
     * `--ignore-exit-status` - display warnings but do not halt the VM or
       return an exit status code
+    * `--incremental` - enable incremental mode (requires OTP 26+). Overrides
+      the `incremental` setting in mix.exs if present.
+    * `--apps <app1,app2,...>` - specify applications to analyze (requires --incremental).
+      Multiple apps can be comma-separated or the flag can be used multiple times.
+      These are typically OTP and third-party libraries that Dialyzer needs to understand
+      but where you don't want warnings reported.
+    * `--warning-apps <app1,app2,...>` - specify applications to emit warnings for (requires --incremental).
+      Multiple apps can be comma-separated or the flag can be used multiple times.
+      These are typically your own applications where you want warnings reported.
+      Note: `--apps` and `--warning-apps` must not overlap - they are mutually exclusive.
     * `--list-unused-filters` - list unused ignore filters useful for CI. do
       not use with `mix do`.
     * `--plt` - only build the required PLT(s) and exit
@@ -93,6 +103,60 @@ defmodule Mix.Tasks.Dialyzer do
   * `dialyzer: :plt_core_path` - specify an alternative to `MIX_HOME` to use to store the Erlang and Elixir core files.
 
   * `dialyzer: :ignore_warnings` - specify file path to filter well-known warnings.
+
+  ### Incremental Mode
+
+  * `dialyzer: :incremental` - enable Dialyzer's incremental analysis mode (requires OTP 26+). When set to `true`, Dialyzer will reuse previous analysis results and analyze changed modules plus any modules that depend on them, significantly speeding up subsequent runs. Note that incremental PLT files are separate from standard PLTs and are managed by Dialyzer itself.
+
+  * `dialyzer: :core_apps` - list of core OTP applications to include when using `apps: :transitive` or `warning_apps: :transitive`. Defaults to an empty list if not specified. This is useful for specifying which core OTP apps (like `:erts`, `:kernel`, `:stdlib`, `:elixir`, `:logger`, `:mix`) should be included in the analysis.
+
+  * `dialyzer: :apps` - applications to analyze (requires incremental: true). These are
+    typically OTP and third-party libraries that Dialyzer needs to understand but where you don't
+    want warnings reported. Can be:
+    - An explicit list: `[:erts, :kernel, :stdlib, ...]`
+    - `:transitive` - automatically includes `core_apps` + all dependencies + project apps
+    - `:project` - automatically includes only project apps (umbrella children or single app)
+    - `nil` - file mode (no app mode)
+
+  * `dialyzer: :warning_apps` - applications to emit warnings for (requires incremental: true).
+    These are typically your own applications where you want warnings reported. Can be:
+    - An explicit list: `[:my_app, :other_app]`
+    - `:transitive` - automatically includes `core_apps` + all dependencies + project apps
+    - `:project` - automatically includes only project apps (umbrella children or single app)
+    - `nil` - no warning apps
+
+  Note: `apps` and `warning_apps` must not overlap - they are mutually exclusive.
+
+  ```elixir
+  # Using explicit lists (backward compatible)
+  def project do
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [
+        incremental: true,
+        apps: [:erts, :kernel, :stdlib, :elixir, :logger],
+        warning_apps: [:my_app]
+      ]
+    ]
+  end
+
+  # Using flags for automatic resolution
+  def project do
+    [
+      app: :my_app,
+      version: "0.0.1",
+      deps: deps,
+      dialyzer: [
+        incremental: true,
+        core_apps: [:erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix],
+        apps: :transitive,  # Resolves to core_apps ++ deps ++ project_apps
+        warning_apps: :project  # Resolves to project apps only
+      ]
+    ]
+  end
+  ```
   """
 
   use Mix.Task
@@ -148,6 +212,7 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options Keyword.merge(@old_options,
                      force_check: :boolean,
                      ignore_exit_status: :boolean,
+                     incremental: :boolean,
                      list_unused_filters: :boolean,
                      no_check: :boolean,
                      no_compile: :boolean,
@@ -155,7 +220,9 @@ defmodule Mix.Tasks.Dialyzer do
                      quiet: :boolean,
                      quiet_with_result: :boolean,
                      raw: :boolean,
-                     format: [:string, :keep]
+                     format: [:string, :keep],
+                     apps: :keep,
+                     warning_apps: :keep
                    )
 
   def run(args) do
@@ -169,14 +236,80 @@ defmodule Mix.Tasks.Dialyzer do
     if Mix.Project.get() do
       Project.check_config()
 
+      incremental? = resolve_incremental(opts[:incremental])
+      opts = Keyword.put(opts, :incremental, incremental?)
+
+      apps = parse_apps_list(opts, :apps)
+      warning_apps = parse_apps_list(opts, :warning_apps)
+
+      # Validate that apps/warning_apps are only used with incremental
+      if (apps != [] || warning_apps != []) && !incremental? do
+        error("""
+        --apps and --warning-apps can only be used with --incremental
+        """)
+
+        exit(1)
+      end
+
+      # Merge CLI values with config values (CLI takes precedence)
+      config_apps = Dialyxir.Project.dialyzer_apps()
+      config_warning_apps = Dialyxir.Project.dialyzer_warning_apps()
+
+      # If incremental is false but apps/warning_apps CLI flags are provided, ignore them and use config
+      final_apps =
+        if !incremental? && apps != [] do
+          normalize_apps(config_apps)
+        else
+          if apps == [], do: normalize_apps(config_apps), else: normalize_apps(apps)
+        end
+
+      final_warning_apps =
+        if !incremental? && warning_apps != [] do
+          normalize_apps(config_warning_apps)
+        else
+          if warning_apps == [],
+            do: normalize_apps(config_warning_apps),
+            else: normalize_apps(warning_apps)
+        end
+
+      # Ensure warning_apps are included in apps (warning_apps must be a subset of apps)
+      # This ensures Dialyzer analyzes all apps, but only reports warnings for warning_apps
+      # We automatically merge warning_apps into apps so they're always included
+      final_apps =
+        if incremental? && final_warning_apps != [] do
+          (final_apps ++ final_warning_apps) |> Enum.uniq()
+        else
+          final_apps
+        end
+
+      # Filter out missing apps and warn about them
+      final_apps = filter_missing_apps(final_apps, "apps")
+      final_warning_apps = filter_missing_apps(final_warning_apps, "warning_apps")
+
       unless opts[:no_compile], do: Mix.Task.run("compile")
 
-      _ =
-        unless no_check?(opts) do
+      no_check = no_check?(opts)
+      skip_plt_check? = incremental? && !opts[:plt]
+
+      cond do
+        no_check ->
+          :ok
+
+        skip_plt_check? ->
+          info("Incremental mode enabled; skipping PLT check step")
+          info("Will use PLT file: #{Project.plt_file(true)}")
+
+        incremental? && opts[:plt] ->
+          info("""
+          Incremental mode is enabled. The --plt flag builds classic PLTs, but incremental mode uses PLTs managed by Dialyzer itself.
+          Skipping classic PLT build. Run 'mix dialyzer --incremental' to let Dialyzer create its incremental PLT.
+          """)
+
+        true ->
           info("Finding suitable PLTs")
           force_check? = Keyword.get(opts, :force_check, false)
-          check_plt(force_check?)
-        end
+          plt_check_fun().(force_check?)
+      end
 
       default = Dialyxir.Project.default_ignore_warnings()
       ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
@@ -210,7 +343,10 @@ defmodule Mix.Tasks.Dialyzer do
       end
 
       warn_old_options(opts)
-      unless opts[:plt], do: run_dialyzer(opts, dargs)
+
+      unless opts[:plt] do
+        run_dialyzer(opts, dargs, final_apps, final_warning_apps)
+      end
     else
       info("No mix project found - checking core PLTs...")
       Project.plts_list([], false) |> Plt.check()
@@ -254,6 +390,10 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
+  defp plt_check_fun do
+    Application.get_env(:dialyxir, :plt_check_fun, &check_plt/1)
+  end
+
   defp check_plt(force_check?) do
     info("Checking PLT...")
     {apps, hash} = dependency_hash()
@@ -266,18 +406,28 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp run_dialyzer(opts, dargs) do
+  defp run_dialyzer(opts, dargs, apps, warning_apps) do
+    incremental? = Keyword.get(opts, :incremental, false)
+
+    plt_file = Project.plt_file(incremental?)
+
     args = [
       {:check_plt, opts[:force_check] || false},
-      {:init_plt, String.to_charlist(Project.plt_file())},
-      {:files, Project.dialyzer_files()},
+      {:init_plt, String.to_charlist(plt_file)},
       {:warnings, dialyzer_warnings(dargs)},
       {:format, Keyword.get_values(opts, :format)},
       {:raw, opts[:raw]},
       {:list_unused_filters, opts[:list_unused_filters]},
       {:ignore_exit_status, opts[:ignore_exit_status]},
-      {:quiet_with_result, opts[:quiet_with_result]}
+      {:quiet_with_result, opts[:quiet_with_result]},
+      {:incremental, incremental?}
     ]
+
+    args =
+      args
+      |> maybe_put_apps(apps)
+      |> maybe_put_warning_apps(warning_apps)
+      |> maybe_put_files(apps, warning_apps)
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
@@ -305,6 +455,88 @@ defmodule Mix.Tasks.Dialyzer do
     unless exit_status == 0 || opts[:ignore_exit_status] do
       error("Halting VM with exit status #{exit_status}")
       System.halt(exit_status)
+    end
+  end
+
+  defp maybe_put_apps(opts, []), do: opts
+  defp maybe_put_apps(opts, apps), do: Keyword.put(opts, :apps, apps)
+
+  defp maybe_put_warning_apps(opts, []), do: opts
+  defp maybe_put_warning_apps(opts, apps), do: Keyword.put(opts, :warning_apps, apps)
+
+  defp maybe_put_files(args, apps, _warning_apps) do
+    cond do
+      apps != [] ->
+        # Application-based mode: when apps are provided, do NOT pass files.
+        # --apps and --files are mutually exclusive modes in Dialyzer.
+        # Dialyzer will resolve app names to their BEAM files internally.
+        args
+
+      true ->
+        # File-based mode: no apps provided, pass files directly
+        files = Project.dialyzer_files()
+        [{:files, files} | args]
+    end
+  end
+
+  defp parse_apps_list(opts, key) do
+    opts
+    |> Keyword.get_values(key)
+    |> Enum.flat_map(&String.split(&1, ","))
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.to_atom/1)
+  end
+
+  defp normalize_apps(apps) when is_list(apps) do
+    Enum.map(apps, &normalize_app/1)
+  end
+
+  defp normalize_apps(_), do: []
+
+  defp normalize_app(app) when is_atom(app), do: app
+  defp normalize_app(app) when is_binary(app), do: String.to_atom(app)
+
+  defp normalize_app(app) when is_list(app) do
+    # Handle charlists (like ~c"app_name")
+    app |> List.to_string() |> String.to_atom()
+  end
+
+  defp filter_missing_apps(apps, context) when is_list(apps) do
+    {valid_apps, missing_apps} =
+      Enum.split_with(apps, &app_exists?/1)
+
+    if missing_apps != [] do
+      warning("""
+      The following applications in #{context} were not found and will be skipped:
+      #{inspect(missing_apps)}
+
+      This may cause Dialyzer to miss type information from these applications.
+      """)
+    end
+
+    valid_apps
+  end
+
+  defp app_exists?(app) do
+    # Check if app is already loaded (most reliable check)
+    loaded_app = Application.get_application(app)
+
+    if loaded_app != nil do
+      true
+    else
+      # For OTP apps, check if lib_dir exists
+      # For local project apps, we let them through and let Dialyzer validate
+      case :code.lib_dir(app) do
+        {:error, :bad_name} ->
+          # Not an OTP app - might be local project app, let Dialyzer handle it
+          true
+
+        path when is_list(path) ->
+          # OTP app exists
+          path_str = List.to_string(path)
+          File.exists?(path_str)
+      end
     end
   end
 
@@ -345,6 +577,31 @@ defmodule Mix.Tasks.Dialyzer do
     unless rc == 0 do
       info("Error building parent PLT, process returned code: #{rc}\n#{out}")
     end
+  end
+
+  defp resolve_incremental(nil), do: resolve_incremental(Project.dialyzer_incremental())
+  defp resolve_incremental(false), do: false
+
+  defp resolve_incremental(true) do
+    otp_version = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_version < 26 do
+      error("""
+      INCREMENTAL MODE NOT SUPPORTED
+      ------------------------
+      Incremental mode requires OTP 26 or later. Current OTP version: #{otp_version}
+
+      To use incremental mode, upgrade to OTP 26 or later.
+
+      To run Dialyzer without incremental mode:
+        - Remove 'incremental: true' from your mix.exs dialyzer config, OR
+        - Don't use the --incremental flag
+      """)
+
+      :erlang.halt(3)
+    end
+
+    true
   end
 
   if Version.match?(System.version(), ">= 1.15.0") do
