@@ -27,8 +27,41 @@ defmodule Dialyxir.Project do
     end
   end
 
-  def plt_file() do
-    plt_path(dialyzer_config()[:plt_file]) || deps_plt()
+  def plt_file(incremental? \\ false) do
+    if incremental? do
+      plt_incremental_file()
+    else
+      plt_path(dialyzer_config()[:plt_file]) || deps_plt()
+    end
+  end
+
+  defp plt_incremental_file do
+    config = dialyzer_config()
+
+    case config[:plt_incremental_file] do
+      nil ->
+        # When there is no explicit config, append _incremental suffix to base PLT filename
+        base_plt = plt_path(config[:plt_file]) || deps_plt()
+        add_incremental_suffix(base_plt)
+
+      file when is_binary(file) ->
+        plt_path(file)
+
+      {:no_warn, file} when is_binary(file) ->
+        plt_path({:no_warn, file})
+
+      _ ->
+        base_plt = plt_path(config[:plt_file]) || deps_plt()
+        add_incremental_suffix(base_plt)
+    end
+  end
+
+  defp add_incremental_suffix(plt_path) do
+    if String.ends_with?(plt_path, ".plt") do
+      String.replace_suffix(plt_path, ".plt", "_incremental.plt")
+    else
+      plt_path <> "_incremental"
+    end
   end
 
   defp plt_path(file) when is_binary(file), do: Path.expand(file)
@@ -112,6 +145,165 @@ defmodule Dialyxir.Project do
 
   def dialyzer_flags do
     Mix.Project.config()[:dialyzer][:flags] || []
+  end
+
+  def dialyzer_incremental do
+    dialyzer_config()[:incremental] || false
+  end
+
+  @doc """
+  Returns the list of applications for Dialyzer to analyze.
+
+  This function resolves the `apps` configuration value, which can be:
+  - An explicit list of apps: `[:app1, :app2, ...]`
+  - `:transitive` - automatically includes `core_apps` + all dependencies + project apps
+  - `:project` - automatically includes only project apps (umbrella children or single app)
+  - `nil` - returns empty list (file mode)
+
+  Maintains backward compatibility: if the config is already a list, it is returned as-is.
+  """
+  def dialyzer_apps do
+    config = dialyzer_config()
+    resolved = resolve_apps(config)
+
+    # Maintain backward compatibility: if config is already a list, return it as-is
+    # If resolved is nil, return empty list for backward compatibility
+    cond do
+      is_list(config[:apps]) -> config[:apps]
+      resolved == nil -> []
+      true -> resolved
+    end
+  end
+
+  @doc """
+  Returns the list of applications for Dialyzer to emit warnings for.
+
+  This function resolves the `warning_apps` configuration value, which can be:
+  - An explicit list of apps: `[:app1, :app2, ...]`
+  - `:transitive` - automatically includes `core_apps` + all dependencies + project apps
+  - `:project` - automatically includes only project apps (umbrella children or single app)
+  - `nil` - returns empty list (no warning apps)
+
+  Maintains backward compatibility: if the config is already a list, it is returned as-is.
+  """
+  def dialyzer_warning_apps do
+    config = dialyzer_config()
+    resolved = resolve_warning_apps(config)
+
+    # Maintain backward compatibility: if config is already a list, return it as-is
+    # If resolved is nil, return empty list for backward compatibility
+    cond do
+      is_list(config[:warning_apps]) -> config[:warning_apps]
+      resolved == nil -> []
+      true -> resolved
+    end
+  end
+
+  # Returns core apps configured under :core_apps.
+  # This is a Dialyxir-only concept used for incremental app mode.
+  defp core_apps(config) do
+    Keyword.get(config, :core_apps, [])
+  end
+
+  # Returns dependency apps as a list of atoms.
+  defp dep_apps do
+    # Get dependencies from Mix.Project.deps_paths() which returns a map of {app, path} pairs
+    Mix.Project.deps_paths()
+    |> Map.keys()
+    |> Enum.filter(fn app ->
+      # Check if the dependency has an app enabled by looking at the project config
+      config = Mix.Project.config()
+      deps = config[:deps] || []
+
+      case Enum.find(deps, fn
+             {^app, opts} when is_list(opts) -> true
+             {^app, _req, opts} when is_list(opts) -> true
+             _ -> false
+           end) do
+        {_, opts} when is_list(opts) ->
+          # Only filter out deps with app: false, include all others regardless of runtime status
+          Keyword.get(opts, :app, true)
+
+        {_, _req, opts} when is_list(opts) ->
+          # Only filter out deps with app: false, include all others regardless of runtime status
+          Keyword.get(opts, :app, true)
+
+        _ ->
+          true
+      end
+    end)
+    |> Enum.uniq()
+  end
+
+  # Returns project app(s) - uses Mix.Project.apps_paths/0 for umbrella,
+  # Mix.Project.config()[:app] for single app.
+  defp project_apps do
+    if function_exported?(Mix.Project, :apps_paths, 0) do
+      case Mix.Project.apps_paths() do
+        nil -> [Mix.Project.config()[:app]]
+        apps_paths when is_map(apps_paths) -> Map.keys(apps_paths)
+      end
+    else
+      [Mix.Project.config()[:app]]
+    end
+  end
+
+  @doc """
+  Resolves the `apps` config value into a concrete list of apps.
+
+  Supported values:
+    * `nil`         – no app mode (stay in file mode)
+    * `[:app, ...]` – explicit app list, used as-is
+    * `:project`    – all project apps (umbrella children or single app)
+    * `:transitive`  – core_apps + all dependencies + project apps
+
+  Note: `:transitive` includes all dependencies that have an app, regardless of
+  their `runtime` status. Only dependencies with `app: false` are excluded.
+  """
+  @spec resolve_apps(Keyword.t()) :: nil | [atom()]
+  def resolve_apps(config) do
+    case Keyword.get(config, :apps) do
+      nil ->
+        nil
+
+      apps when is_list(apps) ->
+        apps
+
+      :project ->
+        project_apps()
+
+      :transitive ->
+        core_apps(config) ++ dep_apps() ++ project_apps()
+    end
+  end
+
+  @doc """
+  Resolves the `warning_apps` config value into a concrete list of apps.
+
+  Supported values:
+    * `nil`         – no warning apps
+    * `[:app, ...]` – explicit app list, used as-is
+    * `:project`    – all project apps (umbrella children or single app)
+    * `:transitive`  – core_apps + all dependencies + project apps
+
+  Note: `:transitive` includes all dependencies that have an app, regardless of
+  their `runtime` status. Only dependencies with `app: false` are excluded.
+  """
+  @spec resolve_warning_apps(Keyword.t()) :: nil | [atom()]
+  def resolve_warning_apps(config) do
+    case Keyword.get(config, :warning_apps) do
+      nil ->
+        nil
+
+      apps when is_list(apps) ->
+        apps
+
+      :project ->
+        project_apps()
+
+      :transitive ->
+        core_apps(config) ++ dep_apps() ++ project_apps()
+    end
   end
 
   def no_umbrella? do
