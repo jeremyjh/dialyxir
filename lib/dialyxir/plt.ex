@@ -241,9 +241,14 @@ defmodule Dialyxir.Plt do
     info("Looking up modules in #{Path.basename(plt)}")
 
     case plt_info(plt) do
-      {:ok, info} ->
+      {:ok, info} when is_list(info) ->
         Keyword.fetch!(info, :files)
         |> Enum.reduce(MapSet.new(), &MapSet.put(&2, Path.expand(&1)))
+
+      {:ok, {:incremental, info}} ->
+        # Incremental PLTs return a keyword list with :modules key
+        modules = Keyword.get(info, :modules, [])
+        resolve_modules(modules, MapSet.new())
 
       {:error, :no_such_file} ->
         nil
