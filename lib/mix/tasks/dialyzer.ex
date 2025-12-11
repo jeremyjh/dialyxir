@@ -106,36 +106,36 @@ defmodule Mix.Tasks.Dialyzer do
 
   ### Incremental Mode
 
-  * `dialyzer: :incremental` - enable Dialyzer's incremental analysis mode (requires OTP 26+). When set to `true`, Dialyzer will reuse previous analysis results and analyze changed modules plus any modules that depend on them, significantly speeding up subsequent runs. Note that incremental PLT files are separate from standard PLTs and are managed by Dialyzer itself.
-
-  * `dialyzer: :apps` - applications to analyze (requires incremental: true). These are
-    typically OTP and third-party libraries that Dialyzer needs to understand but where you don't
-    want warnings reported. Can be:
-    - An explicit list: `[:erts, :kernel, :stdlib, ...]`
-    - `:transitive` - automatically includes all dependencies + project apps
-    - `:project` - automatically includes only project apps (umbrella children or single app)
-    - `nil` - file mode (no app mode)
-
-  * `dialyzer: :warning_apps` - applications to emit warnings for (requires incremental: true).
-    These are typically your own applications where you want warnings reported. Can be:
-    - An explicit list: `[:my_app, :other_app]`
-    - `:transitive` - automatically includes all dependencies + project apps
-    - `:project` - automatically includes only project apps (umbrella children or single app)
-    - `nil` - no warning apps
+  * `dialyzer: :incremental` - configuration for incremental mode (requires OTP 26+). Must be a keyword list with:
+    - `:enabled` (boolean) - enables incremental mode. When enabled, Dialyzer will reuse previous analysis results and analyze changed modules plus any modules that depend on them, significantly speeding up subsequent runs. Note that incremental PLT files are separate from standard PLTs and are managed by Dialyzer itself.
+    - `:apps` - applications to analyze. These are typically OTP and third-party libraries that Dialyzer needs to understand but where you don't want warnings reported. Can be:
+      - An explicit list: `[:erts, :kernel, :stdlib, ...]`
+      - `:app_tree` - automatically includes all transitive dependencies + project apps
+      - `:apps_direct` - automatically includes direct dependencies + project apps
+      - `nil` - file mode (no app mode)
+    - `:warning_apps` - applications to emit warnings for. These are typically your own applications where you want warnings reported. Can be:
+      - An explicit list: `[:my_app, :other_app]`
+      - `:app_tree` - automatically includes all transitive dependencies + project apps
+      - `:apps_direct` - automatically includes direct dependencies + project apps
+      - `nil` - no warning apps
 
   Note: `apps` and `warning_apps` must not overlap - they are mutually exclusive.
 
+  **Important:** When using `:app_tree` or `:apps_direct` flags, you must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in your `apps` configuration. These flags automatically include project dependencies, project apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). However, core OTP apps like `:erts`, `:kernel`, and `:stdlib` are never included automatically and must be explicitly listed. You may also need to include `:mix` if your code depends on it.
+
   ```elixir
-  # Using explicit lists (backward compatible)
+  # Using explicit lists
   def project do
     [
       app: :my_app,
       version: "0.0.1",
       deps: deps,
       dialyzer: [
-        incremental: true,
-        apps: [:erts, :kernel, :stdlib, :elixir, :logger, :my_app],
-        warning_apps: [:my_app]
+        incremental: [
+          enabled: true,
+          apps: [:erts, :kernel, :stdlib, :elixir, :logger, :my_app],
+          warning_apps: [:my_app]
+        ]
       ]
     ]
   end
@@ -147,9 +147,13 @@ defmodule Mix.Tasks.Dialyzer do
       version: "0.0.1",
       deps: deps,
       dialyzer: [
-        incremental: true,
-        apps: [:erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix] ++ deps ++ [:project],  # Explicit list including OTP apps, deps, and project apps
-        warning_apps: :project  # Resolves to project apps only
+        incremental: [
+          enabled: true,
+          # OTP apps must be explicitly listed even when using :app_tree
+          # Typical OTP apps (plus mix if needed): :erts, :kernel, :stdlib, :mix
+          apps: [:erts, :kernel, :stdlib, :mix] ++ [:app_tree],
+          warning_apps: :apps_direct  # Resolves to direct deps + project apps
+        ]
       ]
     ]
   end

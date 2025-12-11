@@ -7,8 +7,10 @@ defmodule WarningAppsTransitive.Mixfile do
       version: "0.1.0",
       prune_code_paths: false,
       dialyzer: [
-        incremental: true,
-        warning_apps: :transitive
+        incremental: [
+          enabled: true,
+          warning_apps: :app_tree
+        ]
       ]
     ]
   end

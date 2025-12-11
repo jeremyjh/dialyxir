@@ -7,7 +7,9 @@ defmodule IncrementalNoWarn.Mixfile do
       version: "0.1.0",
       prune_code_paths: false,
       dialyzer: [
-        incremental: true,
+        incremental: [
+          enabled: true
+        ],
         plt_incremental_file: {:no_warn, "incremental_no_warn.plt"}
       ]
     ]

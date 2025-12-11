@@ -251,7 +251,11 @@ def project do
     app: :my_app,
     version: "0.0.1",
     deps: deps,
-    dialyzer: [incremental: true]
+    dialyzer: [
+      incremental: [
+        enabled: true
+      ]
+    ]
   ]
 end
 ```
@@ -270,7 +274,9 @@ You can optionally specify a custom path for the incremental PLT:
 
 ```elixir
 dialyzer: [
-  incremental: true,
+  incremental: [
+    enabled: true
+  ],
   plt_incremental_file: "_build/dev/my_incremental.plt"
 ]
 ```
@@ -305,7 +311,7 @@ In CI, it usually works well to:
 **Analyzing specific applications**
 
 When using incremental mode, you can tell Dialyzer which applications to analyse
-using the `apps` and `warning_apps` options:
+using the `apps` and `warning_apps` options nested under `incremental`:
 
 - `apps` – all applications that Dialyzer should know about and analyse upstream of your own code
 - `warning_apps` – the apps where you actually want warnings reported
@@ -327,11 +333,11 @@ into, but it only reports issues in the code you own.
 
 Both `apps` and `warning_apps` accept:
 - An explicit list of apps: `[:app1, :app2, ...]`
-- The `:transitive` flag – automatically includes all dependencies + project apps
-- The `:project` flag – automatically includes only project apps (umbrella children or single app)
+- The `:app_tree` flag – automatically includes all transitive dependencies + project apps
+- The `:apps_direct` flag – automatically includes direct dependencies + project apps
 - `nil` – for `apps`, this means file mode (no app mode); for `warning_apps`, this means no warning apps
 
-Note: When using `:transitive`, users must explicitly list any OTP apps (like `:erts`, `:kernel`, `:stdlib`, `:elixir`) they want in their `apps` configuration. The `:transitive` flag only automatically includes dependencies and project apps.
+Note: When using `:app_tree`, users must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in their `apps` configuration. The `:app_tree` flag automatically includes project dependencies, project apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). However, core OTP apps like `:erts`, `:kernel`, and `:stdlib` are never included automatically and must be explicitly listed. You may also need to include `:mix` if your code depends on it.
 
 > **Important:** `warning_apps` must be a subset of `apps`. Dialyxir enforces this in incremental mode by merging `warning_apps` into `apps` internally so Dialyzer analyses everything it needs while only reporting on your `warning_apps`. Non-project entries in `warning_apps` are filtered out with a warning.
 
@@ -340,12 +346,14 @@ Note: When using `:transitive`, users must explicitly list any OTP apps (like `:
 **Via mix.exs configuration:**
 
 ```elixir
-# mix.exs - Using explicit lists (backward compatible)
+# mix.exs - Using explicit lists
 
 dialyzer: [
-  incremental: true,
-  apps: [:erts, :kernel, :stdlib, :elixir, :logger],
-  warning_apps: [:my_app]
+  incremental: [
+    enabled: true,
+    apps: [:erts, :kernel, :stdlib, :elixir, :logger],
+    warning_apps: [:my_app]
+  ]
 ]
 ```
 
@@ -353,9 +361,13 @@ dialyzer: [
 # mix.exs - Using flags for automatic resolution
 
 dialyzer: [
-  incremental: true,
-  apps: [:erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix] ++ deps ++ [:my_app],  # Explicit list including OTP apps, deps, and project apps
-  warning_apps: :project  # Resolves to project apps only
+  incremental: [
+    enabled: true,
+    # OTP apps must be explicitly listed even when using :app_tree
+    # Typical OTP apps: :erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix, :public_key
+    apps: [:erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix, :public_key] ++ [:app_tree],
+    warning_apps: :apps_direct  # Resolves to direct deps + project apps
+  ]
 ]
 ```
 

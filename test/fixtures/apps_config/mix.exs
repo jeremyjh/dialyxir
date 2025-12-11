@@ -7,8 +7,10 @@ defmodule AppsConfig.Mixfile do
       version: "0.1.0",
       prune_code_paths: false,
       dialyzer: [
-        incremental: true,
-        apps: [:apps_config, :kernel]
+        incremental: [
+          enabled: true,
+          apps: [:apps_config, :kernel]
+        ]
       ]
     ]
   end

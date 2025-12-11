@@ -7,8 +7,10 @@ defmodule WarningAppsProject.Mixfile do
       version: "0.1.0",
       prune_code_paths: false,
       dialyzer: [
-        incremental: true,
-        warning_apps: :project
+        incremental: [
+          enabled: true,
+          warning_apps: :apps_direct
+        ]
       ]
     ]
   end

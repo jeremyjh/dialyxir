@@ -4,7 +4,7 @@ defmodule Dialyxir.AppSelection do
 
   Responsibilities:
   - Merge CLI-provided lists with mix.exs config, honoring CLI precedence.
-  - Expand `:transitive`/`:project` flags via `Dialyxir.Project` helpers.
+  - Expand `:app_tree`/`:apps_direct` flags via `Dialyxir.Project` helpers.
   - Normalize atoms/strings/charlists to atoms.
   - Filter non-project entries from `warning_apps` (incremental mode only) and warn about removals.
   - Merge `warning_apps` into `apps` so Dialyzer analyzes everything it needs while only emitting warnings for `warning_apps`.
@@ -34,8 +34,8 @@ defmodule Dialyxir.AppSelection do
       ...>   incremental: true,
       ...>   cli_apps: [:my_dep],
       ...>   cli_warning_apps: [],
-      ...>   config_apps: [:transitive],
-      ...>   config_warning_apps: [:project]
+      ...>   config_apps: [:app_tree],
+      ...>   config_warning_apps: [:apps_direct]
       ...> )
       %{apps: [:my_dep | _], warning_apps: [:my_app | _]}
   """
@@ -77,32 +77,52 @@ defmodule Dialyxir.AppSelection do
     |> Enum.map(&normalize_app/1)
   end
 
-  defp normalize(:project, _key), do: Project.project_apps()
-  defp normalize(:transitive, :apps), do: Project.resolve_apps(apps: :transitive) || []
+  defp normalize(:apps_direct, :apps), do: Project.resolve_apps(apps: :apps_direct) || []
 
-  defp normalize(:transitive, :warning_apps) do
-    Project.resolve_warning_apps(warning_apps: :transitive) || []
+  defp normalize(:apps_direct, :warning_apps) do
+    Project.resolve_warning_apps(warning_apps: :apps_direct) || []
+  end
+
+  defp normalize(:app_tree, :apps), do: Project.resolve_apps(apps: :app_tree) || []
+
+  defp normalize(:app_tree, :warning_apps) do
+    Project.resolve_warning_apps(warning_apps: :app_tree) || []
   end
 
   defp normalize(_unknown, _key), do: []
 
   defp expand_flags(list, key) do
-    case :transitive in list do
-      true ->
+    cond do
+      :app_tree in list ->
         list
-        |> Enum.reject(&(&1 == :transitive))
-        |> Kernel.++(resolve_transative_apps(key, :transitive))
+        |> Enum.reject(&(&1 == :app_tree))
+        |> Kernel.++(resolve_app_tree_apps(key, :app_tree))
         |> Enum.uniq()
 
-      false ->
+      :apps_direct in list ->
+        list
+        |> Enum.reject(&(&1 == :apps_direct))
+        |> Kernel.++(resolve_app_tree_apps(key, :apps_direct))
+        |> Enum.uniq()
+
+      true ->
         list
     end
   end
 
-  defp resolve_transative_apps(key, :transitive) do
-    case key do
-      :apps -> Project.resolve_apps(apps: :transitive) || []
-      :warning_apps -> Project.resolve_warning_apps(warning_apps: :transitive) || []
+  defp resolve_app_tree_apps(key, flag) do
+    case {key, flag} do
+      {:apps, :app_tree} ->
+        Project.resolve_apps(apps: :app_tree) || []
+
+      {:apps, :apps_direct} ->
+        Project.resolve_apps(apps: :apps_direct) || []
+
+      {:warning_apps, :app_tree} ->
+        Project.resolve_warning_apps(warning_apps: :app_tree) || []
+
+      {:warning_apps, :apps_direct} ->
+        Project.resolve_warning_apps(warning_apps: :apps_direct) || []
     end
   end
 

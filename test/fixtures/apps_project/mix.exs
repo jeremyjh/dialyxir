@@ -7,8 +7,10 @@ defmodule AppsProject.Mixfile do
       version: "0.1.0",
       prune_code_paths: false,
       dialyzer: [
-        incremental: true,
-        apps: :project
+        incremental: [
+          enabled: true,
+          apps: :apps_direct
+        ]
       ]
     ]
   end

@@ -7,9 +7,11 @@ defmodule AppsWarningAppsConfig.Mixfile do
       version: "0.1.0",
       prune_code_paths: false,
       dialyzer: [
-        incremental: true,
-        apps: [:kernel, :stdlib, :apps_warning_apps_config],
-        warning_apps: [:apps_warning_apps_config]
+        incremental: [
+          enabled: true,
+          apps: [:kernel, :stdlib, :apps_warning_apps_config],
+          warning_apps: [:apps_warning_apps_config]
+        ]
       ]
     ]
   end

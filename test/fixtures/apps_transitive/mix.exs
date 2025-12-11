@@ -7,8 +7,10 @@ defmodule AppsTransitive.Mixfile do
       version: "0.1.0",
       prune_code_paths: false,
       dialyzer: [
-        incremental: true,
-        apps: :transitive
+        incremental: [
+          enabled: true,
+          apps: :app_tree
+        ]
       ]
     ]
   end

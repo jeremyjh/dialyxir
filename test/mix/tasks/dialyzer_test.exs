@@ -605,7 +605,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "apps: :transitive flag is resolved correctly" do
+    test "apps: :app_tree flag is resolved correctly" do
       in_project(:apps_transitive, fn ->
         parent = self()
 
@@ -639,7 +639,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "apps: :project flag is resolved correctly" do
+    test "apps: :apps_direct flag is resolved correctly" do
       in_project(:apps_project, fn ->
         parent = self()
 
@@ -666,7 +666,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "warning_apps: :transitive flag is resolved correctly, but dependencies are filtered" do
+    test "warning_apps: :app_tree flag is resolved correctly, but dependencies are filtered" do
       in_project(:warning_apps_transitive, fn ->
         parent = self()
 
@@ -697,7 +697,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "warning_apps: :project flag is resolved correctly" do
+    test "warning_apps: :apps_direct flag is resolved correctly" do
       in_project(:warning_apps_project, fn ->
         parent = self()
 
@@ -724,7 +724,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "CLI apps flag overrides resolved config :transitive flag" do
+    test "CLI apps flag overrides resolved config :app_tree flag" do
       in_project(:apps_transitive, fn ->
         parent = self()
 
@@ -753,7 +753,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "CLI warning_apps flag overrides resolved config :project flag" do
+    test "CLI warning_apps flag overrides resolved config :apps_direct flag" do
       in_project(:warning_apps_project, fn ->
         parent = self()
 
@@ -782,13 +782,13 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "apps: :transitive and warning_apps: :project can be used together" do
+    test "apps: :app_tree and warning_apps: :apps_direct can be used together" do
       # Test that both flags can be resolved independently
       in_project(:apps_transitive, fn ->
         apps = Dialyxir.Project.dialyzer_apps()
         assert is_list(apps)
         assert :apps_transitive in apps
-        # :transitive does NOT include OTP apps - users must explicitly list them
+        # :app_tree does NOT include OTP apps - users must explicitly list them
         refute :erts in apps
       end)
 

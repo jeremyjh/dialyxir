@@ -280,19 +280,21 @@ defmodule Dialyxir.ProjectTest do
       assert Project.resolve_apps(config) == [:my_app, :other_app]
     end
 
-    test "resolve_apps with :project returns project apps" do
+    test "resolve_apps with :apps_direct returns direct deps and project apps" do
       in_project(:apps_project, fn ->
         config = Mix.Project.config()[:dialyzer]
-        resolved = Project.resolve_apps(config)
+        incremental_config = config[:incremental] || []
+        resolved = Project.resolve_apps(apps: Keyword.get(incremental_config, :apps))
         assert is_list(resolved)
         assert :apps_project in resolved
       end)
     end
 
-    test "resolve_apps with :transitive includes deps and project apps" do
+    test "resolve_apps with :app_tree includes deps and project apps" do
       in_project(:apps_transitive, fn ->
         config = Mix.Project.config()[:dialyzer]
-        resolved = Project.resolve_apps(config)
+        incremental_config = config[:incremental] || []
+        resolved = Project.resolve_apps(apps: Keyword.get(incremental_config, :apps))
         assert is_list(resolved)
         # Should include project app
         assert :apps_transitive in resolved
@@ -314,19 +316,31 @@ defmodule Dialyxir.ProjectTest do
       assert Project.resolve_warning_apps(config) == [:my_app, :other_app]
     end
 
-    test "resolve_warning_apps with :project returns project apps" do
+    test "resolve_warning_apps with :apps_direct returns direct deps and project apps" do
       in_project(:warning_apps_project, fn ->
         config = Mix.Project.config()[:dialyzer]
-        resolved = Project.resolve_warning_apps(config)
+        incremental_config = config[:incremental] || []
+
+        resolved =
+          Project.resolve_warning_apps(
+            warning_apps: Keyword.get(incremental_config, :warning_apps)
+          )
+
         assert is_list(resolved)
         assert :warning_apps_project in resolved
       end)
     end
 
-    test "resolve_warning_apps with :transitive includes deps and project apps" do
+    test "resolve_warning_apps with :app_tree includes deps and project apps" do
       in_project(:warning_apps_transitive, fn ->
         config = Mix.Project.config()[:dialyzer]
-        resolved = Project.resolve_warning_apps(config)
+        incremental_config = config[:incremental] || []
+
+        resolved =
+          Project.resolve_warning_apps(
+            warning_apps: Keyword.get(incremental_config, :warning_apps)
+          )
+
         assert is_list(resolved)
         # Should include project app
         assert :warning_apps_transitive in resolved
@@ -341,7 +355,7 @@ defmodule Dialyxir.ProjectTest do
     test "project_apps returns single app for non-umbrella project" do
       in_project(:default_apps, fn ->
         # We can't directly test project_apps/0 as it's private, but we can test via resolve_apps
-        config = [apps: :project]
+        config = [apps: :apps_direct]
         resolved = Project.resolve_apps(config)
         assert is_list(resolved)
         assert :default_apps in resolved
@@ -350,7 +364,7 @@ defmodule Dialyxir.ProjectTest do
 
     test "project_apps returns all apps for umbrella project" do
       in_project(:umbrella, fn ->
-        config = [apps: :project]
+        config = [apps: :apps_direct]
         resolved = Project.resolve_apps(config)
         assert is_list(resolved)
         # Should include umbrella child apps
@@ -368,18 +382,18 @@ defmodule Dialyxir.ProjectTest do
       end)
     end
 
-    test "dialyzer_apps resolves :transitive flag" do
+    test "dialyzer_apps resolves :app_tree flag" do
       in_project(:apps_transitive, fn ->
         apps = Project.dialyzer_apps()
         assert is_list(apps)
         assert :apps_transitive in apps
-        # :transitive does NOT include OTP apps - users must explicitly list them
+        # :app_tree does NOT include OTP apps - users must explicitly list them
         refute :erts in apps
         refute :kernel in apps
       end)
     end
 
-    test "dialyzer_apps resolves :project flag" do
+    test "dialyzer_apps resolves :apps_direct flag" do
       in_project(:apps_project, fn ->
         apps = Project.dialyzer_apps()
         assert is_list(apps)
@@ -396,18 +410,18 @@ defmodule Dialyxir.ProjectTest do
       end)
     end
 
-    test "dialyzer_warning_apps resolves :transitive flag" do
+    test "dialyzer_warning_apps resolves :app_tree flag" do
       in_project(:warning_apps_transitive, fn ->
         warning_apps = Project.dialyzer_warning_apps()
         assert is_list(warning_apps)
         assert :warning_apps_transitive in warning_apps
-        # :transitive does NOT include OTP apps - users must explicitly list them
+        # :app_tree does NOT include OTP apps - users must explicitly list them
         refute :erts in warning_apps
         refute :kernel in warning_apps
       end)
     end
 
-    test "dialyzer_warning_apps resolves :project flag" do
+    test "dialyzer_warning_apps resolves :apps_direct flag" do
       in_project(:warning_apps_project, fn ->
         warning_apps = Project.dialyzer_warning_apps()
         assert is_list(warning_apps)
