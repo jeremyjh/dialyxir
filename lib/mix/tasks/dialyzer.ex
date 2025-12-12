@@ -112,12 +112,16 @@ defmodule Mix.Tasks.Dialyzer do
       - An explicit list: `[:erts, :kernel, :stdlib, ...]`
       - `:app_tree` - automatically includes all transitive dependencies + project apps
       - `:apps_direct` - automatically includes direct dependencies + project apps
-      - `nil` - file mode (no app mode)
+
+      Note: `apps` is required in incremental mode and cannot be `nil`. Incremental mode is designed for application-based analysis.
     - `:warning_apps` - applications to emit warnings for. These are typically your own applications where you want warnings reported. Can be:
-      - An explicit list: `[:my_app, :other_app]`
-      - `:app_tree` - automatically includes all transitive dependencies + project apps
-      - `:apps_direct` - automatically includes direct dependencies + project apps
+      - An explicit list: `[:my_app, :other_app]` (recommended - only project apps)
+      - `:apps_project` - automatically includes all project apps (equivalent to `Map.keys(Mix.Project.apps_paths())` for umbrella projects, or `[Mix.Project.config()[:app]]` for single apps). Only works in `warning_apps`, not in `apps`.
       - `nil` - no warning apps
+
+      Note: `:app_tree` and `:apps_direct` flags are not allowed in `warning_apps` because
+      `warning_apps` should only include project apps, not dependencies. If these flags are
+      used, they will be replaced with project apps only and a warning will be shown.
 
   Note: `apps` and `warning_apps` must not overlap - they are mutually exclusive.
 
@@ -152,7 +156,7 @@ defmodule Mix.Tasks.Dialyzer do
           # OTP apps must be explicitly listed even when using :app_tree
           # Typical OTP apps (plus mix if needed): :erts, :kernel, :stdlib, :mix
           apps: [:erts, :kernel, :stdlib, :mix] ++ [:app_tree],
-          warning_apps: :apps_direct  # Resolves to direct deps + project apps
+          warning_apps: :apps_project  # Resolves to project apps only
         ]
       ]
     ]
@@ -261,6 +265,19 @@ defmodule Mix.Tasks.Dialyzer do
           config_apps: Dialyxir.Project.dialyzer_apps(),
           config_warning_apps: Dialyxir.Project.dialyzer_warning_apps()
         )
+
+      # Validate that apps is specified when incremental mode is enabled
+      if incremental? && selection.apps == [] do
+        error("""
+        Incremental mode requires apps to be specified. apps cannot be nil or empty in incremental mode.
+        Please specify apps using one of:
+        - An explicit list: apps: [:erts, :kernel, :stdlib, ...]
+        - The :app_tree flag: apps: [:erts, :kernel, :stdlib] ++ [:app_tree]
+        - The :apps_direct flag: apps: [:erts, :kernel, :stdlib] ++ [:apps_direct]
+        """)
+
+        exit(1)
+      end
 
       unless opts[:no_compile], do: Mix.Task.run("compile")
 

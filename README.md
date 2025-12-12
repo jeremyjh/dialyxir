@@ -331,11 +331,21 @@ into, but it only reports issues in the code you own.
 
 **Configuration options:**
 
-Both `apps` and `warning_apps` accept:
-- An explicit list of apps: `[:app1, :app2, ...]`
-- The `:app_tree` flag – automatically includes all transitive dependencies + project apps
-- The `:apps_direct` flag – automatically includes direct dependencies + project apps
-- `nil` – for `apps`, this means file mode (no app mode); for `warning_apps`, this means no warning apps
+- `apps` accepts:
+  - An explicit list of apps: `[:app1, :app2, ...]`
+  - The `:app_tree` flag – automatically includes all transitive dependencies + project apps
+  - The `:apps_direct` flag – automatically includes direct dependencies + project apps
+  
+  Note: `apps` is required in incremental mode and cannot be `nil`. Incremental mode is designed for application-based analysis.
+
+- `warning_apps` accepts:
+  - An explicit list of project apps: `[:my_app, :other_app]` (recommended)
+  - `:apps_project` – automatically includes all project apps (equivalent to `Map.keys(Mix.Project.apps_paths())` for umbrella projects, or `[Mix.Project.config()[:app]]` for single apps). Only works in `warning_apps`, not in `apps`.
+  - `nil` – no warning apps, warn on everything in `apps`
+  
+  Note: `:app_tree` and `:apps_direct` flags are not allowed in `warning_apps` because
+  `warning_apps` should only include project apps, not dependencies. If these flags are
+  used, they will be replaced with project apps only and a warning will be shown.
 
 Note: When using `:app_tree`, users must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in their `apps` configuration. The `:app_tree` flag automatically includes project dependencies, project apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). However, core OTP apps like `:erts`, `:kernel`, and `:stdlib` are never included automatically and must be explicitly listed. You may also need to include `:mix` if your code depends on it.
 
@@ -366,7 +376,7 @@ dialyzer: [
     # OTP apps must be explicitly listed even when using :app_tree
     # Typical OTP apps: :erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix, :public_key
     apps: [:erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix, :public_key] ++ [:app_tree],
-    warning_apps: :apps_direct  # Resolves to direct deps + project apps
+    warning_apps: :apps_project  # Resolves to project apps only
   ]
 ]
 ```

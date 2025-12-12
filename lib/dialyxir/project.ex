@@ -257,10 +257,10 @@ defmodule Dialyxir.Project do
   Resolves the `apps` config value into a concrete list of apps.
 
   Supported values:
-    * `nil`         – no app mode (stay in file mode)
     * `[:app, ...]` – explicit app list, used as-is
     * `:apps_direct` – direct dependencies + project apps
     * `:app_tree`    – all transitive dependencies + project apps
+    * `nil`          – returns `nil` (validation should be done at call site for incremental mode)
 
   Note: `:app_tree` includes all dependencies that have an app, regardless of
   their `runtime` status. Only dependencies with `app: false` are excluded.
@@ -269,6 +269,9 @@ defmodule Dialyxir.Project do
   core OTP apps like `:erts`, `:kernel`, and `:stdlib` are never included
   automatically and must be explicitly listed. You may also need to include `:mix`
   if your code depends on it.
+
+  Note: In incremental mode, `apps` is required and cannot be `nil`. The caller
+  should validate this before calling this function.
   """
   @spec resolve_apps(Keyword.t()) :: nil | [atom()]
   def resolve_apps(config) do
@@ -293,12 +296,11 @@ defmodule Dialyxir.Project do
   Supported values:
     * `nil`         – no warning apps
     * `[:app, ...]` – explicit app list, used as-is
-    * `:apps_direct` – direct dependencies + project apps
-    * `:app_tree`    – all transitive dependencies + project apps
+    * `:apps_project` – project apps only (equivalent to `Map.keys(Mix.Project.apps_paths())`)
 
-  Note: `:app_tree` includes all dependencies that have an app, regardless of
-  their `runtime` status. Only dependencies with `app: false` are excluded.
-  Users must explicitly list any OTP apps they want in their `warning_apps` configuration.
+  Note: `:app_tree` and `:apps_direct` flags are not allowed in `warning_apps` because
+  `warning_apps` should only include project apps, not dependencies. Dependencies will
+  be filtered out with a warning if included.
   """
   @spec resolve_warning_apps(Keyword.t()) :: nil | [atom()]
   def resolve_warning_apps(config) do
@@ -309,11 +311,22 @@ defmodule Dialyxir.Project do
       apps when is_list(apps) ->
         apps
 
+      :apps_project ->
+        project_apps()
+
       :apps_direct ->
-        direct_dep_apps() ++ project_apps()
+        warning("""
+        :apps_direct flag is not allowed in warning_apps. warning_apps should only include project apps.
+        Use an explicit list of project apps instead, e.g. warning_apps: [:my_app]
+        """)
+        nil
 
       :app_tree ->
-        dep_apps() ++ project_apps()
+        warning("""
+        :app_tree flag is not allowed in warning_apps. warning_apps should only include project apps.
+        Use an explicit list of project apps instead, e.g. warning_apps: [:my_app]
+        """)
+        nil
     end
   end
 

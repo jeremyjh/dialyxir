@@ -80,19 +80,67 @@ defmodule Dialyxir.AppSelection do
   defp normalize(:apps_direct, :apps), do: Project.resolve_apps(apps: :apps_direct) || []
 
   defp normalize(:apps_direct, :warning_apps) do
-    Project.resolve_warning_apps(warning_apps: :apps_direct) || []
+    warning("""
+    :apps_direct flag is not allowed in warning_apps. warning_apps should only include project apps.
+    Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
+    """)
+    []
   end
 
   defp normalize(:app_tree, :apps), do: Project.resolve_apps(apps: :app_tree) || []
 
   defp normalize(:app_tree, :warning_apps) do
-    Project.resolve_warning_apps(warning_apps: :app_tree) || []
+    warning("""
+    :app_tree flag is not allowed in warning_apps. warning_apps should only include project apps.
+    Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
+    """)
+    []
+  end
+
+  defp normalize(:apps_project, :warning_apps), do: Project.project_apps()
+
+  defp normalize(:apps_project, :apps) do
+    warning("""
+    :apps_project flag is only allowed in warning_apps, not in apps.
+    Use :app_tree or :apps_direct for apps, or an explicit list.
+    """)
+    []
   end
 
   defp normalize(_unknown, _key), do: []
 
   defp expand_flags(list, key) do
     cond do
+      :app_tree in list && key == :warning_apps ->
+        warning("""
+        :app_tree flag is not allowed in warning_apps. warning_apps should only include project apps.
+        Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
+        """)
+        list
+        |> Enum.reject(&(&1 == :app_tree))
+
+      :apps_direct in list && key == :warning_apps ->
+        warning("""
+        :apps_direct flag is not allowed in warning_apps. warning_apps should only include project apps.
+        Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
+        """)
+        list
+        |> Enum.reject(&(&1 == :apps_direct))
+
+      :apps_project in list && key == :apps ->
+        warning("""
+        :apps_project flag is only allowed in warning_apps, not in apps.
+        Use :app_tree or :apps_direct for apps, or an explicit list.
+        """)
+        list
+        |> Enum.reject(&(&1 == :apps_project))
+
+      :apps_project in list && key == :warning_apps ->
+        list
+        |> Enum.reject(&(&1 == :apps_project))
+        |> Kernel.++(Project.project_apps())
+        |> Enum.uniq()
+
       :app_tree in list ->
         list
         |> Enum.reject(&(&1 == :app_tree))
