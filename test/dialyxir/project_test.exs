@@ -316,40 +316,20 @@ defmodule Dialyxir.ProjectTest do
       assert Project.resolve_warning_apps(config) == [:my_app, :other_app]
     end
 
-    test "resolve_warning_apps with :apps_direct returns direct deps and project apps" do
-      in_project(:warning_apps_project, fn ->
-        config = Mix.Project.config()[:dialyzer]
-        incremental_config = config[:incremental] || []
+    test "resolve_warning_apps with :apps_direct returns nil and shows warning" do
+      # Test that :apps_direct is rejected in warning_apps
+      resolved = Project.resolve_warning_apps(warning_apps: :apps_direct)
 
-        resolved =
-          Project.resolve_warning_apps(
-            warning_apps: Keyword.get(incremental_config, :warning_apps)
-          )
-
-        assert is_list(resolved)
-        assert :warning_apps_project in resolved
-      end)
+      # :apps_direct is not allowed in warning_apps, should return nil
+      assert resolved == nil
     end
 
-    test "resolve_warning_apps with :app_tree includes deps and project apps" do
-      in_project(:warning_apps_transitive, fn ->
-        config = Mix.Project.config()[:dialyzer]
-        incremental_config = config[:incremental] || []
+    test "resolve_warning_apps with :app_tree returns nil and shows warning" do
+      # Test that :app_tree is rejected in warning_apps
+      resolved = Project.resolve_warning_apps(warning_apps: :app_tree)
 
-        resolved =
-          Project.resolve_warning_apps(
-            warning_apps: Keyword.get(incremental_config, :warning_apps)
-          )
-
-        assert is_list(resolved)
-        # Should include project app
-        assert :warning_apps_transitive in resolved
-        # Should NOT include core apps (users must explicitly list them)
-        refute :erts in resolved
-        refute :kernel in resolved
-        refute :stdlib in resolved
-        refute :elixir in resolved
-      end)
+      # :app_tree is not allowed in warning_apps, should return nil
+      assert resolved == nil
     end
 
     test "project_apps returns single app for non-umbrella project" do
@@ -410,22 +390,21 @@ defmodule Dialyxir.ProjectTest do
       end)
     end
 
-    test "dialyzer_warning_apps resolves :app_tree flag" do
-      in_project(:warning_apps_transitive, fn ->
+    test "dialyzer_warning_apps with :apps_project returns project apps" do
+      in_project(:warning_apps_project, fn ->
         warning_apps = Project.dialyzer_warning_apps()
+        # :apps_project should return project apps
         assert is_list(warning_apps)
-        assert :warning_apps_transitive in warning_apps
-        # :app_tree does NOT include OTP apps - users must explicitly list them
-        refute :erts in warning_apps
-        refute :kernel in warning_apps
+        assert :warning_apps_project in warning_apps
       end)
     end
 
-    test "dialyzer_warning_apps resolves :apps_direct flag" do
-      in_project(:warning_apps_project, fn ->
+    test "dialyzer_warning_apps with :apps_project returns project apps (transitive)" do
+      in_project(:warning_apps_transitive, fn ->
         warning_apps = Project.dialyzer_warning_apps()
+        # :apps_project should return project apps
         assert is_list(warning_apps)
-        assert :warning_apps_project in warning_apps
+        assert :warning_apps_transitive in warning_apps
       end)
     end
 

@@ -327,7 +327,7 @@ into, but it only reports issues in the code you own.
 > **Note:** if your `apps` list is incomplete or inconsistent, you won't get a
 > direct error for that – you may just see confusing warnings in your
 > `warning_apps` because Dialyzer inferred "broken" behaviour for the missing
-> modules. Keep this in mind when debugging surprising incremental warnings.
+> modules. Keep this in mind when debugging surprising incremental warnings, particularly `unknown_function`
 
 **Configuration options:**
 
@@ -335,6 +335,8 @@ into, but it only reports issues in the code you own.
   - An explicit list of apps: `[:app1, :app2, ...]`
   - The `:app_tree` flag – automatically includes all transitive dependencies + project apps
   - The `:apps_direct` flag – automatically includes direct dependencies + project apps
+
+    Note: Dialyxir no longer compiles before resolving `:app_tree` or `:apps_direct`, so you must explicitly list OTP core apps such as `:erts`, `:kernel`, `:stdlib`, `:elixir`, and `:logger` in `apps` whenever you use these flags. They are not inferred automatically unless you compile first.
   
   Note: `apps` is required in incremental mode and cannot be `nil`. Incremental mode is designed for application-based analysis.
 

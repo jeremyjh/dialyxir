@@ -204,38 +204,99 @@ defmodule Dialyxir.Project do
   end
 
   # Returns dependency apps as a list of atoms (transitive - all deps).
-  # Uses the same traversal mechanism as include_deps for consistency.
-  # Matches the :app_tree case in include_deps: load_external_deps(recursive: true)
   defp dep_apps do
-    initial_acc = {
-      _loaded_apps = [],
-      _unloaded_apps = [],
-      _initial_load_statuses = %{}
-    }
+    deps_paths = Mix.Project.deps_paths()
+    all_deps = collect_all_deps()
 
-    {loaded_apps, _unloaded_apps, _final_load_statuses} =
-      reduce_umbrella_children(initial_acc, fn acc ->
-        load_external_deps(acc, recursive: true)
-      end)
+    deps_paths
+    |> Map.keys()
+    |> Enum.filter(fn app ->
+      case find_dep_config(app, all_deps) do
+        {:found, opts} ->
+          Keyword.get(opts, :app, true)
 
-    loaded_apps
+        :not_found ->
+          case Application.get_application(app) do
+            nil ->
+              # App not currently loaded - assume true unless explicitly disabled.
+              true
+
+            _ ->
+              true
+          end
+      end
+    end)
+    |> Enum.uniq()
   end
 
   # Returns direct dependency apps as a list of atoms (only direct deps, not transitive).
-  # Uses the same traversal mechanism as include_deps for consistency.
   defp direct_dep_apps do
-    initial_acc = {
-      _loaded_apps = [],
-      _unloaded_apps = [],
-      _initial_load_statuses = %{}
-    }
+    all_deps = collect_all_deps()
 
-    {loaded_apps, _unloaded_apps, _final_load_statuses} =
-      reduce_umbrella_children(initial_acc, fn acc ->
-        load_external_deps(acc, recursive: false)
-      end)
+    all_deps
+    |> Enum.map(&dep_name_from_config/1)
+    |> Enum.filter(&dep_enabled?(&1, all_deps))
+    |> Enum.uniq()
+  end
 
-    loaded_apps
+  defp dep_name_from_config({app, _opts}) when is_atom(app), do: app
+  defp dep_name_from_config({app, _req, _opts}) when is_atom(app), do: app
+
+  defp dep_enabled?(app, deps) do
+    case find_dep_config(app, deps) do
+      {:found, opts} -> Keyword.get(opts, :app, true)
+      :not_found -> true
+    end
+  end
+
+  defp collect_all_deps do
+    root_config = Mix.Project.config()
+    root_deps = root_config[:deps] || []
+
+    child_deps =
+      if function_exported?(Mix.Project, :apps_paths, 0) do
+        case Mix.Project.apps_paths() do
+          nil ->
+            []
+
+          apps_paths when is_map(apps_paths) ->
+            Enum.flat_map(apps_paths, fn {child_app, path} ->
+              child_mix_exs = Path.join(path, "mix.exs")
+
+              if File.exists?(child_mix_exs) do
+                try do
+                  Mix.Project.in_project(
+                    child_app,
+                    path,
+                    fn _ ->
+                      Mix.Project.config()[:deps] || []
+                    end
+                  )
+                rescue
+                  _ -> []
+                end
+              else
+                []
+              end
+            end)
+        end
+      else
+        []
+      end
+
+    root_deps ++ child_deps
+  end
+
+  defp find_dep_config(app, deps) do
+    case Enum.find(deps, fn
+           {^app, opts} when is_list(opts) -> true
+           {^app, _req, opts} when is_list(opts) -> true
+           _ -> false
+         end) do
+      {_, opts} when is_list(opts) -> {:found, opts}
+      {_, _req, opts} when is_list(opts) -> {:found, opts}
+      _ -> :not_found
+    end
   end
 
   @doc """

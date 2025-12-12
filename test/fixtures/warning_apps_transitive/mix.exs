@@ -9,7 +9,8 @@ defmodule WarningAppsTransitive.Mixfile do
       dialyzer: [
         incremental: [
           enabled: true,
-          warning_apps: :app_tree
+          apps: [:app_tree],
+          warning_apps: :apps_project
         ]
       ]
     ]

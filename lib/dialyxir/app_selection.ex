@@ -127,14 +127,6 @@ defmodule Dialyxir.AppSelection do
         list
         |> Enum.reject(&(&1 == :apps_direct))
 
-      :apps_project in list && key == :apps ->
-        warning("""
-        :apps_project flag is only allowed in warning_apps, not in apps.
-        Use :app_tree or :apps_direct for apps, or an explicit list.
-        """)
-        list
-        |> Enum.reject(&(&1 == :apps_project))
-
       :apps_project in list && key == :warning_apps ->
         list
         |> Enum.reject(&(&1 == :apps_project))

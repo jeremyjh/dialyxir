@@ -8,7 +8,8 @@ defmodule Incremental.Mixfile do
       prune_code_paths: false,
       dialyzer: [
         incremental: [
-          enabled: true
+          enabled: true,
+          apps: [:app_tree]
         ]
       ]
     ]

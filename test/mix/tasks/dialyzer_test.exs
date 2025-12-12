@@ -92,26 +92,41 @@ defmodule Mix.Tasks.DialyzerTest do
 
   test "task runs when custom ignore file provided and exists" do
     in_project(:ignore, fn ->
-      fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status"]) end
+      output =
+        capture_io(fn ->
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run(["--ignore-exit-status"])
+          end)
+        end)
 
-      assert capture_io(fun) =~ "ignore_warnings: ignore_test.exs"
+      assert output =~ "ignore_warnings: ignore_test.exs"
     end)
   end
 
   test "task runs when custom ignore file provided and does not exist" do
     in_project(:ignore_custom_missing, fn ->
-      fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status"]) end
+      output =
+        capture_io(fn ->
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run(["--ignore-exit-status"])
+          end)
+        end)
 
-      assert capture_io(fun) =~
+      assert output =~
                ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file does not exist"
     end)
   end
 
   test "task runs when custom ignore file provided and it is empty" do
     in_project(:ignore_custom_empty, fn ->
-      fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status"]) end
+      output =
+        capture_io(fn ->
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run(["--ignore-exit-status"])
+          end)
+        end)
 
-      assert capture_io(fun) =~
+      assert output =~
                ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file is empty"
     end)
   end
@@ -155,7 +170,9 @@ defmodule Mix.Tasks.DialyzerTest do
 
       output =
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run(["--incremental", "--no-compile", "--ignore-exit-status"])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run(["--incremental", "--no-compile", "--ignore-exit-status"])
+          end)
         end)
 
       assert output =~ "Incremental mode enabled; skipping PLT check step"
@@ -286,7 +303,7 @@ defmodule Mix.Tasks.DialyzerTest do
           Application.delete_env(:dialyxir, :test_parent)
         end)
 
-        capture_io(fn ->
+        capture_io(:stderr, fn ->
           Mix.Tasks.Dialyzer.run([
             "--incremental",
             "--apps",
@@ -322,13 +339,15 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--apps",
-            "my_app",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--apps",
+              "my_app",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -353,11 +372,13 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -386,11 +407,13 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -413,13 +436,15 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--warning-apps",
-            "incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--warning-apps",
+              "incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -445,11 +470,13 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -474,15 +501,17 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--apps",
-            "kernel,stdlib,incremental",
-            "--warning-apps",
-            "incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--apps",
+              "kernel,stdlib,incremental",
+              "--warning-apps",
+              "incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -506,7 +535,7 @@ defmodule Mix.Tasks.DialyzerTest do
           Application.delete_env(:dialyxir, :test_parent)
         end)
 
-        capture_io(fn ->
+        capture_io(:stderr, fn ->
           Mix.Tasks.Dialyzer.run([
             "--incremental",
             "--apps",
@@ -534,13 +563,15 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--warning-apps",
-            "apps_warning_apps_config",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--warning-apps",
+              "apps_warning_apps_config",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -548,8 +579,8 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "files option is included when apps is not provided" do
-      in_project(:incremental, fn ->
+    test "files option is included when apps is not provided (non-incremental mode)" do
+      in_project(:local_plt, fn ->
         parent = self()
 
         Application.put_env(:dialyxir, :dialyzer_module, DialyzerArgsCapture)
@@ -561,11 +592,12 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -587,13 +619,15 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--apps",
-            "my_app,other_app,third_app",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--apps",
+              "my_app,other_app,third_app",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -618,11 +652,13 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -652,11 +688,13 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -666,7 +704,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "warning_apps: :app_tree flag is resolved correctly, but dependencies are filtered" do
+    test "warning_apps: :apps_project flag is resolved correctly (warning_apps_transitive)" do
       in_project(:warning_apps_transitive, fn ->
         parent = self()
 
@@ -679,25 +717,24 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
         warning_apps = Keyword.get(args, :warning_apps)
         assert is_list(warning_apps)
-        # Should only include project app (dependencies and core apps are filtered)
+        # Should only include project app
         assert warning_apps == [:warning_apps_transitive]
-        # Note: This fixture has no dependencies, so there's nothing to filter out
-        # If there were dependencies, they would be filtered and a warning would be shown
-        # The important part is that only the project app is in warning_apps
       end)
     end
 
-    test "warning_apps: :apps_direct flag is resolved correctly" do
+    test "warning_apps: :apps_project flag is resolved correctly (warning_apps_project)" do
       in_project(:warning_apps_project, fn ->
         parent = self()
 
@@ -710,11 +747,13 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -737,13 +776,15 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--apps",
-            "cli_app",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--apps",
+              "cli_app",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -753,7 +794,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "CLI warning_apps flag overrides resolved config :apps_direct flag" do
+    test "CLI warning_apps flag overrides resolved config :apps_project flag" do
       in_project(:warning_apps_project, fn ->
         parent = self()
 
@@ -766,13 +807,15 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--warning-apps",
-            "warning_apps_project",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--warning-apps",
+              "warning_apps_project",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}
@@ -782,7 +825,7 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
 
-    test "apps: :app_tree and warning_apps: :apps_direct can be used together" do
+    test "apps: :app_tree and warning_apps: :apps_project can be used together" do
       # Test that both flags can be resolved independently
       in_project(:apps_transitive, fn ->
         apps = Dialyxir.Project.dialyzer_apps()
@@ -814,13 +857,15 @@ defmodule Mix.Tasks.DialyzerTest do
         # Try to include a dependency in warning_apps
         output =
           capture_io(fn ->
-            Mix.Tasks.Dialyzer.run([
-              "--incremental",
-              "--warning-apps",
-              "local_plt,logger",
-              "--no-compile",
-              "--ignore-exit-status"
-            ])
+            capture_io(:stderr, fn ->
+              Mix.Tasks.Dialyzer.run([
+                "--incremental",
+                "--warning-apps",
+                "local_plt,logger",
+                "--no-compile",
+                "--ignore-exit-status"
+              ])
+            end)
           end)
 
         assert_receive {:dialyzer_args, args}
@@ -847,13 +892,15 @@ defmodule Mix.Tasks.DialyzerTest do
         end)
 
         capture_io(fn ->
-          Mix.Tasks.Dialyzer.run([
-            "--incremental",
-            "--warning-apps",
-            "local_plt",
-            "--no-compile",
-            "--ignore-exit-status"
-          ])
+          capture_io(:stderr, fn ->
+            Mix.Tasks.Dialyzer.run([
+              "--incremental",
+              "--warning-apps",
+              "local_plt",
+              "--no-compile",
+              "--ignore-exit-status"
+            ])
+          end)
         end)
 
         assert_receive {:dialyzer_args, args}

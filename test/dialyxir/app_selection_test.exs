@@ -75,4 +75,19 @@ defmodule Dialyxir.AppSelectionTest do
       assert :apps_warning_apps_config in selection.apps
     end)
   end
+
+  test "apps list keeps project app named :apps_project" do
+    in_project(:apps_project, fn ->
+      selection =
+        AppSelection.resolve(
+          incremental: true,
+          cli_apps: [],
+          cli_warning_apps: [],
+          config_apps: Project.dialyzer_apps(),
+          config_warning_apps: Project.dialyzer_warning_apps()
+        )
+
+      assert selection.apps == [:apps_project]
+    end)
+  end
 end
