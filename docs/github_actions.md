@@ -49,3 +49,5 @@ steps:
 
 # ...
 ```
+
+> **Incremental mode tip:** when you run `mix dialyzer --incremental`, you can skip the explicit `mix dialyzer --plt` step—the first incremental run will build its own PLT inside `priv/plts`, and the cache configuration above will persist both the classic and incremental artifacts automatically. Keep the cache key tied to OTP/Elixir versions and `mix.lock`; if you want per-branch warm caches, append `${{ github.ref_name }}` to the key.

@@ -14,6 +14,21 @@ defmodule Dialyxir.DialyzerTest do
     def run(_, _), do: {:error, "dialyzer failed"}
   end
 
+  defmodule RunnerDialyzerStub do
+    def run(args) do
+      send(self(), {:dialyzer_run_args, args})
+      []
+    end
+  end
+
+  defmodule RunnerFiltererStub do
+    def filter_map(_args), do: %Dialyxir.FilterMap{}
+
+    def filter_warning?(_warning, _filter_map), do: {false, []}
+
+    def filter_legacy_warnings(output), do: output
+  end
+
   setup do
     ansi_enabled = IO.ANSI.enabled?()
 
@@ -104,6 +119,38 @@ defmodule Dialyxir.DialyzerTest do
       assert expected_result_code == :error
       assert expected_exit_code == 1
       assert expected_messages == [[[], "dialyzer failed"]]
+    end
+  end
+
+  describe "Runner incremental args" do
+    setup do
+      Application.put_env(:dialyxir, :dialyzer_module, RunnerDialyzerStub)
+
+      on_exit(fn ->
+        Application.delete_env(:dialyxir, :dialyzer_module)
+      end)
+
+      :ok
+    end
+
+    test "analysis_type is set when incremental flag is present" do
+      args = [
+        {:check_plt, false},
+        {:init_plt, ~c"dummy.plt"},
+        {:files, []},
+        {:warnings, []},
+        {:format, []},
+        {:raw, false},
+        {:list_unused_filters, false},
+        {:ignore_exit_status, false},
+        {:quiet_with_result, false},
+        {:incremental, true}
+      ]
+
+      assert {:ok, {_time, [], ""}} = Dialyxir.Dialyzer.Runner.run(args, RunnerFiltererStub)
+
+      assert_receive {:dialyzer_run_args, final_args}
+      assert {:analysis_type, :incremental} in final_args
     end
   end
 end
