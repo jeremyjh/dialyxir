@@ -380,6 +380,7 @@ defmodule Dialyxir.Project do
         :apps_direct flag is not allowed in warning_apps. warning_apps should only include project apps.
         Use an explicit list of project apps instead, e.g. warning_apps: [:my_app]
         """)
+
         nil
 
       :app_tree ->
@@ -387,6 +388,7 @@ defmodule Dialyxir.Project do
         :app_tree flag is not allowed in warning_apps. warning_apps should only include project apps.
         Use an explicit list of project apps instead, e.g. warning_apps: [:my_app]
         """)
+
         nil
     end
   end

@@ -84,6 +84,7 @@ defmodule Dialyxir.AppSelection do
     :apps_direct flag is not allowed in warning_apps. warning_apps should only include project apps.
     Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
     """)
+
     []
   end
 
@@ -94,6 +95,7 @@ defmodule Dialyxir.AppSelection do
     :app_tree flag is not allowed in warning_apps. warning_apps should only include project apps.
     Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
     """)
+
     []
   end
 
@@ -104,6 +106,7 @@ defmodule Dialyxir.AppSelection do
     :apps_project flag is only allowed in warning_apps, not in apps.
     Use :app_tree or :apps_direct for apps, or an explicit list.
     """)
+
     []
   end
 
@@ -116,6 +119,7 @@ defmodule Dialyxir.AppSelection do
         :app_tree flag is not allowed in warning_apps. warning_apps should only include project apps.
         Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
         """)
+
         list
         |> Enum.reject(&(&1 == :app_tree))
 
@@ -124,6 +128,7 @@ defmodule Dialyxir.AppSelection do
         :apps_direct flag is not allowed in warning_apps. warning_apps should only include project apps.
         Use an explicit list of project apps instead, e.g. warning_apps: [:my_app] or use :apps_project
         """)
+
         list
         |> Enum.reject(&(&1 == :apps_direct))
 
