@@ -40,6 +40,7 @@ mix dialyzer
   * `--no-compile`                  - do not compile even if needed.
   * `--no-check`                    - do not perform (quick) check to see if PLT needs to be updated.
   * `--ignore-exit-status`          - display warnings but do not halt the VM or return an exit status code.
+  * `--incremental`                 - enable incremental mode (requires OTP 26+). Overrides the `incremental` setting in mix.exs if present.
   * `--list-unused-filters`         - list unused ignore filters useful for CI. do not use with `mix do`.
   * `--plt`                         - only build the required PLT(s) and exit.
   * `--format <name>`               - Specify the format for the warnings, can be specified multiple times to print warnings multiple times in different output formats. Defaults to `dialyxir`.
@@ -211,6 +212,190 @@ def project do
   ]
 end
 ```
+
+### Incremental Mode
+
+Dialyxir supports Dialyzer's incremental analysis mode (available in OTP 26+).
+
+When you enable incremental mode, Dialyzer starts from an existing incremental PLT
+(or creates one if it doesn't exist yet) and reuses previous analysis results.
+On each run it:
+
+- finds modules that changed since the PLT was last used, and
+- re-analyses those modules **plus any modules that depend on them**,
+
+while leaving unrelated modules untouched.
+
+This means small, localized changes are usually much faster to check, but changing
+a "core" module that many others depend on can still cause a large part of the
+codebase to be re-analysed. Incrementality optimizes away *irrelevant* work, not
+all work.
+
+**How PLTs work with incremental mode:**
+
+- **Core PLTs** (Erlang/Elixir standard libraries) are always classic PLTs stored in `$MIX_HOME` and shared across all projects. These are not affected by incremental mode.
+- **Project PLT** (your dependencies and code) can be either classic or incremental:
+  - **Classic mode** (default): Uses `dialyxir_erlang-{version}_elixir-{version}_deps-{env}.plt`
+  - **Incremental mode**: Uses `dialyxir_erlang-{version}_elixir-{version}_deps-{env}_incremental.plt` (or a custom path)
+  - Both PLT types can coexist, allowing you to switch between modes without rebuilding
+
+When incremental mode is active, Dialyxir skips its traditional PLT bootstrap (`mix dialyzer --plt`) for the project PLT and lets Dialyzer's incremental pipeline build and maintain the incremental PLT itself. Your first `mix dialyzer --incremental` run will create the incremental PLT automatically; later runs reuse those files.
+
+You can enable incremental mode in two ways:
+
+**1. Via mix.exs configuration:**
+
+```elixir
+def project do
+  [
+    app: :my_app,
+    version: "0.0.1",
+    deps: deps,
+    dialyzer: [
+      incremental: [
+        enabled: true
+      ]
+    ]
+  ]
+end
+```
+
+**2. Via command line flag:**
+
+```bash
+mix dialyzer --incremental
+```
+
+The `--incremental` flag overrides the mix.exs setting, allowing you to test incremental mode without modifying your configuration.
+
+**Custom incremental PLT path:**
+
+You can optionally specify a custom path for the incremental PLT:
+
+```elixir
+dialyzer: [
+  incremental: [
+    enabled: true
+  ],
+  plt_incremental_file: "_build/dev/my_incremental.plt"
+]
+```
+
+If `plt_incremental_file` is not specified, Dialyxir automatically appends `_incremental` to the base PLT filename.
+
+#### PLT files and CI caching
+
+In incremental mode you normally don't run a separate "build PLT" step. Instead,
+you call the same command every time (e.g. `mix dialyzer --incremental`) and:
+
+- Dialyzer starts from the PLT file you configured,
+- builds it if it doesn't exist yet, and
+- updates it in place on each run to minimise future work.
+
+From Dialyxir's point of view, the PLT is just a cache file.
+
+Because incremental PLTs are a different format from "classic" PLTs, you should
+either:
+
+- use a separate filename for the incremental PLT (for example via
+  `plt_incremental_file`), or
+- ensure that the PLT path you cache in CI is only ever used with incremental
+  mode.
+
+In CI, it usually works well to:
+
+- cache the incremental PLT path per OS + OTP + Elixir + lockfile, and
+- optionally include the branch name in the cache key, so long-lived feature
+  branches can benefit from warm incremental PLTs without polluting `main`.
+
+**Analyzing specific applications**
+
+When using incremental mode, you can tell Dialyzer which applications to analyse
+using the `apps` and `warning_apps` options nested under `incremental`:
+
+- `apps` – all applications that Dialyzer should know about and analyse upstream of your own code
+- `warning_apps` – the apps where you actually want warnings reported
+
+A good rule of thumb is:
+
+- Put OTP and third-party libraries in `apps` only.
+- Put your own applications in both `apps` and `warning_apps`.
+
+That way Dialyzer understands the behaviour and types of the libraries you call
+into, but it only reports issues in the code you own.
+
+> **Note:** if your `apps` list is incomplete or inconsistent, you won't get a
+> direct error for that – you may just see confusing warnings in your
+> `warning_apps` because Dialyzer inferred "broken" behaviour for the missing
+> modules. Keep this in mind when debugging surprising incremental warnings, particularly `unknown_function`
+
+**Configuration options:**
+
+- `apps` accepts:
+  - An explicit list of apps: `[:app1, :app2, ...]`
+  - The `:app_tree` flag – automatically includes all transitive dependencies + project apps
+  - The `:apps_direct` flag – automatically includes direct dependencies + project apps
+
+    Note: When using `:app_tree`, core OTP apps (`:erts`, `:kernel`, `:stdlib`, `:sasl`, `:mix`) are automatically included. When using `:apps_direct`, you must explicitly list OTP core apps such as `:erts`, `:kernel`, `:stdlib`, `:elixir`, and `:logger` in `apps`. Dialyxir no longer compiles before resolving `:app_tree` or `:apps_direct`, so OTP apps are not inferred automatically unless you compile first (except for the hardcoded core apps with `:app_tree`).
+  
+  Note: `apps` is required in incremental mode and cannot be `nil`. Incremental mode is designed for application-based analysis.
+
+- `warning_apps` accepts:
+  - An explicit list of project apps: `[:my_app, :other_app]` (recommended)
+  - `:apps_project` – automatically includes all project apps (equivalent to `Map.keys(Mix.Project.apps_paths())` for umbrella projects, or `[Mix.Project.config()[:app]]` for single apps). Only works in `warning_apps`, not in `apps`.
+  - `nil` – no warning apps, warn on everything in `apps`
+  
+  Note: `:app_tree` and `:apps_direct` flags are not allowed in `warning_apps` because
+  `warning_apps` should only include project apps, not dependencies. If these flags are
+  used, they will be replaced with project apps only and a warning will be shown.
+
+Note: When using `:app_tree`, core OTP apps (`:erts`, `:kernel`, `:stdlib`, `:sasl`, `:mix`) are automatically included. The `:app_tree` flag automatically includes project dependencies, project apps, core OTP apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). When using `:apps_direct`, you must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in your `apps` configuration.
+
+> **Important:** `warning_apps` must be a subset of `apps`. Dialyxir enforces this in incremental mode by merging `warning_apps` into `apps` internally so Dialyzer analyses everything it needs while only reporting on your `warning_apps`. Non-project entries in `warning_apps` are filtered out with a warning.
+
+> **macOS ulimit tip:** On large codebases, the default macOS file descriptor limit can cause `EMFILE` errors when Erlang computes MD5 hashes for many modules. If you hit `emfile` during PLT building or incremental runs, increase the limit, e.g. `ulimit -n 1024` before running `mix dialyzer`.
+
+**Via mix.exs configuration:**
+
+```elixir
+# mix.exs - Using explicit lists
+
+dialyzer: [
+  incremental: [
+    enabled: true,
+    apps: [:erts, :kernel, :stdlib, :elixir, :logger],
+    warning_apps: [:my_app]
+  ]
+]
+```
+
+```elixir
+# mix.exs - Using flags for automatic resolution
+
+dialyzer: [
+  incremental: [
+    enabled: true,
+    # Core OTP apps (:erts, :kernel, :stdlib, :sasl, :mix) are automatically included with :app_tree
+    # You may still need to explicitly list other OTP apps like :crypto, :elixir, :logger, :public_key
+    apps: [:crypto, :elixir, :logger, :public_key] ++ [:app_tree],
+    warning_apps: :apps_project  # Resolves to project apps only
+  ]
+]
+```
+
+**Via command line flags:**
+
+```bash
+mix dialyzer --incremental \
+  --apps erts,kernel,stdlib,elixir,logger \
+  --warning-apps my_app
+```
+
+Both `apps` and `warning_apps` require `--incremental` to be enabled.
+
+**Note:** Incremental mode requires OTP 26 or later. If you're running OTP < 26, dialyxir will halt with an error explaining how to proceed.
+
+**CI tip:** cache `priv/plts` exactly as you would for classic PLTs. The same cache entries now include Dialyzer's incremental metadata, so restoring that directory before `mix dialyzer --incremental` preserves the speedups across builds.
 
 ### Ignore Warnings
 #### Dialyxir defaults
