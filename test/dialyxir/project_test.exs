@@ -298,11 +298,13 @@ defmodule Dialyxir.ProjectTest do
         assert is_list(resolved)
         # Should include project app
         assert :apps_transitive in resolved
-        # Should NOT include core apps (users must explicitly list them)
-        refute :erts in resolved
-        refute :kernel in resolved
-        refute :stdlib in resolved
-        refute :elixir in resolved
+        # Core OTP apps are now hardcoded when using :app_tree
+        # Note: :sasl may not be available in all environments, so we don't assert it
+        assert :erts in resolved
+        assert :kernel in resolved
+        assert :stdlib in resolved
+        assert :mix in resolved
+        # :elixir and :sasl are not guaranteed to be present (may be filtered if unavailable)
       end)
     end
 
@@ -367,9 +369,13 @@ defmodule Dialyxir.ProjectTest do
         apps = Project.dialyzer_apps()
         assert is_list(apps)
         assert :apps_transitive in apps
-        # :app_tree does NOT include OTP apps - users must explicitly list them
-        refute :erts in apps
-        refute :kernel in apps
+        # Core OTP apps are now hardcoded when using :app_tree
+        # Note: :sasl may not be available in all environments, so we don't assert it
+        assert :erts in apps
+        assert :kernel in apps
+        assert :stdlib in apps
+        assert :mix in apps
+        # :sasl may be filtered out if not available
       end)
     end
 

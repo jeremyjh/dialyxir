@@ -326,10 +326,9 @@ defmodule Dialyxir.Project do
   Note: `:app_tree` includes all dependencies that have an app, regardless of
   their `runtime` status. Only dependencies with `app: false` are excluded.
   It also includes OTP apps that are declared as dependencies by your project's
-  dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). However,
-  core OTP apps like `:erts`, `:kernel`, and `:stdlib` are never included
-  automatically and must be explicitly listed. You may also need to include `:mix`
-  if your code depends on it.
+  dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). Core OTP
+  apps `:erts`, `:kernel`, `:stdlib`, `:sasl`, and `:mix` are automatically
+  included when using `:app_tree` in incremental mode.
 
   Note: In incremental mode, `apps` is required and cannot be `nil`. The caller
   should validate this before calling this function.
@@ -347,7 +346,8 @@ defmodule Dialyxir.Project do
         direct_dep_apps() ++ project_apps()
 
       :app_tree ->
-        dep_apps() ++ project_apps()
+        core_otp_apps = filter_available_apps([:erts, :kernel, :stdlib, :sasl, :mix])
+        dep_apps() ++ project_apps() ++ core_otp_apps
     end
   end
 
@@ -396,7 +396,8 @@ defmodule Dialyxir.Project do
   defp expand_app_tree_apps(apps) when is_list(apps) do
     cond do
       Enum.member?(apps, :app_tree) ->
-        app_tree_apps = dep_apps() ++ project_apps()
+        core_otp_apps = filter_available_apps([:erts, :kernel, :stdlib, :sasl, :mix])
+        app_tree_apps = dep_apps() ++ project_apps() ++ core_otp_apps
         ((apps -- [:app_tree]) ++ app_tree_apps) |> Enum.uniq()
 
       Enum.member?(apps, :apps_direct) ->
@@ -828,6 +829,17 @@ defmodule Dialyxir.Project do
     else
       f.(acc)
     end
+  end
+
+  defp filter_available_apps(apps) do
+    Enum.filter(apps, fn app ->
+      app_file = Atom.to_charlist(app) ++ ~c".app"
+
+      case :code.where_is_file(app_file) do
+        :non_existing -> false
+        _ -> true
+      end
+    end)
   end
 
   defp dialyzer_config(), do: Mix.Project.config()[:dialyzer]

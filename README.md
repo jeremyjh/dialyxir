@@ -336,7 +336,7 @@ into, but it only reports issues in the code you own.
   - The `:app_tree` flag – automatically includes all transitive dependencies + project apps
   - The `:apps_direct` flag – automatically includes direct dependencies + project apps
 
-    Note: Dialyxir no longer compiles before resolving `:app_tree` or `:apps_direct`, so you must explicitly list OTP core apps such as `:erts`, `:kernel`, `:stdlib`, `:elixir`, and `:logger` in `apps` whenever you use these flags. They are not inferred automatically unless you compile first.
+    Note: When using `:app_tree`, core OTP apps (`:erts`, `:kernel`, `:stdlib`, `:sasl`, `:mix`) are automatically included. When using `:apps_direct`, you must explicitly list OTP core apps such as `:erts`, `:kernel`, `:stdlib`, `:elixir`, and `:logger` in `apps`. Dialyxir no longer compiles before resolving `:app_tree` or `:apps_direct`, so OTP apps are not inferred automatically unless you compile first (except for the hardcoded core apps with `:app_tree`).
   
   Note: `apps` is required in incremental mode and cannot be `nil`. Incremental mode is designed for application-based analysis.
 
@@ -349,7 +349,7 @@ into, but it only reports issues in the code you own.
   `warning_apps` should only include project apps, not dependencies. If these flags are
   used, they will be replaced with project apps only and a warning will be shown.
 
-Note: When using `:app_tree`, users must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in their `apps` configuration. The `:app_tree` flag automatically includes project dependencies, project apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). However, core OTP apps like `:erts`, `:kernel`, and `:stdlib` are never included automatically and must be explicitly listed. You may also need to include `:mix` if your code depends on it.
+Note: When using `:app_tree`, core OTP apps (`:erts`, `:kernel`, `:stdlib`, `:sasl`, `:mix`) are automatically included. The `:app_tree` flag automatically includes project dependencies, project apps, core OTP apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). When using `:apps_direct`, you must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in your `apps` configuration.
 
 > **Important:** `warning_apps` must be a subset of `apps`. Dialyxir enforces this in incremental mode by merging `warning_apps` into `apps` internally so Dialyzer analyses everything it needs while only reporting on your `warning_apps`. Non-project entries in `warning_apps` are filtered out with a warning.
 
@@ -375,9 +375,9 @@ dialyzer: [
 dialyzer: [
   incremental: [
     enabled: true,
-    # OTP apps must be explicitly listed even when using :app_tree
-    # Typical OTP apps: :erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix, :public_key
-    apps: [:erts, :kernel, :stdlib, :crypto, :elixir, :logger, :mix, :public_key] ++ [:app_tree],
+    # Core OTP apps (:erts, :kernel, :stdlib, :sasl, :mix) are automatically included with :app_tree
+    # You may still need to explicitly list other OTP apps like :crypto, :elixir, :logger, :public_key
+    apps: [:crypto, :elixir, :logger, :public_key] ++ [:app_tree],
     warning_apps: :apps_project  # Resolves to project apps only
   ]
 ]

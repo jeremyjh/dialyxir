@@ -125,7 +125,7 @@ defmodule Mix.Tasks.Dialyzer do
 
   Note: `apps` and `warning_apps` must not overlap - they are mutually exclusive.
 
-  **Important:** When using `:app_tree` or `:apps_direct` flags, you must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in your `apps` configuration. These flags automatically include project dependencies, project apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). However, core OTP apps like `:erts`, `:kernel`, and `:stdlib` are never included automatically and must be explicitly listed. You may also need to include `:mix` if your code depends on it.
+  **Important:** When using `:app_tree`, core OTP apps (`:erts`, `:kernel`, `:stdlib`, `:sasl`, `:mix`) are automatically included. The `:app_tree` flag automatically includes project dependencies, project apps, core OTP apps, and OTP apps that are declared as dependencies by your project's dependencies (like `:elixir`, `:logger`, `:crypto`, `:public_key`). When using `:apps_direct`, you must explicitly list core OTP apps like `:erts`, `:kernel`, and `:stdlib` in your `apps` configuration.
 
   ```elixir
   # Using explicit lists
@@ -153,9 +153,9 @@ defmodule Mix.Tasks.Dialyzer do
       dialyzer: [
         incremental: [
           enabled: true,
-          # OTP apps must be explicitly listed even when using :app_tree
-          # Typical OTP apps (plus mix if needed): :erts, :kernel, :stdlib, :mix
-          apps: [:erts, :kernel, :stdlib, :mix] ++ [:app_tree],
+          # Core OTP apps (:erts, :kernel, :stdlib, :sasl, :mix) are automatically included with :app_tree
+          # You may still need to explicitly list other OTP apps like :elixir, :logger, :crypto, :public_key
+          apps: [:elixir, :logger, :crypto, :public_key] ++ [:app_tree],
           warning_apps: :apps_project  # Resolves to project apps only
         ]
       ]

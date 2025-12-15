@@ -667,11 +667,13 @@ defmodule Mix.Tasks.DialyzerTest do
         # Should include project app
         assert :apps_transitive in apps
 
-        # OTP apps like :erts, :kernel, :stdlib, :elixir are filtered out in incremental mode (handled by core PLTs)
-        refute :erts in apps
-        refute :kernel in apps
-        refute :stdlib in apps
-        refute :elixir in apps
+        # OTP apps are now hardcoded when using :app_tree in incremental mode
+        # Note: :sasl may not be available in all environments, so we don't assert it
+        assert :erts in apps
+        assert :kernel in apps
+        assert :stdlib in apps
+        assert :mix in apps
+        # :elixir and :sasl are not guaranteed to be present (may be filtered if unavailable)
       end)
     end
 
@@ -831,8 +833,11 @@ defmodule Mix.Tasks.DialyzerTest do
         apps = Dialyxir.Project.dialyzer_apps()
         assert is_list(apps)
         assert :apps_transitive in apps
-        # :app_tree does NOT include OTP apps - users must explicitly list them
-        refute :erts in apps
+        # :app_tree now automatically includes core OTP apps
+        assert :erts in apps
+        assert :kernel in apps
+        assert :stdlib in apps
+        assert :mix in apps
       end)
 
       in_project(:warning_apps_project, fn ->
