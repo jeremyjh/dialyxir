@@ -108,8 +108,7 @@ defmodule Dialyxir.Test.WarningTest do
 
   test "opaque union warning formats through the Dialyxir formatter" do
     warning =
-      {:warn_opaque, {~c"lib/example.ex", {10, 5}},
-       {:opaque_union, [true, ~c"atom()"]}}
+      {:warn_opaque, {~c"lib/example.ex", {10, 5}}, {:opaque_union, [true, ~c"atom()"]}}
 
     formatted = Dialyxir.Formatter.Dialyxir.format(warning)
 
