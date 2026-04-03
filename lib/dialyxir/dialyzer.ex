@@ -11,7 +11,8 @@ defmodule Dialyxir.Dialyzer do
       :format,
       :list_unused_filters,
       :ignore_exit_status,
-      :quiet_with_result
+      :quiet_with_result,
+      :project_files
     ]
 
     @default_formatter Dialyxir.Formatter.Dialyxir
@@ -42,6 +43,8 @@ defmodule Dialyxir.Dialyzer do
         |> info
 
         {duration_us, result} = :timer.tc(&:dialyzer.run/1, [args])
+
+        result = Dialyxir.Dialyzer.filter_to_project_files(result, split[:project_files])
 
         formatted_time_elapsed = Formatter.formatted_time(duration_us)
 
@@ -86,6 +89,16 @@ defmodule Dialyxir.Dialyzer do
 
       @default_formatter
     end
+  end
+
+  def filter_to_project_files(result, nil), do: result
+
+  def filter_to_project_files(result, project_files) do
+    project_file_set = MapSet.new(project_files)
+
+    Enum.filter(result, fn {_tag, {file, _line}, _warning} ->
+      MapSet.member?(project_file_set, file)
+    end)
   end
 
   @success_return_code 0

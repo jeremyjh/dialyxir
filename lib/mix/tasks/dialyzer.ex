@@ -27,6 +27,8 @@ defmodule Mix.Tasks.Dialyzer do
       * `--format ignore_file_strict` - format the warnings in {file, short_description} format for Elixir Format ignore file.
     * `--quiet` - suppress all informational messages
     * `--quiet-with-result` - suppress all informational messages except for the final result message
+    * `--incremental` - use Dialyzer's incremental mode (requires OTP 27+, enabled by default on OTP 27+)
+    * `--no-incremental` - disable incremental mode even on OTP 27+
 
   Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
@@ -148,6 +150,7 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options Keyword.merge(@old_options,
                      force_check: :boolean,
                      ignore_exit_status: :boolean,
+                     incremental: :boolean,
                      list_unused_filters: :boolean,
                      no_check: :boolean,
                      no_compile: :boolean,
@@ -166,17 +169,21 @@ defmodule Mix.Tasks.Dialyzer do
     check_dialyzer()
     compatibility_notice()
 
+    incremental? = incremental_mode?(opts)
+
     if Mix.Project.get() do
       Project.check_config()
 
       unless opts[:no_compile], do: Mix.Task.run("compile")
 
-      _ =
-        unless no_check?(opts) do
-          info("Finding suitable PLTs")
-          force_check? = Keyword.get(opts, :force_check, false)
-          check_plt(force_check?)
-        end
+      unless incremental? do
+        _ =
+          unless no_check?(opts) do
+            info("Finding suitable PLTs")
+            force_check? = Keyword.get(opts, :force_check, false)
+            check_plt(force_check?)
+          end
+      end
 
       default = Dialyxir.Project.default_ignore_warnings()
       ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
@@ -210,7 +217,7 @@ defmodule Mix.Tasks.Dialyzer do
       end
 
       warn_old_options(opts)
-      unless opts[:plt], do: run_dialyzer(opts, dargs)
+      unless opts[:plt], do: run_dialyzer(opts, dargs, incremental?)
     else
       info("No mix project found - checking core PLTs...")
       Project.plts_list([], false) |> Plt.check()
@@ -266,18 +273,38 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp run_dialyzer(opts, dargs) do
-    args = [
-      {:check_plt, opts[:force_check] || false},
-      {:init_plt, String.to_charlist(Project.plt_file())},
-      {:files, Project.dialyzer_files()},
-      {:warnings, dialyzer_warnings(dargs)},
-      {:format, Keyword.get_values(opts, :format)},
-      {:raw, opts[:raw]},
-      {:list_unused_filters, opts[:list_unused_filters]},
-      {:ignore_exit_status, opts[:ignore_exit_status]},
-      {:quiet_with_result, opts[:quiet_with_result]}
-    ]
+  defp run_dialyzer(opts, dargs, incremental?) do
+    base_args =
+      if incremental? do
+        incremental_plt = String.to_charlist(Project.plt_file() <> ".incremental")
+        project_files = Project.dialyzer_files()
+
+        [
+          {:analysis_type, :incremental},
+          {:init_plt, incremental_plt},
+          {:output_plt, incremental_plt},
+          {:files, project_files ++ dep_beam_files()},
+          {:warnings, dialyzer_warnings(dargs)},
+          {:project_files, project_files}
+        ]
+      else
+        [
+          {:check_plt, opts[:force_check] || false},
+          {:init_plt, String.to_charlist(Project.plt_file())},
+          {:files, Project.dialyzer_files()},
+          {:warnings, dialyzer_warnings(dargs)}
+        ]
+      end
+
+    args =
+      base_args ++
+        [
+          {:format, Keyword.get_values(opts, :format)},
+          {:raw, opts[:raw]},
+          {:list_unused_filters, opts[:list_unused_filters]},
+          {:ignore_exit_status, opts[:ignore_exit_status]},
+          {:quiet_with_result, opts[:quiet_with_result]}
+        ]
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
@@ -375,6 +402,27 @@ defmodule Mix.Tasks.Dialyzer do
 
         :erlang.halt(3)
       end
+    end
+  end
+
+  defp dep_beam_files do
+    all_apps = Enum.uniq(Project.core_apps() ++ Project.cons_apps())
+
+    Enum.flat_map(all_apps, fn app ->
+      ebin_dir = Application.app_dir(app, "ebin")
+
+      if File.dir?(ebin_dir) do
+        Path.join(ebin_dir, "*.beam") |> Path.wildcard() |> Enum.map(&to_charlist/1)
+      else
+        []
+      end
+    end)
+  end
+
+  defp incremental_mode?(opts) do
+    case Keyword.fetch(opts, :incremental) do
+      {:ok, value} -> value
+      :error -> Project.incremental_mode?()
     end
   end
 

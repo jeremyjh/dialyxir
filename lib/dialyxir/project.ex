@@ -9,19 +9,21 @@ defmodule Dialyxir.Project do
   # Maximum depth in the dependency tree to traverse before giving up.
   @max_dep_traversal_depth 100
 
-  def plts_list(deps, include_project \\ true, exclude_core \\ false) do
-    elixir_apps = [:elixir]
-    erlang_apps = [:erts, :kernel, :stdlib, :crypto]
+  @elixir_apps [:elixir]
+  @erlang_apps [:erts, :kernel, :stdlib, :crypto]
 
+  def core_apps, do: @erlang_apps ++ @elixir_apps
+
+  def plts_list(deps, include_project \\ true, exclude_core \\ false) do
     core_plts =
       if exclude_core do
         []
       else
-        [{elixir_plt(), elixir_apps}, {erlang_plt(), erlang_apps}]
+        [{elixir_plt(), @elixir_apps}, {erlang_plt(), @erlang_apps}]
       end
 
     if include_project do
-      [{plt_file(), deps ++ elixir_apps ++ erlang_apps} | core_plts]
+      [{plt_file(), deps ++ @elixir_apps ++ @erlang_apps} | core_plts]
     else
       core_plts
     end
@@ -532,6 +534,18 @@ defmodule Dialyxir.Project do
     else
       f.(acc)
     end
+  end
+
+  def incremental_mode? do
+    case dialyzer_config()[:incremental] do
+      true -> true
+      false -> false
+      _ -> otp_release_major() >= 27
+    end
+  end
+
+  defp otp_release_major do
+    :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
   end
 
   defp dialyzer_config(), do: Mix.Project.config()[:dialyzer]

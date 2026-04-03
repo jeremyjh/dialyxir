@@ -205,4 +205,28 @@ defmodule Dialyxir.ProjectTest do
       assert Project.no_umbrella?()
     end)
   end
+
+  test "incremental_mode? returns true when explicitly enabled in config" do
+    in_project(:incremental_enabled, fn ->
+      assert Project.incremental_mode?()
+    end)
+  end
+
+  test "incremental_mode? returns false when explicitly disabled in config" do
+    in_project(:incremental_disabled, fn ->
+      refute Project.incremental_mode?()
+    end)
+  end
+
+  test "incremental_mode? defaults based on OTP version" do
+    in_project(:default_apps, fn ->
+      otp_major = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+      if otp_major >= 27 do
+        assert Project.incremental_mode?()
+      else
+        refute Project.incremental_mode?()
+      end
+    end)
+  end
 end

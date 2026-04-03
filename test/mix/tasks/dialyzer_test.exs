@@ -103,4 +103,39 @@ defmodule Mix.Tasks.DialyzerTest do
                ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file is empty"
     end)
   end
+
+  test "incremental mode skips PLT checking" do
+    otp_major = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_major >= 27 do
+      in_project(:default_apps, fn ->
+        fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status", "--no-compile", "--plt"]) end
+        output = capture_io(fun)
+
+        refute output =~ "Finding suitable PLTs"
+        refute output =~ "Checking PLT"
+      end)
+    end
+  end
+
+  test "--no-incremental flag disables incremental mode" do
+    otp_major = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_major >= 27 do
+      in_project(:default_apps, fn ->
+        fun = fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--no-incremental",
+            "--ignore-exit-status",
+            "--no-compile",
+            "--plt"
+          ])
+        end
+
+        output = capture_io(fun)
+
+        assert output =~ "Finding suitable PLTs"
+      end)
+    end
+  end
 end
