@@ -48,8 +48,8 @@ mix dialyzer
     * `--format dialyxir`           - format the warnings in a pretty printed format. (default)
     * `--format dialyzer`           - format the warnings in the original Dialyzer format, suitable for ignore file using simple string matches.
     * `--format github`             - format the warnings in the Github Actions message format.
-    * `--format ignore_file`        - format the warnings in {file, warning} format for Elixir Format ignore file.
-    * `--format ignore_file_strict` - format the warnings in {file, short_description} format for Elixir Format ignore file.
+    * `--format ignore_file`        - format warnings as `{file, warning_type}` entries for an Elixir term ignore file.
+    * `--format ignore_file_strict` - format warnings as `{file, warning_description}` entries for an Elixir term ignore file.
   * `--quiet`                       - suppress all informational messages.
   * `--quiet-with-result`           - suppress all informational messages except for the final result message.
 
@@ -313,9 +313,11 @@ applied to the *short-description* format of Dialyzer output (`mix dialyzer --fo
 
 _Note that `short_description` contains additional information that `warning_description` does not._
 
-Entries for existing warnings can be generated with one of the following:
+Entries for existing warnings can be generated with one of the following formatters:
 - `mix dialyzer --format ignore_file`
 - `mix dialyzer --format ignore_file_strict` (recommended)
+
+Both formatters emit lines that can be pasted into the list in `.dialyzer_ignore.exs`. The `ignore_file` formatter groups warnings by file and warning type, while `ignore_file_strict` includes the formatted warning description for more granular ignores.
 
 For example, if `mix dialyzer --format short` gives you a result like:
 ```
