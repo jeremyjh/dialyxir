@@ -58,7 +58,7 @@ defmodule Dialyxir.Mixfile do
   defp deps do
     [
       {:erlex, ">= 0.2.8"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.40.3", only: :dev, runtime: false}
     ]
   end
 

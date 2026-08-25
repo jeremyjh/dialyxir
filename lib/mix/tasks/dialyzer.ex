@@ -23,8 +23,8 @@ defmodule Mix.Tasks.Dialyzer do
       * `--format dialyxir`    - format the warnings in a pretty printed format (default)
       * `--format dialyzer`    - format the warnings in the original Dialyzer format
       * `--format github`      - format the warnings in the Github Actions message format
-      * `--format ignore_file` - format the warnings in {file, warning} format for Elixir Format ignore file
-      * `--format ignore_file_strict` - format the warnings in {file, short_description} format for Elixir Format ignore file.
+      * `--format ignore_file` - format warnings as `{file, warning_type}` entries for an Elixir term ignore file
+      * `--format ignore_file_strict` - format warnings as `{file, warning_description}` entries for an Elixir term ignore file.
     * `--quiet` - suppress all informational messages
     * `--quiet-with-result` - suppress all informational messages except for the final result message
 
