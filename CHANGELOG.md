@@ -8,6 +8,10 @@ Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased changes post [1.4.7]
 
+  ### Changed
+
+  - Update ExDoc to 0.40.3 to generate Markdown documentation and `llms.txt`.
+
 ## [1.4.7] - 2025-11-05
 
   ### Changed
