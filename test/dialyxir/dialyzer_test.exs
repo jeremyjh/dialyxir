@@ -180,50 +180,31 @@ defmodule Dialyxir.DialyzerTest do
     end
   end
 
-  describe "filter_to_project_files/2" do
-    test "filters warnings to only project files" do
-      project_file = ~c"/app/lib/my_app.beam"
-      dep_file = ~c"/deps/some_dep/ebin/dep.beam"
+  describe "warning scoping" do
+    import Dialyzer, only: [dialyze: 3]
 
-      warnings = [
-        {:warn_return_no_exit, {project_file, 10}, {:some_warning, []}},
-        {:warn_return_no_exit, {dep_file, 20}, {:some_warning, []}},
-        {:warn_matching, {project_file, 30}, {:pattern_match, []}}
+    # Warning scope in incremental mode is Dialyzer's job, via `warning_files_rec`
+    # (analyze everything, report only the project). This must reach `:dialyzer.run/1`
+    # untouched — it is not a dialyxir-internal arg to be split out and dropped.
+    test "warning_files_rec is passed through to the runner" do
+      args = [
+        {:analysis_type, :incremental},
+        {:init_plt, ~c"some.plt.incremental"},
+        {:output_plt, ~c"some.plt.incremental"},
+        {:files, [~c"_build/dev/lib/my_app/ebin/Elixir.MyApp.beam"]},
+        {:warning_files_rec, [~c"_build/dev/lib/my_app/ebin"]},
+        {:warnings, [:unknown]},
+        {:format, []},
+        {:raw, nil},
+        {:list_unused_filters, nil},
+        {:ignore_exit_status, nil},
+        {:quiet_with_result, nil}
       ]
 
-      result = Dialyzer.filter_to_project_files(warnings, [project_file])
+      dialyze(args, ArgsCapture, nil)
 
-      assert length(result) == 2
-
-      Enum.each(result, fn {_tag, {file, _line}, _warning} ->
-        assert file == project_file
-      end)
-    end
-
-    test "returns all warnings when project_files includes all files" do
-      file_a = ~c"/app/lib/a.beam"
-      file_b = ~c"/app/lib/b.beam"
-
-      warnings = [
-        {:warn_return_no_exit, {file_a, 10}, {:some_warning, []}},
-        {:warn_matching, {file_b, 20}, {:pattern_match, []}}
-      ]
-
-      result = Dialyzer.filter_to_project_files(warnings, [file_a, file_b])
-
-      assert length(result) == 2
-    end
-
-    test "returns empty list when no warnings match project files" do
-      dep_file = ~c"/deps/some_dep/ebin/dep.beam"
-
-      warnings = [
-        {:warn_return_no_exit, {dep_file, 10}, {:some_warning, []}}
-      ]
-
-      result = Dialyzer.filter_to_project_files(warnings, [~c"/app/lib/my_app.beam"])
-
-      assert result == []
+      assert_received {:dialyzer_args, captured_args}
+      assert captured_args[:warning_files_rec] == [~c"_build/dev/lib/my_app/ebin"]
     end
   end
 end

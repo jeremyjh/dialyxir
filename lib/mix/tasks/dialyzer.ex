@@ -29,6 +29,9 @@ defmodule Mix.Tasks.Dialyzer do
     * `--quiet-with-result` - suppress all informational messages except for the final result message
     * `--incremental` - use Dialyzer's incremental mode (requires OTP 27+, enabled by default on OTP 27+)
     * `--no-incremental` - disable incremental mode even on OTP 27+
+    * `--warning-apps <app_a,app_b>` - in incremental mode, restrict warnings to the
+      given applications (overrides the `:warning_apps` config). Defaults to the
+      project's own applications.
 
   Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
@@ -85,6 +88,17 @@ defmodule Mix.Tasks.Dialyzer do
 
   * `dialyzer: :plt_apps` - a list of applications to include that will replace the default,
   include all the apps you need e.g.
+
+  ### Incremental Configuration
+
+  On OTP 27+ Dialyzer runs in incremental mode by default. Incremental analysis
+  loads your project *and* its dependencies so callee types resolve, but warnings
+  are scoped to your own applications. To widen or change that scope:
+
+  * `dialyzer: :warning_apps` - a list of applications to emit warnings for in
+  incremental mode. Defaults to the project's own application(s). Dependencies not
+  listed here are still analyzed (so types resolve and you avoid `:unknown`
+  warnings) but are not themselves reported on.
 
   ### Other Configuration
 
@@ -158,6 +172,7 @@ defmodule Mix.Tasks.Dialyzer do
                      quiet: :boolean,
                      quiet_with_result: :boolean,
                      raw: :boolean,
+                     warning_apps: :string,
                      format: [:string, :keep]
                    )
 
@@ -284,8 +299,8 @@ defmodule Mix.Tasks.Dialyzer do
           {:init_plt, incremental_plt},
           {:output_plt, incremental_plt},
           {:files, project_files ++ dep_beam_files()},
-          {:warnings, dialyzer_warnings(dargs)},
-          {:project_files, project_files}
+          {:warning_files_rec, warning_paths(opts)},
+          {:warnings, dialyzer_warnings(dargs)}
         ]
       else
         [
@@ -403,6 +418,19 @@ defmodule Mix.Tasks.Dialyzer do
         :erlang.halt(3)
       end
     end
+  end
+
+  # Directories passed to Dialyzer as `warning_files_rec` in incremental mode.
+  # A `--warning-apps app_a,app_b` CLI flag overrides the `:warning_apps` config,
+  # which in turn overrides the default (the project's own compiled paths).
+  defp warning_paths(opts) do
+    override =
+      case opts[:warning_apps] do
+        nil -> nil
+        csv -> csv |> String.split(",", trim: true) |> Enum.map(&String.to_atom/1)
+      end
+
+    Project.warning_paths(override)
   end
 
   defp dep_beam_files do

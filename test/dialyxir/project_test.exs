@@ -229,4 +229,24 @@ defmodule Dialyxir.ProjectTest do
       end
     end)
   end
+
+  test "warning_paths defaults to the project's own compiled path" do
+    in_project(:default_apps, fn ->
+      assert Project.warning_paths() == [String.to_charlist(Mix.Project.compile_path())]
+    end)
+  end
+
+  test "warning_paths resolves overriding apps to their ebin directories" do
+    in_project(:default_apps, fn ->
+      elixir_ebin = String.to_charlist(Application.app_dir(:elixir, "ebin"))
+
+      assert Project.warning_paths([:elixir]) == [elixir_ebin]
+    end)
+  end
+
+  test "warning_paths ignores unknown or unloaded apps" do
+    in_project(:default_apps, fn ->
+      assert Project.warning_paths([:this_app_does_not_exist]) == []
+    end)
+  end
 end

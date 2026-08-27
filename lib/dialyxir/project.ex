@@ -79,6 +79,34 @@ defmodule Dialyxir.Project do
     |> Enum.map(&to_charlist(&1))
   end
 
+  @doc """
+  Directories whose beam files Dialyzer should emit warnings for in incremental
+  mode (`warning_files_rec`).
+
+  Incremental analysis loads the project *and* its dependencies into the iPLT so
+  callee types resolve, but warnings should still be scoped to the project's own
+  code. This returns the directories to warn on, as charlists:
+
+    * when `override_apps` (from `--warning-apps`) or the `:warning_apps` config
+      is set, the `ebin` directory of each named application, or
+    * otherwise the project's own compiled paths (`dialyzer_paths/0`), which for
+      an umbrella spans every child app.
+  """
+  def warning_paths(override_apps \\ nil) do
+    case override_apps || dialyzer_config()[:warning_apps] do
+      nil -> dialyzer_paths()
+      [] -> dialyzer_paths()
+      apps -> apps |> List.wrap() |> Enum.flat_map(&app_ebin_dir/1)
+    end
+  end
+
+  defp app_ebin_dir(app) do
+    dir = Application.app_dir(app, "ebin")
+    if File.dir?(dir), do: [String.to_charlist(dir)], else: []
+  rescue
+    ArgumentError -> []
+  end
+
   defp reject_exclude_files(files) do
     file_exclusions = dialyzer_config()[:exclude_files] || []
 
