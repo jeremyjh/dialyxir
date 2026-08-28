@@ -291,37 +291,7 @@ defmodule Mix.Tasks.Dialyzer do
   end
 
   defp run_dialyzer(opts, dargs, incremental?) do
-    base_args =
-      if incremental? do
-        incremental_plt = String.to_charlist(Project.plt_file() <> ".incremental")
-        project_files = Project.dialyzer_files()
-
-        [
-          {:analysis_type, :incremental},
-          {:init_plt, incremental_plt},
-          {:output_plt, incremental_plt},
-          {:files, project_files ++ dep_beam_files()},
-          {:warning_files_rec, warning_paths(opts)},
-          {:warnings, dialyzer_warnings(dargs)}
-        ]
-      else
-        [
-          {:check_plt, opts[:force_check] || false},
-          {:init_plt, String.to_charlist(Project.plt_file())},
-          {:files, Project.dialyzer_files()},
-          {:warnings, dialyzer_warnings(dargs)}
-        ]
-      end
-
-    args =
-      base_args ++
-        [
-          {:format, Keyword.get_values(opts, :format)},
-          {:raw, opts[:raw]},
-          {:list_unused_filters, opts[:list_unused_filters]},
-          {:ignore_exit_status, opts[:ignore_exit_status]},
-          {:quiet_with_result, opts[:quiet_with_result]}
-        ]
+    args = base_args(incremental?, opts, dargs) ++ common_args(opts)
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
@@ -350,6 +320,38 @@ defmodule Mix.Tasks.Dialyzer do
       error("Halting VM with exit status #{exit_status}")
       System.halt(exit_status)
     end
+  end
+
+  defp base_args(true = _incremental?, opts, dargs) do
+    incremental_plt = String.to_charlist(Project.plt_file() <> ".incremental")
+
+    [
+      {:analysis_type, :incremental},
+      {:init_plt, incremental_plt},
+      {:output_plt, incremental_plt},
+      {:files, Project.dialyzer_files() ++ dep_beam_files()},
+      {:warning_files_rec, warning_paths(opts)},
+      {:warnings, dialyzer_warnings(dargs)}
+    ]
+  end
+
+  defp base_args(false = _incremental?, opts, dargs) do
+    [
+      {:check_plt, opts[:force_check] || false},
+      {:init_plt, String.to_charlist(Project.plt_file())},
+      {:files, Project.dialyzer_files()},
+      {:warnings, dialyzer_warnings(dargs)}
+    ]
+  end
+
+  defp common_args(opts) do
+    [
+      {:format, Keyword.get_values(opts, :format)},
+      {:raw, opts[:raw]},
+      {:list_unused_filters, opts[:list_unused_filters]},
+      {:ignore_exit_status, opts[:ignore_exit_status]},
+      {:quiet_with_result, opts[:quiet_with_result]}
+    ]
   end
 
   defp dialyzer_warnings(dargs) do
