@@ -138,4 +138,40 @@ defmodule Mix.Tasks.DialyzerTest do
       end)
     end
   end
+
+  test "incremental mode warns that PLT-management options are ignored" do
+    in_project(:default_apps, fn ->
+      fun = fn ->
+        Mix.Tasks.Dialyzer.run([
+          "--incremental",
+          "--plt",
+          "--force-check",
+          "--no-compile"
+        ])
+      end
+
+      output = capture_io(fun)
+
+      assert output =~ "no effect in incremental mode"
+      assert output =~ "--plt"
+      assert output =~ "--force-check"
+    end)
+  end
+
+  test "classic mode does not warn about PLT-management options" do
+    in_project(:default_apps, fn ->
+      fun = fn ->
+        Mix.Tasks.Dialyzer.run([
+          "--no-incremental",
+          "--force-check",
+          "--no-compile",
+          "--plt"
+        ])
+      end
+
+      output = capture_io(fun)
+
+      refute output =~ "no effect in incremental mode"
+    end)
+  end
 end

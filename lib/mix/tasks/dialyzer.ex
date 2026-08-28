@@ -191,6 +191,8 @@ defmodule Mix.Tasks.Dialyzer do
 
       unless opts[:no_compile], do: Mix.Task.run("compile")
 
+      if incremental?, do: warn_incremental_plt_options(opts)
+
       unless incremental? do
         _ =
           unless no_check?(opts) do
@@ -457,6 +459,28 @@ defmodule Mix.Tasks.Dialyzer do
   defp warn_old_options(opts) do
     for {opt, _} <- opts, @old_options[opt] do
       error("#{opt} is no longer a valid CLI argument.")
+    end
+
+    nil
+  end
+
+  # In incremental mode Dialyzer builds and maintains the incremental PLT itself
+  # on every run, so there is no separate PLT build/check step. The classic
+  # PLT-management options are silently ignored by Dialyzer here; warn so the
+  # no-op is not surprising.
+  defp warn_incremental_plt_options(opts) do
+    ignored =
+      for {key, flag} <- [plt: "--plt", force_check: "--force-check", no_check: "--no-check"],
+          opts[key],
+          do: flag
+
+    unless ignored == [] do
+      warning("""
+      The following options have no effect in incremental mode and were ignored: \
+      #{Enum.join(ignored, ", ")}.
+      Incremental mode has no separate PLT build/check step — Dialyzer builds and \
+      updates the incremental PLT automatically on each run.
+      """)
     end
 
     nil

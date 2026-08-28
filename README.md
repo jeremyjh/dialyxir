@@ -225,6 +225,13 @@ first `mix dialyzer --incremental` run builds the incremental PLT itself and lat
 runs update it in place. From Dialyxir's point of view it is just a cache file; for
 CI caching see the [Continuous Integration](#continuous-integration) configs.
 
+Because there is no separate PLT build/check step, the classic PLT-management
+options — `--plt`, `--force-check`, and `--no-check` — have no effect in incremental
+mode and are ignored (Dialyxir prints a notice if you pass them). This is a
+constraint of Dialyzer itself: incremental analysis, building a PLT, and adding to a
+PLT are mutually exclusive modes, and the incremental PLT verifies its own freshness
+on every run.
+
 **Which applications get warnings**
 
 Incremental mode analyses your project *and* its dependencies together, so that the
