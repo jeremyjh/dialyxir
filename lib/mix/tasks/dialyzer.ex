@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Dialyzer do
       * `--format ignore_file_strict` - format warnings as `{file, warning_description}` entries for an Elixir term ignore file.
     * `--quiet` - suppress all informational messages
     * `--quiet-with-result` - suppress all informational messages except for the final result message
-    * `--incremental` - use Dialyzer's incremental mode (requires OTP 27+, enabled by default on OTP 27+)
+    * `--incremental` - use Dialyzer's incremental mode (incremental analysis is available on OTP 26+; enabled by default on OTP 27+)
     * `--no-incremental` - disable incremental mode even on OTP 27+
     * `--warning-apps <app_a,app_b>` - in incremental mode, restrict warnings to the
       given applications (overrides the `:warning_apps` config). Defaults to the
@@ -91,9 +91,10 @@ defmodule Mix.Tasks.Dialyzer do
 
   ### Incremental Configuration
 
-  On OTP 27+ Dialyzer runs in incremental mode by default. Incremental analysis
-  loads your project *and* its dependencies so callee types resolve, but warnings
-  are scoped to your own applications. To widen or change that scope:
+  Incremental analysis is available on OTP 26+ and is enabled by default on OTP
+  27+. Incremental analysis loads your project *and* its dependencies so callee
+  types resolve, but warnings are scoped to your own applications. To widen or
+  change that scope:
 
   * `dialyzer: :warning_apps` - a list of applications to emit warnings for in
   incremental mode. Defaults to the project's own application(s). Dependencies not
@@ -428,13 +429,24 @@ defmodule Mix.Tasks.Dialyzer do
   # A `--warning-apps app_a,app_b` CLI flag overrides the `:warning_apps` config,
   # which in turn overrides the default (the project's own compiled paths).
   defp warning_paths(opts) do
-    override =
-      case opts[:warning_apps] do
-        nil -> nil
-        csv -> csv |> String.split(",", trim: true) |> Enum.map(&String.to_atom/1)
-      end
+    opts[:warning_apps]
+    |> parse_warning_apps()
+    |> Project.warning_paths()
+  end
 
-    Project.warning_paths(override)
+  @doc false
+  # Parse the comma-separated `--warning-apps` value into a list of app atoms,
+  # tolerating surrounding whitespace and empty entries. `nil` (flag absent)
+  # stays `nil` so the `:warning_apps` config is consulted instead.
+  @spec parse_warning_apps(String.t() | nil) :: [atom()] | nil
+  def parse_warning_apps(nil), do: nil
+
+  def parse_warning_apps(csv) when is_binary(csv) do
+    csv
+    |> String.split(",", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.to_atom/1)
   end
 
   defp dep_beam_files do

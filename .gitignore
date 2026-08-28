@@ -8,3 +8,4 @@ erl_crash.dump
 src/dialyzer_parser.erl
 src/dialyzer_lexer.erl
 lib/example.ex
+.DS_Store

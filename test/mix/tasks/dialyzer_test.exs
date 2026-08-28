@@ -174,4 +174,20 @@ defmodule Mix.Tasks.DialyzerTest do
       refute output =~ "no effect in incremental mode"
     end)
   end
+
+  describe "parse_warning_apps/1" do
+    test "returns nil when the flag is absent" do
+      assert Mix.Tasks.Dialyzer.parse_warning_apps(nil) == nil
+    end
+
+    test "splits a comma-separated list into app atoms" do
+      assert Mix.Tasks.Dialyzer.parse_warning_apps("my_app,my_app_web") ==
+               [:my_app, :my_app_web]
+    end
+
+    test "trims whitespace and drops empty entries" do
+      assert Mix.Tasks.Dialyzer.parse_warning_apps(" my_app , my_app_web ,,") ==
+               [:my_app, :my_app_web]
+    end
+  end
 end

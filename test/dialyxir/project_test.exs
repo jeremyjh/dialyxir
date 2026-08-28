@@ -249,4 +249,12 @@ defmodule Dialyxir.ProjectTest do
       assert Project.warning_paths([:this_app_does_not_exist]) == []
     end)
   end
+
+  test "warning_paths reads the :warning_apps config when no override is given" do
+    in_project(:warning_apps_config, fn ->
+      elixir_ebin = String.to_charlist(Application.app_dir(:elixir, "ebin"))
+
+      assert Project.warning_paths() == [elixir_ebin]
+    end)
+  end
 end

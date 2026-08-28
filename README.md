@@ -52,7 +52,7 @@ mix dialyzer
     * `--format ignore_file_strict` - format warnings as `{file, warning_description}` entries for an Elixir term ignore file.
   * `--quiet`                       - suppress all informational messages.
   * `--quiet-with-result`           - suppress all informational messages except for the final result message.
-  * `--incremental`                 - use Dialyzer's incremental mode (requires OTP 27+; enabled by default there). See [Incremental Mode](#incremental-mode).
+  * `--incremental`                 - use Dialyzer's incremental mode (available on OTP 26+; enabled by default on OTP 27+). See [Incremental Mode](#incremental-mode).
   * `--no-incremental`              - disable incremental mode even on OTP 27+.
   * `--warning-apps <app_a,app_b>`  - in incremental mode, narrow reported warnings to the listed applications. Defaults to your project's own app(s).
 
@@ -178,8 +178,8 @@ Dialyxir supports formatting the errors in several different ways:
 
 ### Incremental Mode
 
-Dialyxir supports Dialyzer's incremental analysis mode (OTP 27+, and enabled by
-default there). Instead of building a whole-project PLT up front, incremental mode
+Dialyxir supports Dialyzer's incremental analysis mode (available on OTP 26+, and
+enabled by default on OTP 27+). Instead of building a whole-project PLT up front, incremental mode
 keeps a long-lived *incremental* PLT and, on each run:
 
 - finds the modules that changed since the PLT was last used, and
