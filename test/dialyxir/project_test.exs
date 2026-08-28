@@ -205,4 +205,56 @@ defmodule Dialyxir.ProjectTest do
       assert Project.no_umbrella?()
     end)
   end
+
+  test "incremental_mode? returns true when explicitly enabled in config" do
+    in_project(:incremental_enabled, fn ->
+      assert Project.incremental_mode?()
+    end)
+  end
+
+  test "incremental_mode? returns false when explicitly disabled in config" do
+    in_project(:incremental_disabled, fn ->
+      refute Project.incremental_mode?()
+    end)
+  end
+
+  test "incremental_mode? defaults based on OTP version" do
+    in_project(:default_apps, fn ->
+      otp_major = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+      if otp_major >= 27 do
+        assert Project.incremental_mode?()
+      else
+        refute Project.incremental_mode?()
+      end
+    end)
+  end
+
+  test "warning_paths defaults to the project's own compiled path" do
+    in_project(:default_apps, fn ->
+      assert Project.warning_paths() == [String.to_charlist(Mix.Project.compile_path())]
+    end)
+  end
+
+  test "warning_paths resolves overriding apps to their ebin directories" do
+    in_project(:default_apps, fn ->
+      elixir_ebin = String.to_charlist(Application.app_dir(:elixir, "ebin"))
+
+      assert Project.warning_paths([:elixir]) == [elixir_ebin]
+    end)
+  end
+
+  test "warning_paths ignores unknown or unloaded apps" do
+    in_project(:default_apps, fn ->
+      assert Project.warning_paths([:this_app_does_not_exist]) == []
+    end)
+  end
+
+  test "warning_paths reads the :warning_apps config when no override is given" do
+    in_project(:warning_apps_config, fn ->
+      elixir_ebin = String.to_charlist(Application.app_dir(:elixir, "ebin"))
+
+      assert Project.warning_paths() == [elixir_ebin]
+    end)
+  end
 end

@@ -67,3 +67,9 @@ dialyzer-check:
 
 # ...
 ```
+
+> **Incremental mode tip:** use `mix dialyzer --incremental` in place of the
+> `dialyzer-plt` + `dialyzer-check` steps. Dialyzer writes its incremental PLT next
+> to the classic PLTs (the same `priv/plts` path cached above), so the existing
+> cache keys keep it warm. Keep the cache key tied to OTP/Elixir versions and
+> `mix.lock`; for per-branch warm caches, include `$CI_COMMIT_REF_NAME` in the key.

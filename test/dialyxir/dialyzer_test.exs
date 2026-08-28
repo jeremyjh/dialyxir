@@ -14,6 +14,13 @@ defmodule Dialyxir.DialyzerTest do
     def run(_, _), do: {:error, "dialyzer failed"}
   end
 
+  defmodule ArgsCapture do
+    def run(args, _filterer) do
+      send(self(), {:dialyzer_args, args})
+      {:ok, {"time", [], ""}}
+    end
+  end
+
   setup do
     ansi_enabled = IO.ANSI.enabled?()
 
@@ -104,6 +111,100 @@ defmodule Dialyxir.DialyzerTest do
       assert expected_result_code == :error
       assert expected_exit_code == 1
       assert expected_messages == [[[], "dialyzer failed"]]
+    end
+  end
+
+  describe "incremental mode args" do
+    import Dialyzer, only: [dialyze: 3]
+
+    test "analysis_type :incremental is passed through to runner" do
+      args = [
+        {:analysis_type, :incremental},
+        {:init_plt, ~c"some.plt.incremental"},
+        {:output_plt, ~c"some.plt.incremental"},
+        {:files, [~c"some_file.beam"]},
+        {:warnings, [:unknown]},
+        {:format, []},
+        {:raw, nil},
+        {:list_unused_filters, nil},
+        {:ignore_exit_status, nil},
+        {:quiet_with_result, nil}
+      ]
+
+      dialyze(args, ArgsCapture, nil)
+
+      assert_received {:dialyzer_args, captured_args}
+      assert captured_args[:analysis_type] == :incremental
+    end
+
+    test "incremental mode uses separate PLT with output_plt" do
+      args = [
+        {:analysis_type, :incremental},
+        {:init_plt, ~c"deps.plt.incremental"},
+        {:output_plt, ~c"deps.plt.incremental"},
+        {:files, [~c"some_file.beam"]},
+        {:warnings, [:unknown]},
+        {:format, []},
+        {:raw, nil},
+        {:list_unused_filters, nil},
+        {:ignore_exit_status, nil},
+        {:quiet_with_result, nil}
+      ]
+
+      dialyze(args, ArgsCapture, nil)
+
+      assert_received {:dialyzer_args, captured_args}
+      assert captured_args[:init_plt] == ~c"deps.plt.incremental"
+      assert captured_args[:output_plt] == ~c"deps.plt.incremental"
+      refute Keyword.has_key?(captured_args, :check_plt)
+    end
+
+    test "analysis_type is not present when not specified" do
+      args = [
+        {:check_plt, false},
+        {:init_plt, ~c"some.plt"},
+        {:files, [~c"some_file.beam"]},
+        {:warnings, [:unknown]},
+        {:format, []},
+        {:raw, nil},
+        {:list_unused_filters, nil},
+        {:ignore_exit_status, nil},
+        {:quiet_with_result, nil}
+      ]
+
+      dialyze(args, ArgsCapture, nil)
+
+      assert_received {:dialyzer_args, captured_args}
+      refute Keyword.has_key?(captured_args, :analysis_type)
+      refute Keyword.has_key?(captured_args, :output_plt)
+    end
+  end
+
+  describe "warning scoping" do
+    import Dialyzer, only: [dialyze: 3]
+
+    # Warning scope in incremental mode is Dialyzer's job, via `warning_files_rec`
+    # (analyze everything, report only the project). This must reach `:dialyzer.run/1`
+    # untouched — it is not a dialyxir-internal arg to be split out and dropped.
+    test "warning_files_rec is passed through to the runner" do
+      args = [
+        {:analysis_type, :incremental},
+        {:init_plt, ~c"some.plt.incremental"},
+        {:output_plt, ~c"some.plt.incremental"},
+        {:files, [~c"_build/dev/lib/my_app/ebin/Elixir.MyApp.beam"]},
+        {:warning_files_rec, [~c"_build/dev/lib/my_app/ebin"]},
+        {:warnings, [:unknown]},
+        {:format, []},
+        {:raw, nil},
+        {:list_unused_filters, nil},
+        {:ignore_exit_status, nil},
+        {:quiet_with_result, nil}
+      ]
+
+      dialyze(args, ArgsCapture, nil)
+
+      assert_received {:dialyzer_args, captured_args}
+      assert captured_args[:warning_files_rec] == [~c"_build/dev/lib/my_app/ebin"]
     end
   end
 end

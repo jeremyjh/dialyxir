@@ -103,4 +103,91 @@ defmodule Mix.Tasks.DialyzerTest do
                ":ignore_warnings opt specified in mix.exs: ignore_test.exs, but file is empty"
     end)
   end
+
+  test "incremental mode skips PLT checking" do
+    otp_major = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_major >= 27 do
+      in_project(:default_apps, fn ->
+        fun = fn -> Mix.Tasks.Dialyzer.run(["--ignore-exit-status", "--no-compile", "--plt"]) end
+        output = capture_io(fun)
+
+        refute output =~ "Finding suitable PLTs"
+        refute output =~ "Checking PLT"
+      end)
+    end
+  end
+
+  test "--no-incremental flag disables incremental mode" do
+    otp_major = :erlang.system_info(:otp_release) |> List.to_string() |> String.to_integer()
+
+    if otp_major >= 27 do
+      in_project(:default_apps, fn ->
+        fun = fn ->
+          Mix.Tasks.Dialyzer.run([
+            "--no-incremental",
+            "--ignore-exit-status",
+            "--no-compile",
+            "--plt"
+          ])
+        end
+
+        output = capture_io(fun)
+
+        assert output =~ "Finding suitable PLTs"
+      end)
+    end
+  end
+
+  test "incremental mode warns that PLT-management options are ignored" do
+    in_project(:default_apps, fn ->
+      fun = fn ->
+        Mix.Tasks.Dialyzer.run([
+          "--incremental",
+          "--plt",
+          "--force-check",
+          "--no-compile"
+        ])
+      end
+
+      output = capture_io(fun)
+
+      assert output =~ "no effect in incremental mode"
+      assert output =~ "--plt"
+      assert output =~ "--force-check"
+    end)
+  end
+
+  test "classic mode does not warn about PLT-management options" do
+    in_project(:default_apps, fn ->
+      fun = fn ->
+        Mix.Tasks.Dialyzer.run([
+          "--no-incremental",
+          "--force-check",
+          "--no-compile",
+          "--plt"
+        ])
+      end
+
+      output = capture_io(fun)
+
+      refute output =~ "no effect in incremental mode"
+    end)
+  end
+
+  describe "parse_warning_apps/1" do
+    test "returns nil when the flag is absent" do
+      assert Mix.Tasks.Dialyzer.parse_warning_apps(nil) == nil
+    end
+
+    test "splits a comma-separated list into app atoms" do
+      assert Mix.Tasks.Dialyzer.parse_warning_apps("my_app,my_app_web") ==
+               [:my_app, :my_app_web]
+    end
+
+    test "trims whitespace and drops empty entries" do
+      assert Mix.Tasks.Dialyzer.parse_warning_apps(" my_app , my_app_web ,,") ==
+               [:my_app, :my_app_web]
+    end
+  end
 end

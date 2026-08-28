@@ -37,3 +37,10 @@ jobs:
           name: "Run dialyzer"
           command: mix dialyzer
 ```
+
+> **Incremental mode tip:** switch the final step to `mix dialyzer --incremental` to
+> use OTP 27+'s incremental pipeline, and drop the separate `mix dialyzer --plt`
+> step — the first incremental run builds its own PLT. Dialyzer writes the
+> incremental PLT next to the classic one (the same `priv/plts` directory cached
+> above), so the existing cache definition keeps it warm. For per-branch warm
+> caches, append `-{{ .Branch }}` to the cache key.

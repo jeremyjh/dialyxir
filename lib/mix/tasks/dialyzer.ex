@@ -27,6 +27,11 @@ defmodule Mix.Tasks.Dialyzer do
       * `--format ignore_file_strict` - format warnings as `{file, warning_description}` entries for an Elixir term ignore file.
     * `--quiet` - suppress all informational messages
     * `--quiet-with-result` - suppress all informational messages except for the final result message
+    * `--incremental` - use Dialyzer's incremental mode (incremental analysis is available on OTP 26+; enabled by default on OTP 27+)
+    * `--no-incremental` - disable incremental mode even on OTP 27+
+    * `--warning-apps <app_a,app_b>` - in incremental mode, restrict warnings to the
+      given applications (overrides the `:warning_apps` config). Defaults to the
+      project's own applications.
 
   Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
@@ -83,6 +88,18 @@ defmodule Mix.Tasks.Dialyzer do
 
   * `dialyzer: :plt_apps` - a list of applications to include that will replace the default,
   include all the apps you need e.g.
+
+  ### Incremental Configuration
+
+  Incremental analysis is available on OTP 26+ and is enabled by default on OTP
+  27+. Incremental analysis loads your project *and* its dependencies so callee
+  types resolve, but warnings are scoped to your own applications. To widen or
+  change that scope:
+
+  * `dialyzer: :warning_apps` - a list of applications to emit warnings for in
+  incremental mode. Defaults to the project's own application(s). Dependencies not
+  listed here are still analyzed (so types resolve and you avoid `:unknown`
+  warnings) but are not themselves reported on.
 
   ### Other Configuration
 
@@ -148,6 +165,7 @@ defmodule Mix.Tasks.Dialyzer do
   @command_options Keyword.merge(@old_options,
                      force_check: :boolean,
                      ignore_exit_status: :boolean,
+                     incremental: :boolean,
                      list_unused_filters: :boolean,
                      no_check: :boolean,
                      no_compile: :boolean,
@@ -155,6 +173,7 @@ defmodule Mix.Tasks.Dialyzer do
                      quiet: :boolean,
                      quiet_with_result: :boolean,
                      raw: :boolean,
+                     warning_apps: :string,
                      format: [:string, :keep]
                    )
 
@@ -166,17 +185,23 @@ defmodule Mix.Tasks.Dialyzer do
     check_dialyzer()
     compatibility_notice()
 
+    incremental? = incremental_mode?(opts)
+
     if Mix.Project.get() do
       Project.check_config()
 
       unless opts[:no_compile], do: Mix.Task.run("compile")
 
-      _ =
-        unless no_check?(opts) do
-          info("Finding suitable PLTs")
-          force_check? = Keyword.get(opts, :force_check, false)
-          check_plt(force_check?)
-        end
+      if incremental?, do: warn_incremental_plt_options(opts)
+
+      unless incremental? do
+        _ =
+          unless no_check?(opts) do
+            info("Finding suitable PLTs")
+            force_check? = Keyword.get(opts, :force_check, false)
+            check_plt(force_check?)
+          end
+      end
 
       default = Dialyxir.Project.default_ignore_warnings()
       ignore_warnings = Dialyxir.Project.dialyzer_ignore_warnings()
@@ -210,7 +235,7 @@ defmodule Mix.Tasks.Dialyzer do
       end
 
       warn_old_options(opts)
-      unless opts[:plt], do: run_dialyzer(opts, dargs)
+      unless opts[:plt], do: run_dialyzer(opts, dargs, incremental?)
     else
       info("No mix project found - checking core PLTs...")
       Project.plts_list([], false) |> Plt.check()
@@ -266,18 +291,8 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
-  defp run_dialyzer(opts, dargs) do
-    args = [
-      {:check_plt, opts[:force_check] || false},
-      {:init_plt, String.to_charlist(Project.plt_file())},
-      {:files, Project.dialyzer_files()},
-      {:warnings, dialyzer_warnings(dargs)},
-      {:format, Keyword.get_values(opts, :format)},
-      {:raw, opts[:raw]},
-      {:list_unused_filters, opts[:list_unused_filters]},
-      {:ignore_exit_status, opts[:ignore_exit_status]},
-      {:quiet_with_result, opts[:quiet_with_result]}
-    ]
+  defp run_dialyzer(opts, dargs, incremental?) do
+    args = base_args(incremental?, opts, dargs) ++ common_args(opts)
 
     {status, exit_status, [time | result]} = Dialyzer.dialyze(args)
     info(time)
@@ -306,6 +321,38 @@ defmodule Mix.Tasks.Dialyzer do
       error("Halting VM with exit status #{exit_status}")
       System.halt(exit_status)
     end
+  end
+
+  defp base_args(true = _incremental?, opts, dargs) do
+    incremental_plt = String.to_charlist(Project.plt_file() <> ".incremental")
+
+    [
+      {:analysis_type, :incremental},
+      {:init_plt, incremental_plt},
+      {:output_plt, incremental_plt},
+      {:files, Project.dialyzer_files() ++ dep_beam_files()},
+      {:warning_files_rec, warning_paths(opts)},
+      {:warnings, dialyzer_warnings(dargs)}
+    ]
+  end
+
+  defp base_args(false = _incremental?, opts, dargs) do
+    [
+      {:check_plt, opts[:force_check] || false},
+      {:init_plt, String.to_charlist(Project.plt_file())},
+      {:files, Project.dialyzer_files()},
+      {:warnings, dialyzer_warnings(dargs)}
+    ]
+  end
+
+  defp common_args(opts) do
+    [
+      {:format, Keyword.get_values(opts, :format)},
+      {:raw, opts[:raw]},
+      {:list_unused_filters, opts[:list_unused_filters]},
+      {:ignore_exit_status, opts[:ignore_exit_status]},
+      {:quiet_with_result, opts[:quiet_with_result]}
+    ]
   end
 
   defp dialyzer_warnings(dargs) do
@@ -378,9 +425,76 @@ defmodule Mix.Tasks.Dialyzer do
     end
   end
 
+  # Directories passed to Dialyzer as `warning_files_rec` in incremental mode.
+  # A `--warning-apps app_a,app_b` CLI flag overrides the `:warning_apps` config,
+  # which in turn overrides the default (the project's own compiled paths).
+  defp warning_paths(opts) do
+    opts[:warning_apps]
+    |> parse_warning_apps()
+    |> Project.warning_paths()
+  end
+
+  @doc false
+  # Parse the comma-separated `--warning-apps` value into a list of app atoms,
+  # tolerating surrounding whitespace and empty entries. `nil` (flag absent)
+  # stays `nil` so the `:warning_apps` config is consulted instead.
+  @spec parse_warning_apps(String.t() | nil) :: [atom()] | nil
+  def parse_warning_apps(nil), do: nil
+
+  def parse_warning_apps(csv) when is_binary(csv) do
+    csv
+    |> String.split(",", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.to_atom/1)
+  end
+
+  defp dep_beam_files do
+    all_apps = Enum.uniq(Project.core_apps() ++ Project.cons_apps())
+
+    Enum.flat_map(all_apps, fn app ->
+      ebin_dir = Application.app_dir(app, "ebin")
+
+      if File.dir?(ebin_dir) do
+        Path.join(ebin_dir, "*.beam") |> Path.wildcard() |> Enum.map(&to_charlist/1)
+      else
+        []
+      end
+    end)
+  end
+
+  defp incremental_mode?(opts) do
+    case Keyword.fetch(opts, :incremental) do
+      {:ok, value} -> value
+      :error -> Project.incremental_mode?()
+    end
+  end
+
   defp warn_old_options(opts) do
     for {opt, _} <- opts, @old_options[opt] do
       error("#{opt} is no longer a valid CLI argument.")
+    end
+
+    nil
+  end
+
+  # In incremental mode Dialyzer builds and maintains the incremental PLT itself
+  # on every run, so there is no separate PLT build/check step. The classic
+  # PLT-management options are silently ignored by Dialyzer here; warn so the
+  # no-op is not surprising.
+  defp warn_incremental_plt_options(opts) do
+    ignored =
+      for {key, flag} <- [plt: "--plt", force_check: "--force-check", no_check: "--no-check"],
+          opts[key],
+          do: flag
+
+    unless ignored == [] do
+      warning("""
+      The following options have no effect in incremental mode and were ignored: \
+      #{Enum.join(ignored, ", ")}.
+      Incremental mode has no separate PLT build/check step — Dialyzer builds and \
+      updates the incremental PLT automatically on each run.
+      """)
     end
 
     nil
