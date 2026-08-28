@@ -52,6 +52,9 @@ mix dialyzer
     * `--format ignore_file_strict` - format warnings as `{file, warning_description}` entries for an Elixir term ignore file.
   * `--quiet`                       - suppress all informational messages.
   * `--quiet-with-result`           - suppress all informational messages except for the final result message.
+  * `--incremental`                 - use Dialyzer's incremental mode (requires OTP 27+; enabled by default there). See [Incremental Mode](#incremental-mode).
+  * `--no-incremental`              - disable incremental mode even on OTP 27+.
+  * `--warning-apps <app_a,app_b>`  - in incremental mode, narrow reported warnings to the listed applications. Defaults to your project's own app(s).
 
 Warning flags passed to this task are passed on to `:dialyzer` - e.g.
 
@@ -99,6 +102,7 @@ end
 # .gitignore
 /priv/plts/*.plt
 /priv/plts/*.plt.hash
+/priv/plts/*.plt.incremental
 ```
 
 ### Example CI Configs
@@ -171,6 +175,88 @@ Dialyxir supports formatting the errors in several different ways:
   * Dialyzer - By passing `--format dialyzer`, the messages will be printed in the default Dialyzer format. This format is used in [legacy string matching](#simple-string-matches) ignore files.
   * Raw - By passing `--format raw`, messages will be printed in their form before being pretty printed by Dialyzer or Dialyxir.
   * Dialyxir (default) -- By passing `--format dialyxir`, messages will be converted to Elixir style messages then pretty printed and formatted. Includes `warning_name ` for use in explanations.
+
+### Incremental Mode
+
+Dialyxir supports Dialyzer's incremental analysis mode (OTP 27+, and enabled by
+default there). Instead of building a whole-project PLT up front, incremental mode
+keeps a long-lived *incremental* PLT and, on each run:
+
+- finds the modules that changed since the PLT was last used, and
+- re-analyses those modules **plus any modules that depend on them**,
+
+leaving unrelated modules untouched. Small, localized changes are usually much
+faster to check; changing a widely-depended-on module can still re-analyse a large
+part of the tree. Incrementality removes *irrelevant* work, not all work.
+
+**Enabling it**
+
+Incremental mode is on by default on OTP 27+. You can control it explicitly in
+configuration:
+
+```elixir
+# mix.exs
+def project do
+  [
+    # ...
+    dialyzer: [incremental: true]
+  ]
+end
+```
+
+or per-invocation, which overrides the mix.exs setting:
+
+```console
+mix dialyzer --incremental      # force on
+mix dialyzer --no-incremental   # force classic mode
+```
+
+**PLTs in incremental mode**
+
+- **Core PLTs** (Erlang/Elixir standard libraries) are unchanged — still classic
+  PLTs shared across projects.
+- **Project PLT** — incremental mode uses a separate file alongside the classic
+  one, `<plt_file>.incremental` (e.g.
+  `dialyxir_erlang-27.3_elixir-1.18_deps-dev.plt.incremental`). The two coexist, so
+  you can switch modes without rebuilding.
+
+You do **not** run a separate `mix dialyzer --plt` step in incremental mode — the
+first `mix dialyzer --incremental` run builds the incremental PLT itself and later
+runs update it in place. From Dialyxir's point of view it is just a cache file; for
+CI caching see the [Continuous Integration](#continuous-integration) configs.
+
+**Which applications get warnings**
+
+Incremental mode analyses your project *and* its dependencies together, so that the
+types of the libraries you call into resolve correctly. Warnings, however, are
+scoped to **your own code**:
+
+- By default, warnings are reported for your project's app and — in an umbrella —
+  all of its child apps.
+- Dependencies are analysed but stay silent, so you are not shown warnings you
+  can't act on.
+
+To **narrow** that set further — for example to focus on a single umbrella child —
+list the apps with `:warning_apps` (or `--warning-apps`). The base is your app and
+its sub-apps; `:warning_apps` selects a subset of them to report on, while the
+dependency analysis set is unchanged:
+
+```elixir
+dialyzer: [
+  incremental: true,
+  warning_apps: [:my_app, :my_app_web]
+]
+```
+
+```console
+mix dialyzer --incremental --warning-apps my_app,my_app_web
+```
+
+> **Note:** if a dependency can't be fully analysed (for example, a needed app is
+> missing from the analysis set), you won't get a direct error for that — instead
+> you may see confusing warnings, often `unknown_function`, attributed to *your*
+> code where it calls into the missing pieces. Keep that in mind when debugging
+> surprising incremental warnings.
 
 ### Flags
 
