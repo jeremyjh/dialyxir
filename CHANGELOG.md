@@ -6,11 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
-## Unreleased changes post [1.4.7]
+## Unreleased changes post [1.4.8]
+
+## [1.4.8] - 2026-09-05
+
+  ### Added
+
+  - Add support for the OTP 28 warnings `:exact_compare`, `:opaque_compare`, and `:opaque_union`.
+
+  ### Fixed
+
+  - Handle line-and-column locations when matching line-specific warning ignores.
 
   ### Changed
 
   - Update ExDoc to 0.40.3 to generate Markdown documentation and `llms.txt`.
+
+  ### Docs
+
+  - Clarify the output and intended use of the `ignore_file` and `ignore_file_strict` formatters.
 
 ## [1.4.7] - 2025-11-05
 
