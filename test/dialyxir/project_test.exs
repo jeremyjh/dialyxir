@@ -196,6 +196,32 @@ defmodule Dialyxir.ProjectTest do
     end)
   end
 
+  test "plt_add_apps actually loads the configured applications" do
+    # :dummy_app is not a real dependency of the fixture project (its deps
+    # list is empty) and isn't an OTP app either, so nothing but
+    # `plt_add_apps` could cause it to be loaded. Its .app file lives outside
+    # of _build so it isn't subject to `prune_code_paths`.
+    dummy_app_ebin =
+      Path.expand("test/fixtures/plt_add_apps_precedence/dummy_app/ebin", File.cwd!())
+
+    Code.prepend_path(dummy_app_ebin)
+    Application.unload(:dummy_app)
+
+    on_exit(fn ->
+      Code.delete_path(dummy_app_ebin)
+      Application.unload(:dummy_app)
+    end)
+
+    in_project(:plt_add_apps_precedence, fn ->
+      Project.cons_apps()
+
+      # `plt_add_apps` is documented to load the apps configured. After `cons_apps/0`,
+      # we expect `:dummy_app` to be loaded. A second load attempt is expected to
+      # return an `:already_loaded`
+      assert Application.load(:dummy_app) == {:error, {:already_loaded, :dummy_app}}
+    end)
+  end
+
   test "no_umbrella? works as expected" do
     in_project(:umbrella, fn ->
       refute Project.no_umbrella?()
