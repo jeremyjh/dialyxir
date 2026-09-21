@@ -304,7 +304,7 @@ defmodule Dialyxir.Project do
   end
 
   defp plt_apps, do: dialyzer_config()[:plt_apps] |> load_apps()
-  defp plt_add_apps, do: dialyzer_config()[:plt_add_apps] || [] |> load_apps()
+  defp plt_add_apps, do: (dialyzer_config()[:plt_add_apps] || []) |> load_apps()
   defp plt_ignore_apps, do: dialyzer_config()[:plt_ignore_apps] || []
 
   defp load_apps(nil), do: nil
