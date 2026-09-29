@@ -52,6 +52,32 @@ defmodule Dialyxir.Test.WarningTest do
     assert formatted =~ "can never evaluate to 'true'"
   end
 
+  # --- call_with_opaque ---
+
+  test "call with opaque warning accepts integer argument positions (OTP 27 and earlier)" do
+    arguments = [~c"binary", ~c"split", ~c"(_, _)", [2], [:erl_types.t_atom()]]
+    result = Dialyxir.Warnings.CallWithOpaque.format_long(arguments)
+    assert result =~ "an opaque term in 2nd argument"
+    assert result =~ "a structured term of type atom() is expected"
+  end
+
+  test "call with opaque warning accepts position triples (OTP 28 and later)" do
+    conflicts = [{2, :erl_types.t_atom(), ~c"atom()"}]
+    arguments = [~c"binary", ~c"split", ~c"(_, _)", conflicts, [:erl_types.t_atom()]]
+    result = Dialyxir.Warnings.CallWithOpaque.format_long(arguments)
+    assert result =~ "an opaque term in 2nd argument"
+    assert result =~ "a structured term of type atom() is expected"
+  end
+
+  test "call with opaque warning lists several triple positions" do
+    conflicts = [{1, :erl_types.t_atom(), ~c"atom()"}, {3, :erl_types.t_atom(), ~c"atom()"}]
+    expected = [:erl_types.t_atom(), :erl_types.t_binary()]
+    arguments = [~c"binary", ~c"split", ~c"(_, _, _)", conflicts, expected]
+    result = Dialyxir.Warnings.CallWithOpaque.format_long(arguments)
+    assert result =~ "opaque terms in 1st and 3rd arguments"
+    assert String.ends_with?(result, "terms of different types are expected in these positions.")
+  end
+
   # --- opaque_compare (OTP 28, replaces opaque_eq + opaque_neq) ---
 
   test "opaque compare warning with == reports equality" do

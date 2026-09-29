@@ -8,6 +8,10 @@ Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased changes post [1.4.8]
 
+  ### Fixed
+
+  - Fix crash formatting `:call_with_opaque` warnings on OTP 28+, where argument positions arrive as `{position, type, type_string}` triples, and drop a stray `}` from the message.
+
 ## [1.4.8] - 2026-09-05
 
   ### Added

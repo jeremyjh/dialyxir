@@ -13,12 +13,17 @@ defmodule Dialyxir.Warnings.CallWithOpaque do
 
   @impl Dialyxir.Warning
   @spec format_long([String.t()]) :: String.t()
-  def format_long([module, function, args, arg_positions, expected_args]) do
+  def format_long([module, function, args, conflicts, expected_args]) do
     pretty_module = Erlex.pretty_print(module)
+    arg_positions = Enum.map(conflicts, &position/1)
 
     "The call #{pretty_module}.#{function}#{args} contains #{form_positions(arg_positions)} " <>
-      "when #{form_expected(expected_args)}}."
+      "when #{form_expected(expected_args)}."
   end
+
+  # OTP 28+ passes {position, type, type_string} triples; earlier releases pass positions.
+  defp position({position, _type, _type_string}), do: position
+  defp position(position) when is_integer(position), do: position
 
   defp form_positions(arg_positions = [_]) do
     form_position_string = Dialyxir.WarningHelpers.form_position_string(arg_positions)
