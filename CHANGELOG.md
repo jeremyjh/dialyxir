@@ -6,10 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 Versions follow [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
-## Unreleased changes post [1.4.8]
+## Unreleased changes post [1.4.9]
+
+## [1.4.9] - 2026-11-11
 
   ### Fixed
 
+  - Ensure applications configured in `plt_add_apps` are loaded.
   - Fix crash formatting `:call_with_opaque` warnings on OTP 28+, where argument positions arrive as `{position, type, type_string}` triples, and drop a stray `}` from the message.
 
 ## [1.4.8] - 2026-09-05
